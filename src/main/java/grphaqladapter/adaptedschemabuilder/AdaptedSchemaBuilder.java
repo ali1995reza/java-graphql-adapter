@@ -18,8 +18,8 @@ import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import sun.awt.SunHints;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
+import java.util.stream.Collector;
 
 public final class AdaptedSchemaBuilder {
 
@@ -234,8 +234,7 @@ public final class AdaptedSchemaBuilder {
 
     public synchronized AdaptedSchemaBuilder generator(TypeResolverGenerator generator)
     {
-        if(generator==null)
-            throw new IllegalStateException("code generators can not be null");
+        Assert.ifNull(generator , "code generators can not be null");
 
         typeResolverGenerator = generator;
         return this;
@@ -243,8 +242,7 @@ public final class AdaptedSchemaBuilder {
 
     public synchronized AdaptedSchemaBuilder generator(DataFetcherGenerator generator)
     {
-        if(generator==null)
-            throw new IllegalStateException("code generators can not be null");
+        Assert.ifNull(generator , "data-fetcher generators can not be null");
 
 
         dataFetcherGenerator = generator;
@@ -260,8 +258,6 @@ public final class AdaptedSchemaBuilder {
     public synchronized AdaptedGraphQLSchema build()
     {
         GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
-
-
 
 
         Map<Class , Map<MappedClass.MappedType , MappedClass>> mappedClasses =
@@ -297,43 +293,62 @@ public final class AdaptedSchemaBuilder {
                 new BuildingContextImpl(mappedClasses);
 
 
+        mappedClasses.values()
+                .stream()
+                .forEach(map ->{
 
-        for(Map<MappedClass.MappedType , MappedClass> map:mappedClasses.values()) {
-            for (MappedClass mappedClass : map.values())
-            {
-                if(mappedClass.mappedType().is(MappedClass.MappedType.UNION))
-                    continue;
+                    map.values()
+                            .stream()
+                            .forEach(mappedClass -> {
 
-                discover(mappedClass , context);
-            }
-        }
+                                if(mappedClass.mappedType().
+                                        is(MappedClass.MappedType.UNION))
+                                    return;
+
+                                discover(mappedClass , context);
+
+                            });
+                });
+
+        mappedClasses.values()
+                .stream()
+                .forEach(map ->{
+
+                    map.values()
+                            .stream()
+                            .forEach(mappedClass -> {
+
+                                if(mappedClass.mappedType().
+                                        is(MappedClass.MappedType.UNION))
+                                {
+                                    discoverUnion(mappedClass ,
+                                            context.possibleTypes.get(mappedClass)
+                                            , context);
+
+                                }
+
+                            });
+                });
 
 
-        for(Map<MappedClass.MappedType , MappedClass> map:mappedClasses.values()) {
-            for (MappedClass mappedClass : map.values())
-            {
-                if(mappedClass.mappedType().is(MappedClass.MappedType.UNION))
-                {
-                    discoverUnion(mappedClass , context.possibleTypes.get(mappedClass)
-                            , context);
-
-                }
-            }
-        }
 
         Map<MappedClass , DiscoveredType> discoveredTypes = new HashMap<>();
-        //so put everything in !
-        for(MappedClass mappedClass : context.rawTypes.keySet())
-        {
 
-            GraphQLType type = context.rawTypes.get(mappedClass);
-            discoveredTypes.put(mappedClass , buildDiscoveredType(mappedClass , type));
-        }
+
+        context.rawTypes.keySet()
+                .stream()
+                .forEach(mappedClass -> {
+
+                    GraphQLType type = context.rawTypes.get(mappedClass);
+                    discoveredTypes.put(mappedClass , buildDiscoveredType(mappedClass , type));
+
+                });
 
         GraphQLCodeRegistry.Builder code = GraphQLCodeRegistry.newCodeRegistry();
 
-        for(DiscoveredType discoveredType:discoveredTypes.values())
-        {
+        discoveredTypes.values()
+                .stream().forEach(discoveredType -> {
+
             if(discoveredType.asMappedClass().mappedType().
                     is(MappedClass.MappedType.INTERFACE))
             {
@@ -343,11 +358,12 @@ public final class AdaptedSchemaBuilder {
 
                 if(implementors!=null)
                 {
-                    for(MappedClass mappedClass:implementors)
-                    {
-                        interfaceType.implementors().add((DiscoveredObjectType)
-                                discoveredTypes.get(mappedClass));
-                    }
+                    implementors.stream()
+                            .forEach(mappedClass -> {
+
+                                interfaceType.implementors().add((DiscoveredObjectType)
+                                        discoveredTypes.get(mappedClass));
+                            });
                 }
 
                 interfaceType.setUnmodifiable();
@@ -355,7 +371,6 @@ public final class AdaptedSchemaBuilder {
                 code.typeResolver(interfaceType.typeName() ,
                         typeResolverGenerator.generate(interfaceType));
             }
-
 
             if(discoveredType.asMappedClass().mappedType().
                     is(MappedClass.MappedType.UNION))
@@ -366,11 +381,12 @@ public final class AdaptedSchemaBuilder {
 
                 if(possiableTypes!=null)
                 {
-                    for(MappedClass mappedClass:possiableTypes)
-                    {
-                        unionType.possibleTypes().add((DiscoveredObjectType)
-                                discoveredTypes.get(mappedClass));
-                    }
+                    possiableTypes.stream()
+                            .forEach(mappedClass -> {
+
+                                unionType.possibleTypes().add((DiscoveredObjectType)
+                                        discoveredTypes.get(mappedClass));
+                            });
                 }
 
                 unionType.setUnmodifiable();
@@ -378,7 +394,9 @@ public final class AdaptedSchemaBuilder {
                 code.typeResolver(unionType.typeName() ,
                         typeResolverGenerator.generate(unionType));
             }
-        }
+
+        });
+
 
         List<DiscoveredType> allTypes = new ArrayList<>();
         List<DiscoveredInputType> inputTypes = new ArrayList<>();
