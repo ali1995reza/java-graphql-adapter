@@ -28,10 +28,11 @@
             <artifactId>graphql-java</artifactId>
             <version>13.0</version>
         </dependency>
+
         <dependency>
-            <groupId>org.apache.bcel</groupId>
-            <artifactId>bcel</artifactId>
-            <version>6.3.1</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13-beta-1</version>
         </dependency>
 
     </dependencies>
