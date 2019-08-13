@@ -2,11 +2,15 @@ package grphaqladapter.adaptedschemabuilder.mapper;
 
 import grphaqladapter.adaptedschemabuilder.GraphqlQueryHandler;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
+import grphaqladapter.annotations.GraphqlFieldAnnotation;
+import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
+import grphaqladapter.annotations.impl.field.GraphqlInputFieldAnnotationBuilder;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MappingStatics {
@@ -118,5 +122,40 @@ public class MappingStatics {
         }
     }
 
+
+    public static GraphqlInputFieldAnnotation convertFieldAnnotationToInputFieldAnnotation(GraphqlFieldAnnotation annotation)
+    {
+        Assert.ifNull(annotation , "provided annotation is null");
+        return GraphqlInputFieldAnnotationBuilder
+                .newBuilder()
+                .setNullable(annotation.nullable())
+                .setSetter(annotation.setter())
+                .setInputFieldName(annotation.fieldName())
+                .build();
+    }
+
+
+    public final static List<Method> getAllMethods(Class cls)
+    {
+        Method[] methods = cls.getDeclaredMethods();
+        Method[] declaredMethods = cls.getDeclaredMethods();
+        List<Method> list = new ArrayList<>();
+
+        if(methods!=null)
+        {
+            for(Method method:methods) {
+                list.add(method);
+            }
+        }
+
+        if(declaredMethods!=null) {
+            for (Method method : declaredMethods) {
+                if(!list.contains(method))
+                    list.add(method);
+            }
+        }
+
+        return list;
+    }
 
 }

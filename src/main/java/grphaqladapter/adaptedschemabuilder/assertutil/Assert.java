@@ -181,6 +181,11 @@ public class Assert {
         {
             throw new IllegalStateException(msg);
         }
+
+        if(method.isSynthetic())
+        {
+            throw new IllegalStateException(msg);
+        }
     }
 
     public static void ifModifierNotValidForASetterMethod(Method method  , String msg)
@@ -191,6 +196,11 @@ public class Assert {
         }
 
         if(Modifier.isStatic(method.getModifiers()))
+        {
+            throw new IllegalStateException(msg);
+        }
+
+        if(method.isSynthetic())
         {
             throw new IllegalStateException(msg);
         }
