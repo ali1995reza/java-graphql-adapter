@@ -1,0 +1,36 @@
+package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument;
+
+import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
+import grphaqladapter.adaptedschemabuilder.mapper.strategy.ParameterAnnotationDetector;
+import grphaqladapter.annotations.GraphqlArgument;
+import grphaqladapter.annotations.GraphqlArgumentAnnotation;
+import grphaqladapter.annotations.impl.argument.GraphqlArgumentAnnotationBuilder;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
+public class ParameterRealAnnotationDetector implements ParameterAnnotationDetector {
+
+    private final GraphqlArgumentAnnotationBuilder builder;
+
+    public ParameterRealAnnotationDetector() {
+        this.builder = GraphqlArgumentAnnotationBuilder.newBuilder();
+    }
+
+
+    @Override
+    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Parameter parameter, int parameterIndex) {
+
+
+        GraphqlArgument argument = parameter.getAnnotation(GraphqlArgument.class);
+
+        if(argument==null)
+            return null;
+
+
+        String name = Assert.isNullString(argument.argumentName())?parameter.getName():argument.argumentName();
+        return builder.setArgumentName(name)
+                .setNullable(argument.nullable())
+                .build();
+    }
+}
