@@ -1,10 +1,10 @@
 package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument;
 
-import com.sun.istack.internal.NotNull;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.ParameterAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
 import grphaqladapter.annotations.GraphqlArgumentAnnotation;
+import grphaqladapter.annotations.NotNull;
 import grphaqladapter.annotations.impl.argument.GraphqlArgumentAnnotationBuilder;
 
 
