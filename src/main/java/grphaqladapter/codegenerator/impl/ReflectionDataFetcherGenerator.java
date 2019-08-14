@@ -124,66 +124,56 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
         @Override
         public Object get(DataFetchingEnvironment dataFetchingEnvironment) throws Exception {
 
+
             final Object source = this.source!=null?this.source:dataFetchingEnvironment.getSource();
-            try {
-                if (parameters == null || parameters.size() < 1) {
 
-                    Object result = method.method().invoke(source);
+            if (parameters == null || parameters.size() < 1) {
 
-                    if(method.isQueryHandler())
-                    {
-                        GraphqlQueryHandler handler = (GraphqlQueryHandler)result;
-                        handler.initialize(dataFetchingEnvironment.getSelectionSet());
-                        return handler.execute();
-                    }
+                Object result = method.method().invoke(source);
 
-                    return result;
-                } else {
-                    Object[] args = new Object[parameters.size()];
-                    for (int i = 0; i < parameters.size(); i++) {
-                        MappedParameter parameter = parameters.get(i);
-                        if (parameter.isList()) {
-                            if (isScalar(parameter.type())) {
-                                args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
-                            } else {
-                                args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
-                                        inputTypesMap.get(parameter.type()));
-                            }
-                        } else if (isScalar(parameter.type()) || parameter.type().isEnum()) {
+                if(method.isQueryHandler())
+                {
+                    GraphqlQueryHandler handler = (GraphqlQueryHandler)result;
+                    handler.initialize(dataFetchingEnvironment.getSelectionSet());
+                    return handler.execute();
+                }
+
+
+                return result;
+            } else {
+                Object[] args = new Object[parameters.size()];
+                for (int i = 0; i < parameters.size(); i++) {
+                    MappedParameter parameter = parameters.get(i);
+                    if (parameter.isList()) {
+                        if (isScalar(parameter.type())) {
                             args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
                         } else {
-                            args[i] = buildUsingMap(dataFetchingEnvironment.getArgument(parameter.argumentName()),
+                            args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
                                     inputTypesMap.get(parameter.type()));
                         }
+                    } else if (isScalar(parameter.type()) || parameter.type().isEnum()) {
+                        args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
+                    } else {
+                        args[i] = buildUsingMap(dataFetchingEnvironment.getArgument(parameter.argumentName()),
+                                inputTypesMap.get(parameter.type()));
                     }
-
-                    Object result = method.method().invoke(source , args);
-
-                    if(method.isQueryHandler())
-                    {
-                        GraphqlQueryHandler handler = (GraphqlQueryHandler)result;
-                        handler.initialize(dataFetchingEnvironment.getSelectionSet());
-                        return handler.execute();
-                    }
-
-                    return result;
                 }
-            }catch (Exception e)
-            {
-                e.printStackTrace();
-                throw e;
+
+                Object result = method.method().invoke(source , args);
+
+                if(method.isQueryHandler())
+                {
+                    GraphqlQueryHandler handler = (GraphqlQueryHandler)result;
+                    handler.initialize(dataFetchingEnvironment.getSelectionSet());
+                    return handler.execute();
+                }
+
+                return result;
             }
 
         }
     }
 
-
-    private final static boolean isTopLevelType(MappedClass.MappedType type)
-    {
-        return type.is(MappedClass.MappedType.QUERY)||
-                type.is(MappedClass.MappedType.MUTATION)||
-                type.is(MappedClass.MappedType.SUBSCRIPTION);
-    }
 
 
     private List<DiscoveredInputType> inputTypes;
@@ -192,8 +182,9 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
     @Override
     public DataFetcher generate(MappedClass cls, MappedMethod method) {
 
-        if(isTopLevelType(cls.mappedType())) {
+        if(cls.mappedType().isTopLevelType()) {
             try {
+                System.err.println(cls.baseClass());
                 Object source = cls.baseClass().newInstance();
                 return new ReflectionDataFetcher(method, inputTypes, source);
             } catch (Throwable e) {
