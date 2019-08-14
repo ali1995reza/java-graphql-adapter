@@ -30,25 +30,21 @@ public class Test2 {
     @GraphqlType
     public static class Human implements Character{
 
-        @GraphqlField(nullable = false)
         @Override
         public ID id() {
             return null;
         }
 
-        @GraphqlField(nullable = false)
         @Override
         public String name() {
             return null;
         }
 
-        @GraphqlField
         @Override
         public List<Character> friends() {
             return null;
         }
 
-        @GraphqlField(nullable = false)
         @Override
         public List<Episode> appearsIn() {
             return null;
@@ -65,25 +61,21 @@ public class Test2 {
     @GraphqlType
     public static class Droid implements Character{
 
-        @GraphqlField(nullable = false)
         @Override
         public ID id() {
             return new ID("Droid ID");
         }
 
-        @GraphqlField(nullable = false)
         @Override
         public String name() {
             return "Droid";
         }
 
-        @GraphqlField
         @Override
         public List<Character> friends() {
             return null;
         }
 
-        @GraphqlField(nullable = false)
         @Override
         public List<Episode> appearsIn() {
             return Arrays.asList(Episode.EMPIRE , Episode.JEDI);
