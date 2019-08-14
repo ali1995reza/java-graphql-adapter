@@ -19,7 +19,7 @@ public class ParameterRealAnnotationDetector implements ParameterAnnotationDetec
 
 
     @Override
-    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Parameter parameter, int parameterIndex) {
+    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method , Parameter parameter, int parameterIndex) {
 
 
         GraphqlArgument argument = parameter.getAnnotation(GraphqlArgument.class);

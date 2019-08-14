@@ -9,6 +9,7 @@ import grphaqladapter.annotations.impl.argument.GraphqlArgumentAnnotationBuilder
 
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class ParameterAutomaticAnnotationBuilder implements ParameterAnnotationDetector {
@@ -26,7 +27,7 @@ public class ParameterAutomaticAnnotationBuilder implements ParameterAnnotationD
     }
 
     @Override
-    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Parameter parameter, int parameterIndex) {
+    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method , Parameter parameter, int parameterIndex) {
 
         Assert.ifConditionTrue("can not find the typeName of parameter because parameter typeName not present" ,
                 !parameter.isNamePresent());
