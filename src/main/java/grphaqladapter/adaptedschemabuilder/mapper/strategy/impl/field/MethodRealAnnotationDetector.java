@@ -28,7 +28,7 @@ public class MethodRealAnnotationDetector implements MethodAnnotationDetector {
     public synchronized FieldAnnotations detectAnnotationFor(Method method) {
 
         GraphqlField field = MethodAnnotationLookup.findFirstAppears(method , GraphqlField.class);
-        GraphqlInputField inputField = MethodAnnotationLookup.findFirstAppears(method , GraphqlField.class);
+        GraphqlInputField inputField = MethodAnnotationLookup.findFirstAppears(method , GraphqlInputField.class);
 
         if(field==null && inputField==null)
             return null;

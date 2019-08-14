@@ -9,9 +9,10 @@ public class ParameterAnnotationLookup {
 
     public final static <T> T findFirstAppears(Method method , int parameterIndex , Class annotationClass)
     {
+
         Parameter parameter = method.getParameters()[parameterIndex];
 
-        if(method.getAnnotation(annotationClass)!=null)
+        if(parameter.getAnnotation(annotationClass)!=null)
         {
             return (T) parameter.getAnnotation(annotationClass);
         }else
