@@ -22,7 +22,7 @@ public class ParameterRealAnnotationDetector implements ParameterAnnotationDetec
     public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method , Parameter parameter, int parameterIndex) {
 
 
-        GraphqlArgument argument = parameter.getAnnotation(GraphqlArgument.class);
+        GraphqlArgument argument = ParameterAnnotationLookup.findFirstAppears(method , parameterIndex , GraphqlArgument.class);
 
         if(argument==null)
             return null;

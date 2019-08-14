@@ -12,6 +12,7 @@ import grphaqladapter.adaptedschemabuilder.mapper.strategy.*;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument.ParameterAutomaticAnnotationBuilder;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument.ParameterRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.chain.ChainBuilder;
+import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field.MethodAnnotationLookup;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field.MethodRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.type.ClassRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
@@ -121,14 +122,14 @@ public final class ClassMapper {
         return annotations;
     }
 
-    private final GraphqlArgumentAnnotation detect(Parameter parameter , int index)
+    private final GraphqlArgumentAnnotation detect(Method method , Parameter parameter , int index)
     {
 
         GraphqlArgumentAnnotation annotations = null;
 
         for(ParameterAnnotationDetector detector:parameterAnnotationDetectorChain)
         {
-            annotations = detector.detectAnnotationFor(parameter , index);
+            annotations = detector.detectAnnotationFor(method , parameter , index);
             if(annotations!=null)
                 break;
         }
@@ -332,7 +333,7 @@ public final class ClassMapper {
         for (int index = 0 ;index<method.getParameters().length;index++)
         {
             methodBuilder.addMappedParameter(
-                    mapParameter(method.getParameters()[index] , index)
+                    mapParameter(method , method.getParameters()[index] , index)
             );
         }
 
@@ -395,7 +396,7 @@ public final class ClassMapper {
         for (int index = 0 ;index<method.getParameters().length;index++)
         {
             methodBuilder.addMappedParameter(
-                    mapParameter(method.getParameters()[index] , index)
+                    mapParameter(method , method.getParameters()[index] , index)
             );
         }
 
@@ -414,9 +415,9 @@ public final class ClassMapper {
 
 
 
-    private MappedParameter mapParameter(Parameter parameter , int index)
+    private MappedParameter mapParameter(Method method , Parameter parameter , int index)
     {
-        GraphqlArgumentAnnotation argumentAnnotation = detect(parameter , index);
+        GraphqlArgumentAnnotation argumentAnnotation = detect(method , parameter , index);
         Assert.ifNull(argumentAnnotation , "no annotation detected for [parameter:"
                 +parameter+"]");
 
