@@ -1,5 +1,6 @@
 import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
+import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.annotations.*;
 
 import javax.xml.ws.FaultAction;
@@ -11,7 +12,7 @@ public class Test2 {
     public static interface Character{
 
         @GraphqlField(nullable = false)
-        String id();
+        ID id();
         @GraphqlField(nullable = false)
         String name();
         @GraphqlField
@@ -27,7 +28,7 @@ public class Test2 {
 
         @GraphqlField(nullable = false)
         @Override
-        public String id() {
+        public ID id() {
             return null;
         }
 
@@ -62,7 +63,7 @@ public class Test2 {
 
         @GraphqlField(nullable = false)
         @Override
-        public String id() {
+        public ID id() {
             return null;
         }
 
@@ -109,12 +110,12 @@ public class Test2 {
         }
 
         @GraphqlField
-        public Human human(@GraphqlArgument(argumentName = "id")String id){
+        public Human human(@GraphqlArgument(argumentName = "id")ID id){
             return null;
         }
 
         @GraphqlField
-        public Droid droid(@GraphqlArgument(argumentName = "id")String id){
+        public Droid droid(@GraphqlArgument(argumentName = "id")ID id){
             return null;
         }
     }
