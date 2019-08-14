@@ -3,11 +3,38 @@ package grphaqladapter.adaptedschemabuilder.mapped.impl;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
+import grphaqladapter.adaptedschemabuilder.utils.Utils;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Predicate;
 
 public final class MappedMethodBuilder {
+
+
+    private static final class ParameterNamePredict implements Predicate<MappedParameter>{
+
+        public final static ParameterNamePredict of(String name)
+        {
+            return new ParameterNamePredict(name);
+        }
+
+
+        private final String name;
+
+        private ParameterNamePredict(String name) {
+            this.name = name;
+        }
+
+
+        @Override
+        public boolean test(MappedParameter parameter) {
+            return parameter.argumentName().equals(name);
+        }
+    }
+
+
+
 
     public final static MappedMethodBuilder newBuilder()
     {
@@ -28,7 +55,8 @@ public final class MappedMethodBuilder {
     }
 
 
-    private final Map<String , MappedParameter> mappedParameters = new HashMap<>();
+
+    private final List<MappedParameter> mappedParameters;
     private String fieldName;
     private Method method;
     private boolean nullable;
@@ -40,7 +68,9 @@ public final class MappedMethodBuilder {
 
 
 
-    private MappedMethodBuilder(){}
+    private MappedMethodBuilder(){
+        mappedParameters = new ArrayList<>();
+    }
 
 
     public synchronized MappedMethodBuilder setDimensions(int dimensions) {
@@ -76,9 +106,11 @@ public final class MappedMethodBuilder {
     public synchronized MappedMethodBuilder addMappedParameter(MappedParameter mappedParameter)
     {
         Assert.ifConditionTrue("a parameter with argument typeName ["+mappedParameter.argumentName()
-                +"] already exist - [exist:"+mappedParameters.get(mappedParameter.argumentName())+"]",
-                mappedParameters.containsKey(mappedParameter.argumentName()));
-        this.mappedParameters.put(mappedParameter.argumentName() , mappedParameter);
+                +"] already exist - [exist:"+mappedParameters.stream().
+                        filter(ParameterNamePredict.of(mappedParameter.argumentName())).
+                        findAny().get()+"]",
+                mappedParameters.stream().anyMatch(ParameterNamePredict.of(mappedParameter.argumentName())));
+        this.mappedParameters.add(mappedParameter);
         return this;
     }
 
@@ -89,7 +121,7 @@ public final class MappedMethodBuilder {
 
     public synchronized MappedMethodBuilder removeMappedParameter(MappedParameter parameter)
     {
-        this.mappedParameters.remove(parameter.argumentName() , parameter);
+        this.mappedParameters.remove(parameter);
         return this;
     }
 
@@ -103,14 +135,7 @@ public final class MappedMethodBuilder {
         if(mappedParameters.size()==0)
             return Collections.EMPTY_LIST;
 
-        List<MappedParameter> parameters = new ArrayList<>();
-
-        for(MappedParameter parameter:mappedParameters.values())
-        {
-            parameters.add(parameter);
-        }
-
-        return Collections.unmodifiableList(parameters);
+        return Collections.unmodifiableList(Utils.copy(mappedParameters));
     }
 
     public synchronized MappedMethod build()
