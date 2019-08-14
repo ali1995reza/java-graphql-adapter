@@ -1,9 +1,13 @@
+import graphql.ExecutionResult;
+import graphql.GraphQL;
 import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.annotations.*;
 
 import javax.xml.ws.FaultAction;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Test2 {
@@ -24,7 +28,7 @@ public class Test2 {
 
 
     @GraphqlType
-    public class Human implements Character{
+    public static class Human implements Character{
 
         @GraphqlField(nullable = false)
         @Override
@@ -59,18 +63,18 @@ public class Test2 {
 
 
     @GraphqlType
-    public class Droid implements Character{
+    public static class Droid implements Character{
 
         @GraphqlField(nullable = false)
         @Override
         public ID id() {
-            return null;
+            return new ID("Droid ID");
         }
 
         @GraphqlField(nullable = false)
         @Override
         public String name() {
-            return null;
+            return "Droid";
         }
 
         @GraphqlField
@@ -82,13 +86,13 @@ public class Test2 {
         @GraphqlField(nullable = false)
         @Override
         public List<Episode> appearsIn() {
-            return null;
+            return Arrays.asList(Episode.EMPIRE , Episode.JEDI);
         }
 
         @GraphqlField
         public String primaryFunction()
         {
-            return null;
+            return "talking ! just talking !";
         }
     }
 
@@ -106,7 +110,7 @@ public class Test2 {
 
         @GraphqlField
         public Character hero(@GraphqlArgument(argumentName = "episode") Episode episode){
-            return null;
+            return new Droid();
         }
 
         @GraphqlField
@@ -132,6 +136,21 @@ public class Test2 {
                 .build();
 
         System.out.println(schema.asSchemaDefinitionLanguage());
+
+
+        System.out.println("==============================================");
+
+        GraphQL graphQL = GraphQL.newGraphQL(schema.getSchema()).build();
+
+        ExecutionResult result =
+                graphQL.execute("{\n" +
+                        "    hero(episode:JEDI)\n" +
+                        "    {\n" +
+                        "        name\n" +
+                        "    }\n" +
+                        "}");
+
+        System.out.println(result);
 
     }
 }
