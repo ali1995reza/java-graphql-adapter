@@ -22,198 +22,6 @@ public final class AdaptedSchemaBuilder {
 
 
 
-
-    private final static class BuildingContextImpl implements BuildingContext {
-
-        private final static class ScalarAddController{
-            private final Function<GraphQLScalarType , GraphQLScalarType> controller =
-                    new Function<GraphQLScalarType, GraphQLScalarType>() {
-                        @Override
-                        public GraphQLScalarType apply(GraphQLScalarType type) {
-                            schema.additionalType(type);
-                            return type;
-                        }
-                    };
-
-
-            private final HashMap<GraphQLScalarType , GraphQLScalarType> scalarControllerMap;
-            private final GraphQLSchema.Builder schema;
-            private ScalarAddController(GraphQLSchema.Builder builder)
-            {
-                schema = builder;
-                scalarControllerMap = new HashMap<>();
-            }
-            private  GraphQLScalarType findScalarTypeFor(Class c)
-            {
-
-                if(c == String.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLString ,
-                            controller);
-                }else if(c == int.class || c == Integer.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLInt ,
-                            controller);
-                }else if(c == long.class || c == Long.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLLong ,
-                            controller);
-                }else if(c == float.class || c == Float.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLFloat ,
-                            controller);
-                }else if(c == double.class || c == Double.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLBigDecimal ,
-                            controller);
-                }else if(c == char.class || c == Character.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLChar ,
-                            controller);
-                }else if(c == byte.class || c == Byte.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLByte ,
-                            controller);
-                }else if(c == boolean.class || c == Boolean.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLBoolean ,
-                            controller);
-                }else if(c == short.class || c == Short.class)
-                {
-                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLShort ,
-                            controller);
-                }
-
-                return null;
-
-            }
-
-        }
-
-
-
-
-        private final Map<Class , Map<MappedClass.MappedType , MappedClass>> mappedClasses ;
-        private final Map<MappedClass , GraphQLType> rawTypes;
-        private final Map<MappedClass , List<MappedClass>> possibleTypes;
-        private final GraphQLSchema.Builder schemaBuilder;
-        private final ScalarAddController scalarAddController;
-
-
-        BuildingContextImpl(Map<Class, Map<MappedClass.MappedType, MappedClass>> mcs,
-                            GraphQLSchema.Builder schemaBuilder)
-        {
-
-            mappedClasses = mcs;
-            this.schemaBuilder = schemaBuilder;
-            rawTypes = new HashMap<>();
-            possibleTypes = new HashMap<>();
-            scalarAddController = new ScalarAddController(schemaBuilder);
-        }
-
-
-
-
-        @Override
-        public GraphQLTypeReference getInputTypeFor(Class c)
-        {
-            GraphQLScalarType scalarType = scalarAddController.findScalarTypeFor(c);
-            if(scalarType!=null)
-                return new GraphQLTypeReference(scalarType.getName());
-            return new GraphQLTypeReference(getMappedClassFor(c ,
-                    MappedClass.MappedType.INPUT_TYPE).
-                    typeName());
-        }
-
-
-
-        @Override
-        public GraphQLTypeReference getObjectTypeFor(Class c)
-        {
-            GraphQLScalarType scalarType = scalarAddController.findScalarTypeFor(c);
-            if(scalarType!=null)
-                return new GraphQLTypeReference(scalarType.getName());
-
-            return new GraphQLTypeReference(
-                    getMappedClassFor(c , MappedClass.MappedType.OBJECT_TYPE)
-                            .typeName()
-            );
-        }
-
-
-        @Override
-        public GraphQLTypeReference getInterfaceFor(Class c)
-        {
-
-            return new GraphQLTypeReference(getMappedClassFor(c ,
-                    MappedClass.MappedType.INTERFACE).typeName());
-        }
-
-        @Override
-        public GraphQLTypeReference getEnumFor(Class c)
-        {
-            return new GraphQLTypeReference(getMappedClassFor(c ,
-                    MappedClass.MappedType.ENUM).typeName());
-        }
-
-        @Override
-        public boolean isAnInterface(Class cls)
-        {
-            return mappedClasses.get(cls)!=null &&
-                    mappedClasses.get(cls).get(MappedClass.MappedType.INTERFACE)!=null;
-        }
-
-        @Override
-        public boolean isAnUnion(Class cls) {
-            return mappedClasses.get(cls)!=null &&
-                    mappedClasses.get(cls).get(MappedClass.MappedType.UNION)!=null;
-        }
-
-        @Override
-        public void addToPossibleTypesOf(MappedClass mappedClass, MappedClass possible) {
-
-            if(mappedClass.mappedType()!= MappedClass.MappedType.INTERFACE &&
-                    mappedClass.mappedType()!= MappedClass.MappedType.UNION){
-                throw new IllegalStateException("just interfaces or union types have possible types");
-            }
-            if(mappedClasses.get(mappedClass.baseClass())
-                    .get(mappedClass.mappedType())!=mappedClass)
-            {
-                throw new IllegalStateException("this class dose not related to this context");
-            }
-
-            List<MappedClass> list = possibleTypes.get(mappedClass);
-
-            if(list==null)
-            {
-                list = new ArrayList<>();
-                possibleTypes.put(mappedClass , list);
-            }
-
-            list.add(possible);
-        }
-
-        @Override
-        public MappedClass getMappedClassFor(Class cls, MappedClass.MappedType mappedType) {
-            if(mappedClasses.get(cls)==null)
-                return null;
-
-            return mappedClasses.get(cls).get(mappedType);
-        }
-
-        public void setGraphQLTypeFor(MappedClass cls , GraphQLType type)
-        {
-
-            if(rawTypes.containsKey(cls))
-                assertClassDiscoveredMultipleTimes(cls);
-
-            rawTypes.put(cls , type);
-        }
-    }
-
-
-
-
     public final static AdaptedSchemaBuilder newBuilder()
     {
         return new AdaptedSchemaBuilder();
@@ -359,7 +167,7 @@ public final class AdaptedSchemaBuilder {
                                         is(MappedClass.MappedType.UNION))
                                 {
                                     discoverUnion(mappedClass ,
-                                            context.possibleTypes.get(mappedClass)
+                                            context.possibleTypesOf(mappedClass)
                                             , context);
 
                                 }
@@ -372,11 +180,11 @@ public final class AdaptedSchemaBuilder {
         Map<MappedClass , DiscoveredType> discoveredTypes = new HashMap<>();
 
 
-        context.rawTypes.keySet()
+        context.rawTypes().keySet()
                 .stream()
                 .forEach(mappedClass -> {
 
-                    GraphQLType type = context.rawTypes.get(mappedClass);
+                    GraphQLType type = context.rawTypeOf(mappedClass);
                     discoveredTypes.put(mappedClass , buildDiscoveredType(mappedClass , type));
 
                 });
@@ -391,7 +199,7 @@ public final class AdaptedSchemaBuilder {
             {
                 DiscoveredInterfaceTypeImpl interfaceType = (DiscoveredInterfaceTypeImpl)discoveredType;
 
-                List<MappedClass> implementors = context.possibleTypes.get(discoveredType.asMappedClass());
+                List<MappedClass> implementors = context.possibleTypesOf(discoveredType.asMappedClass());
 
                 if(implementors!=null)
                 {
@@ -414,7 +222,7 @@ public final class AdaptedSchemaBuilder {
             {
                 DiscoveredUnionTypeImpl unionType = (DiscoveredUnionTypeImpl)discoveredType;
 
-                List<MappedClass> possiableTypes = context.possibleTypes.get(discoveredType.asMappedClass());
+                List<MappedClass> possiableTypes = context.possibleTypesOf(discoveredType.asMappedClass());
 
                 if(possiableTypes!=null)
                 {
@@ -466,9 +274,9 @@ public final class AdaptedSchemaBuilder {
 
         });
 
-        GraphQLType queryType = query==null?null:context.rawTypes.get(query);
-        GraphQLType mutationType = mutation==null?null:context.rawTypes.get(mutation);
-        GraphQLType subscriptionType = subscription==null?null:context.rawTypes.get(subscription);
+        GraphQLType queryType = query==null?null:context.rawTypeOf(query);
+        GraphQLType mutationType = mutation==null?null:context.rawTypeOf(mutation);
+        GraphQLType subscriptionType = subscription==null?null:context.rawTypeOf(subscription);
 
         if(queryType!=null)
             schema.query((GraphQLObjectType) queryType);
@@ -484,10 +292,6 @@ public final class AdaptedSchemaBuilder {
 
     }
 
-    private final static void assertClassDiscoveredMultipleTimes(MappedClass cls)
-    {
-        throw new IllegalStateException("class ["+cls.baseClass()+"] discovered multiple times for ["+cls.mappedType()+" - "+cls.typeName()+"]");
-    }
 
 
     private final GraphQLType discover(MappedClass mappedClass , BuildingContextImpl context)
