@@ -3,14 +3,13 @@ package grphaqladapter.adaptedschemabuilder;
 import graphql.Scalars;
 import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
+import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapper.MappingStatics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 final class BuildingContextImpl implements BuildingContext {
@@ -73,6 +72,9 @@ final class BuildingContextImpl implements BuildingContext {
             {
                 return scalarControllerMap.computeIfAbsent(Scalars.GraphQLShort ,
                         controller);
+            }else if(c == ID.class)
+            {
+                return scalarControllerMap.computeIfAbsent(ID.ScalarType , controller);
             }
 
             return null;
