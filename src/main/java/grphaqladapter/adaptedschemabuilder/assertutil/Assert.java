@@ -277,7 +277,7 @@ public class Assert {
 
     public static void ifModifierNotValidForATypeClass(Class cls)
     {
-        ifModifierNotValidForATypeClass(cls , "class can not map to types ["+cls+"]");
+        ifModifierNotValidForATypeClass(cls , "just public modifire classes can map to types ["+cls+"]");
     }
 
     public static void ifModifierNotValidForAnInputTypeClass(Class cls , String msg)

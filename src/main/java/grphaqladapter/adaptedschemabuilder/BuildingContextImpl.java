@@ -1,10 +1,7 @@
 package grphaqladapter.adaptedschemabuilder;
 
 import graphql.Scalars;
-import graphql.schema.GraphQLScalarType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeReference;
+import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapper.MappingStatics;
@@ -13,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 final class BuildingContextImpl implements BuildingContext {
@@ -109,29 +107,51 @@ final class BuildingContextImpl implements BuildingContext {
 
 
     @Override
-    public GraphQLTypeReference getInputTypeFor(Class c)
+    public GraphQLTypeReference getInputObjectTypeFor(Class c)
     {
-        GraphQLScalarType scalarType = scalarAddController.findScalarTypeFor(c);
-        if(scalarType!=null)
-            return new GraphQLTypeReference(scalarType.getName());
-        return new GraphQLTypeReference(getMappedClassFor(c ,
-                MappedClass.MappedType.INPUT_TYPE).
-                typeName());
+
+        MappedClass mappedClass =
+                getMappedClassFor(c , MappedClass.MappedType.INPUT_TYPE);
+        return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
     }
 
+    @Override
+    public GraphQLTypeReference getInputTypeFor(Class c) {
+        GraphQLTypeReference reference = getScalarTypeFor(c);
+        if(reference!=null)return reference;
+        reference = getInputObjectTypeFor(c);
+        if(reference!=null)return reference;
+        return getEnumFor(c);
+    }
+
+    @Override
+    public GraphQLTypeReference geOutputTypeFor(Class c) {
+        GraphQLTypeReference reference = getScalarTypeFor(c);
+        if(reference!=null)return reference;
+        reference = getObjectTypeFor(c);
+        if(reference!=null)return reference;
+        reference = getEnumFor(c);
+        if(reference!=null)return reference;
+        reference = getInterfaceFor(c);
+        if(reference!=null)return reference;
+
+        return null;
+    }
+
+    @Override
+    public GraphQLTypeReference getScalarTypeFor(Class c) {
+        GraphQLScalarType scalarType =
+                scalarAddController.findScalarTypeFor(c);
+        return scalarType==null?null:new GraphQLTypeReference(scalarType.getName());
+    }
 
 
     @Override
     public GraphQLTypeReference getObjectTypeFor(Class c)
     {
-        GraphQLScalarType scalarType = scalarAddController.findScalarTypeFor(c);
-        if(scalarType!=null)
-            return new GraphQLTypeReference(scalarType.getName());
-
-        return new GraphQLTypeReference(
-                getMappedClassFor(c , MappedClass.MappedType.OBJECT_TYPE)
-                        .typeName()
-        );
+        MappedClass mappedClass =
+                getMappedClassFor(c , MappedClass.MappedType.OBJECT_TYPE);
+        return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
     }
 
     public GraphQLType rawTypeOf(MappedClass mappedClass)
@@ -151,16 +171,20 @@ final class BuildingContextImpl implements BuildingContext {
     @Override
     public GraphQLTypeReference getInterfaceFor(Class c)
     {
+        MappedClass mappedClass =
+                getMappedClassFor(c , MappedClass.MappedType.INTERFACE);
 
-        return new GraphQLTypeReference(getMappedClassFor(c ,
-                MappedClass.MappedType.INTERFACE).typeName());
+
+        return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
     }
 
     @Override
     public GraphQLTypeReference getEnumFor(Class c)
     {
-        return new GraphQLTypeReference(getMappedClassFor(c ,
-                MappedClass.MappedType.ENUM).typeName());
+        MappedClass mappedClass =
+                getMappedClassFor(c , MappedClass.MappedType.ENUM);
+
+        return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
     }
 
     @Override

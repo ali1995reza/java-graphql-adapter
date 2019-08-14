@@ -66,7 +66,7 @@ public class StaticMethods {
         //so handle it please !
         GraphQLFieldDefinition.Builder definition = GraphQLFieldDefinition.newFieldDefinition();
         definition.name(method.fieldName());
-        GraphQLOutputType outputType = context.getObjectTypeFor(method.type());
+        GraphQLOutputType outputType = context.geOutputTypeFor(method.type());
 
 
 
@@ -106,7 +106,7 @@ public class StaticMethods {
 
         field.name(method.fieldName());
 
-        GraphQLInputType inputType = context.getInputTypeFor(method.type());
+        GraphQLInputType inputType = context.getInputObjectTypeFor(method.type());
 
 
         if(method.isList())
