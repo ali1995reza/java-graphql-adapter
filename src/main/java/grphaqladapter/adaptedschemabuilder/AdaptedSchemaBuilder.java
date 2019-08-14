@@ -2,7 +2,6 @@ package grphaqladapter.adaptedschemabuilder;
 
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
-import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInterfaceType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
@@ -15,11 +14,9 @@ import grphaqladapter.codegenerator.impl.SimpleTypeResolverGenerator;
 import graphql.Scalars;
 import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import sun.awt.SunHints;
 
 import java.util.*;
-import java.util.function.*;
-import java.util.stream.Collector;
+import java.util.function.Function;
 
 public final class AdaptedSchemaBuilder {
 
@@ -28,53 +25,90 @@ public final class AdaptedSchemaBuilder {
 
     private final static class BuildingContextImpl implements BuildingContext {
 
+        private final static class ScalarAddController{
+            private final Function<GraphQLScalarType , GraphQLScalarType> controller =
+                    new Function<GraphQLScalarType, GraphQLScalarType>() {
+                        @Override
+                        public GraphQLScalarType apply(GraphQLScalarType type) {
+                            schema.additionalType(type);
+                            return type;
+                        }
+                    };
 
-        private final static GraphQLScalarType findScalarTypeFor(Class c)
-        {
-            if(c == String.class)
-            {
 
-                return Scalars.GraphQLString;
-            }else if(c == int.class || c == Integer.class)
+            private final HashMap<GraphQLScalarType , GraphQLScalarType> scalarControllerMap;
+            private final GraphQLSchema.Builder schema;
+            private ScalarAddController(GraphQLSchema.Builder builder)
             {
-                return Scalars.GraphQLInt;
-            }else if(c == long.class || c == Long.class)
-            {
-                return Scalars.GraphQLLong;
-            }else if(c == float.class || c == Float.class)
-            {
-                return Scalars.GraphQLFloat;
-            }else if(c == double.class || c == Double.class)
-            {
-                return Scalars.GraphQLBigDecimal;
-            }else if(c == char.class || c == Character.class)
-            {
-                return Scalars.GraphQLChar;
-            }else if(c == byte.class || c == Byte.class)
-            {
-                return Scalars.GraphQLByte;
-            }else if(c == boolean.class || c == Boolean.class)
-            {
-                return Scalars.GraphQLBoolean;
-            }else if(c == short.class || c == Short.class)
-            {
-                return Scalars.GraphQLShort;
+                schema = builder;
+                scalarControllerMap = new HashMap<>();
             }
+            private  GraphQLScalarType findScalarTypeFor(Class c)
+            {
 
-            return null;
+                if(c == String.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLString ,
+                            controller);
+                }else if(c == int.class || c == Integer.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLInt ,
+                            controller);
+                }else if(c == long.class || c == Long.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLLong ,
+                            controller);
+                }else if(c == float.class || c == Float.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLFloat ,
+                            controller);
+                }else if(c == double.class || c == Double.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLBigDecimal ,
+                            controller);
+                }else if(c == char.class || c == Character.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLChar ,
+                            controller);
+                }else if(c == byte.class || c == Byte.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLByte ,
+                            controller);
+                }else if(c == boolean.class || c == Boolean.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLBoolean ,
+                            controller);
+                }else if(c == short.class || c == Short.class)
+                {
+                    return scalarControllerMap.computeIfAbsent(Scalars.GraphQLShort ,
+                            controller);
+                }
+
+                return null;
+
+            }
 
         }
 
+
+
+
         private final Map<Class , Map<MappedClass.MappedType , MappedClass>> mappedClasses ;
-        private final Map<MappedClass , GraphQLType> rawTypes = new HashMap<>();
-        private final Map<MappedClass , List<MappedClass>> possibleTypes
-                = new HashMap<>();
+        private final Map<MappedClass , GraphQLType> rawTypes;
+        private final Map<MappedClass , List<MappedClass>> possibleTypes;
+        private final GraphQLSchema.Builder schemaBuilder;
+        private final ScalarAddController scalarAddController;
 
 
-        BuildingContextImpl(Map<Class , Map<MappedClass.MappedType , MappedClass>> mcs)
+        BuildingContextImpl(Map<Class, Map<MappedClass.MappedType, MappedClass>> mcs,
+                            GraphQLSchema.Builder schemaBuilder)
         {
 
             mappedClasses = mcs;
+            this.schemaBuilder = schemaBuilder;
+            rawTypes = new HashMap<>();
+            possibleTypes = new HashMap<>();
+            scalarAddController = new ScalarAddController(schemaBuilder);
         }
 
 
@@ -83,8 +117,9 @@ public final class AdaptedSchemaBuilder {
         @Override
         public GraphQLTypeReference getInputTypeFor(Class c)
         {
-            if(findScalarTypeFor(c)!=null)
-                return new GraphQLTypeReference(findScalarTypeFor(c).getName());
+            GraphQLScalarType scalarType = scalarAddController.findScalarTypeFor(c);
+            if(scalarType!=null)
+                return new GraphQLTypeReference(scalarType.getName());
             return new GraphQLTypeReference(getMappedClassFor(c ,
                     MappedClass.MappedType.INPUT_TYPE).
                     typeName());
@@ -95,9 +130,9 @@ public final class AdaptedSchemaBuilder {
         @Override
         public GraphQLTypeReference getObjectTypeFor(Class c)
         {
-
-            if(findScalarTypeFor(c)!=null)
-                return new GraphQLTypeReference(findScalarTypeFor(c).getName());
+            GraphQLScalarType scalarType = scalarAddController.findScalarTypeFor(c);
+            if(scalarType!=null)
+                return new GraphQLTypeReference(scalarType.getName());
 
             return new GraphQLTypeReference(
                     getMappedClassFor(c , MappedClass.MappedType.OBJECT_TYPE)
@@ -257,7 +292,6 @@ public final class AdaptedSchemaBuilder {
 
     public synchronized AdaptedGraphQLSchema build()
     {
-        GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
 
 
         Map<Class , Map<MappedClass.MappedType , MappedClass>> mappedClasses =
@@ -289,8 +323,11 @@ public final class AdaptedSchemaBuilder {
         }
 
 
+
+        GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
+
         final BuildingContextImpl context =
-                new BuildingContextImpl(mappedClasses);
+                new BuildingContextImpl(mappedClasses , schema);
 
 
         mappedClasses.values()
