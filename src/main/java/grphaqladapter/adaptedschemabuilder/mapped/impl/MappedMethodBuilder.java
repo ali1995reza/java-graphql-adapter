@@ -106,9 +106,7 @@ public final class MappedMethodBuilder {
     public synchronized MappedMethodBuilder addMappedParameter(MappedParameter mappedParameter)
     {
         Assert.ifConditionTrue("a parameter with argument typeName ["+mappedParameter.argumentName()
-                +"] already exist - [exist:"+mappedParameters.stream().
-                        filter(ParameterNamePredict.of(mappedParameter.argumentName())).
-                        findAny().get()+"]",
+                +"] already exist",
                 mappedParameters.stream().anyMatch(ParameterNamePredict.of(mappedParameter.argumentName())));
         this.mappedParameters.add(mappedParameter);
         return this;
