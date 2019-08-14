@@ -3,6 +3,7 @@ package grphaqladapter.adaptedschemabuilder;
 
 
 import graphql.schema.*;
+import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
@@ -43,6 +44,8 @@ public class StaticMethods {
         argument.name(parameter.argumentName());
         GraphQLInputType inputType = context.getInputTypeFor(parameter.type());
 
+        Assert.ifNull(inputType , "provided input type for ["+parameter.type()+"] is null");
+
 
         if(parameter.isList())
         {
@@ -67,7 +70,7 @@ public class StaticMethods {
         GraphQLFieldDefinition.Builder definition = GraphQLFieldDefinition.newFieldDefinition();
         definition.name(method.fieldName());
         GraphQLOutputType outputType = context.geOutputTypeFor(method.type());
-
+        Assert.ifNull(outputType , "provided input type for ["+method.type()+"] is null");
 
 
         if(method.isList())

@@ -119,25 +119,26 @@ final class BuildingContextImpl implements BuildingContext {
 
     @Override
     public GraphQLTypeReference getInputTypeFor(Class c) {
-        GraphQLTypeReference reference = getScalarTypeFor(c);
+        GraphQLTypeReference reference = getInputObjectTypeFor(c);
         if(reference!=null)return reference;
-        reference = getInputObjectTypeFor(c);
+        reference = getEnumFor(c);
         if(reference!=null)return reference;
-        return getEnumFor(c);
+        reference = getScalarTypeFor(c);
+
+        return reference;
     }
 
     @Override
     public GraphQLTypeReference geOutputTypeFor(Class c) {
-        GraphQLTypeReference reference = getScalarTypeFor(c);
-        if(reference!=null)return reference;
-        reference = getObjectTypeFor(c);
+        GraphQLTypeReference reference = getObjectTypeFor(c);
         if(reference!=null)return reference;
         reference = getEnumFor(c);
         if(reference!=null)return reference;
         reference = getInterfaceFor(c);
         if(reference!=null)return reference;
+        reference = getScalarTypeFor(c);
 
-        return null;
+        return reference;
     }
 
     @Override
