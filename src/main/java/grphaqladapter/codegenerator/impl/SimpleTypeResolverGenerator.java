@@ -40,7 +40,7 @@ public class SimpleTypeResolverGenerator implements TypeResolverGenerator {
             Class objectClass = typeResolutionEnvironment.getObject().getClass();
             for(DiscoveredObjectType objectType:possibleTypes)
             {
-                if(objectClass == objectType.asMappedClass().baseClass())
+                if(objectType.asMappedClass().baseClass().isAssignableFrom(objectClass))
                     return objectType.asGraphQLType();
             }
 
