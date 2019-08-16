@@ -5,7 +5,7 @@ import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 
 public final class ScalarEntryBuilder {
 
-    public ScalarEntryBuilder newBuilder()
+    public static ScalarEntryBuilder newBuilder()
     {
         return new ScalarEntryBuilder();
     }
