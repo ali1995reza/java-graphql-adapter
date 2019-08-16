@@ -16,6 +16,7 @@ public final class AdaptedGraphQLSchema {
     private final List<DiscoveredObjectType> discoveredObjectTypes;
     private final List<DiscoveredUnionType> discoveredUnionTypes;
     private final List<DiscoveredEnumType> discoveredEnumTypes;
+    private final List<DiscoveredScalarType> discoveredScalarTypes;
 
     AdaptedGraphQLSchema(GraphQLSchema schema  , List<DiscoveredType> types)
     {
@@ -26,6 +27,7 @@ public final class AdaptedGraphQLSchema {
         discoveredObjectTypes = separateAllObjectTypes();
         discoveredUnionTypes = separateAllUnionTypes();
         discoveredEnumTypes = separateAllEnumTypes();
+        discoveredScalarTypes = separateAllScalarTypes();
 
     }
 
@@ -37,6 +39,20 @@ public final class AdaptedGraphQLSchema {
             if(type instanceof DiscoveredInterfaceType)
             {
                 list.add((DiscoveredInterfaceTypeImpl)type);
+            }
+        }
+
+        return Collections.unmodifiableList(list);
+    }
+
+    private List<DiscoveredScalarType> separateAllScalarTypes()
+    {
+        List<DiscoveredScalarType> list = new ArrayList<>();
+        for(DiscoveredType type:discoveredTypes)
+        {
+            if(type instanceof DiscoveredScalarType)
+            {
+                list.add((DiscoveredScalarType)type);
             }
         }
 
