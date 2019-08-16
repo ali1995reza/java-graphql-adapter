@@ -6,6 +6,7 @@ import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapper.ClassMapper;
+import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 import grphaqladapter.annotations.GraphqlType;
 import grphaqladapter.codegenerator.DataFetcherGenerator;
 import grphaqladapter.codegenerator.TypeResolverGenerator;
@@ -30,12 +31,14 @@ public final class AdaptedSchemaBuilder {
     private final List<Class> allClasses = new ArrayList<>();
     private DataFetcherGenerator dataFetcherGenerator;
     private TypeResolverGenerator typeResolverGenerator;
+    private final Map<Class , ScalarEntry> scalarEntries;
     private final ClassMapper mapper;
 
     private AdaptedSchemaBuilder(){
         dataFetcherGenerator = new ReflectionDataFetcherGenerator();
         typeResolverGenerator = new SimpleTypeResolverGenerator();
         mapper = new ClassMapper();
+        scalarEntries = new HashMap<>();
     }
 
     private void addIfNotExists(Class c)
@@ -98,6 +101,32 @@ public final class AdaptedSchemaBuilder {
         return this;
     }
 
+    public synchronized AdaptedSchemaBuilder addScalar(ScalarEntry entry)
+    {
+        scalarEntries.put(entry.type() , entry);
+        return this;
+    }
+
+    public synchronized AdaptedSchemaBuilder removeScalar(ScalarEntry entry)
+    {
+        scalarEntries.remove(entry.type() , entry);
+        return this;
+    }
+
+    public synchronized AdaptedSchemaBuilder removeScalar(Class cls)
+    {
+        scalarEntries.remove(cls);
+        return this;
+    }
+
+    public synchronized AdaptedSchemaBuilder clearScalars()
+    {
+        scalarEntries.clear();
+        return this;
+    }
+
+
+
     public synchronized AdaptedGraphQLSchema build()
     {
 
@@ -135,7 +164,7 @@ public final class AdaptedSchemaBuilder {
         GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
 
         final BuildingContextImpl context =
-                new BuildingContextImpl(mappedClasses , schema);
+                new BuildingContextImpl(mappedClasses , schema , scalarEntries);
 
 
         mappedClasses.values()

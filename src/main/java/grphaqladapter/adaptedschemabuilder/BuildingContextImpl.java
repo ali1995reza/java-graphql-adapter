@@ -5,6 +5,7 @@ import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
+import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +17,9 @@ final class BuildingContextImpl implements BuildingContext {
 
 
     private final static class ScalarAddController{
+
+
+
         private final Function<GraphQLScalarType, GraphQLScalarType> controller =
                 new Function<GraphQLScalarType, GraphQLScalarType>() {
                     @Override
@@ -25,17 +29,26 @@ final class BuildingContextImpl implements BuildingContext {
                     }
                 };
 
-
-        private final HashMap<GraphQLScalarType , GraphQLScalarType> scalarControllerMap;
+        private final Map<Class , GraphQLScalarType> providedScalars;
+        private final Map<GraphQLScalarType , GraphQLScalarType> scalarControllerMap;
         private final GraphQLSchema.Builder schema;
-        private ScalarAddController(GraphQLSchema.Builder builder)
+        private ScalarAddController(GraphQLSchema.Builder builder , Map<Class , ScalarEntry> scalarEntries)
         {
             schema = builder;
             scalarControllerMap = new HashMap<>();
+            providedScalars = new HashMap<>();
+            for(Class c : scalarEntries.keySet())
+            {
+                providedScalars.put(c , StaticMethods.buildScalarType(scalarEntries.get(c)));
+            }
         }
         private  GraphQLScalarType findScalarTypeFor(Class c)
         {
-
+            GraphQLScalarType scalarType = providedScalars.get(c);
+            if(scalarType!=null) {
+                scalarControllerMap.computeIfAbsent(scalarType , controller);
+                return scalarType;
+            }
             if(c == String.class)
             {
                 return scalarControllerMap.computeIfAbsent(Scalars.GraphQLString ,
@@ -94,7 +107,8 @@ final class BuildingContextImpl implements BuildingContext {
 
 
     BuildingContextImpl(Map<Class, Map<MappedClass.MappedType, MappedClass>> mcs,
-                        GraphQLSchema.Builder schemaBuilder)
+                        GraphQLSchema.Builder schemaBuilder ,
+                        Map<Class , ScalarEntry> scalarEntries)
     {
         Assert.ifNull(mcs , "mapped classes is null");
         Assert.ifNull(schemaBuilder , "provided schema builder is null");
@@ -102,7 +116,7 @@ final class BuildingContextImpl implements BuildingContext {
         this.schemaBuilder = schemaBuilder;
         rawTypes = new HashMap<>();
         possibleTypes = new HashMap<>();
-        scalarAddController = new ScalarAddController(schemaBuilder);
+        scalarAddController = new ScalarAddController(schemaBuilder , scalarEntries);
     }
 
 

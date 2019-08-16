@@ -7,6 +7,7 @@ import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
+import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -301,5 +302,15 @@ public class StaticMethods {
         }
 
         return unionType.build();
+    }
+
+
+    public static final GraphQLScalarType buildScalarType(ScalarEntry entry)
+    {
+        return GraphQLScalarType.newScalar()
+                .name(entry.name())
+                .coercing(entry.coercing())
+                .build();
+
     }
 }
