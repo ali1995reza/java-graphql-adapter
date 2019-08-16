@@ -12,6 +12,7 @@ public final class AdaptedGraphQLSchema {
     private final GraphQLSchema schema;
     private final String sdl;
     private final List<DiscoveredType> discoveredTypes;
+    private final List<DiscoveredInputType> discoveredInputTypes;
     private final List<DiscoveredInterfaceType> discoveredInterfacesTypes;
     private final List<DiscoveredObjectType> discoveredObjectTypes;
     private final List<DiscoveredUnionType> discoveredUnionTypes;
@@ -22,7 +23,8 @@ public final class AdaptedGraphQLSchema {
     {
         this.schema = schema;
         sdl = SDLStatic.from(schema);
-        discoveredTypes = Collections.unmodifiableList(types);
+        discoveredTypes = types;
+        discoveredInputTypes = separateAllInputTypes();
         discoveredInterfacesTypes = separateAllInterfaceTypes();
         discoveredObjectTypes = separateAllObjectTypes();
         discoveredUnionTypes = separateAllUnionTypes();
@@ -101,6 +103,20 @@ public final class AdaptedGraphQLSchema {
         return Collections.unmodifiableList(list);
     }
 
+    private List<DiscoveredInputType> separateAllInputTypes()
+    {
+        List<DiscoveredInputType> list = new ArrayList<>();
+        for(DiscoveredType type:discoveredTypes)
+        {
+            if(type instanceof DiscoveredInputType)
+            {
+                list.add((DiscoveredInputType)type);
+            }
+        }
+
+        return Collections.unmodifiableList(list);
+    }
+
 
     public GraphQLSchema getSchema() {
         return schema;
@@ -119,6 +135,13 @@ public final class AdaptedGraphQLSchema {
         return discoveredObjectTypes;
     }
 
+    public List<DiscoveredInputType> discoveredInputTypes() {
+        return discoveredInputTypes;
+    }
+
+    public List<DiscoveredScalarType> discoveredScalarTypes() {
+        return discoveredScalarTypes;
+    }
 
     public List<DiscoveredType> discoveredTypes() {
         return discoveredTypes;

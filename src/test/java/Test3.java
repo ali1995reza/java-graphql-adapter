@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class Test3 {
 
-    private static class IntPeriodScalar{
+    public static class IntPeriodScalar{
 
 
         private final static Pattern PeriodPattern  =

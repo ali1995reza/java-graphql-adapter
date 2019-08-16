@@ -270,14 +270,12 @@ public class Assert {
             throw new IllegalStateException(msg);
         if(cls.isArray())
             throw new IllegalStateException(msg);
-        if(cls.isPrimitive())
-            throw new IllegalStateException(msg);
 
     }
 
     public static void ifModifierNotValidForATypeClass(Class cls)
     {
-        ifModifierNotValidForATypeClass(cls , "just public modifire classes can map to types ["+cls+"]");
+        ifModifierNotValidForATypeClass(cls , "just public modifier classes can map to types ["+cls+"]");
     }
 
     public static void ifModifierNotValidForAnInputTypeClass(Class cls , String msg)

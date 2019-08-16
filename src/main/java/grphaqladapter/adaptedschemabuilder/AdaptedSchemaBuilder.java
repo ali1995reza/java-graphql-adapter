@@ -125,6 +125,19 @@ public final class AdaptedSchemaBuilder {
         return this;
     }
 
+    private final Map<Class , GraphQLScalarType> getScalars()
+    {
+        Map<Class , GraphQLScalarType> scalarTypeMap = new HashMap<>();
+
+        for(Class cls : scalarEntries.keySet())
+        {
+            scalarTypeMap.put(cls ,
+                    StaticMethods.buildScalarType(scalarEntries.get(cls)));
+        }
+
+        return scalarTypeMap;
+    }
+
 
 
     public synchronized AdaptedGraphQLSchema build()
@@ -164,7 +177,7 @@ public final class AdaptedSchemaBuilder {
         GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
 
         final BuildingContextImpl context =
-                new BuildingContextImpl(mappedClasses , schema , scalarEntries);
+                new BuildingContextImpl(mappedClasses , schema , getScalars());
 
 
         mappedClasses.values()
@@ -289,8 +302,12 @@ public final class AdaptedSchemaBuilder {
                     }
                 });
 
-        dataFetcherGenerator.init(inputTypes);
-        allTypes.stream().forEach(d -> {
+        allTypes.addAll(context.allScalars());
+        List<DiscoveredType> unmodifiableTypes = Collections.unmodifiableList(allTypes);
+
+        dataFetcherGenerator.init(unmodifiableTypes);
+
+        unmodifiableTypes.stream().forEach(d -> {
 
             MappedClass mappedClass = d.asMappedClass();
             for(MappedMethod method:mappedClass.mappedMethods().values())
@@ -317,7 +334,7 @@ public final class AdaptedSchemaBuilder {
 
         schema.codeRegistry(code.build());
 
-        return new AdaptedGraphQLSchema(schema.build() , allTypes);
+        return new AdaptedGraphQLSchema(schema.build() , unmodifiableTypes);
 
     }
 

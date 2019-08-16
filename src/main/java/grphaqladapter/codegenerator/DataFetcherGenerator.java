@@ -1,7 +1,9 @@
 package grphaqladapter.codegenerator;
 
 import graphql.schema.DataFetcher;
+import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
+import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 
@@ -11,5 +13,5 @@ public interface DataFetcherGenerator {
 
 
     DataFetcher generate(MappedClass cls , MappedMethod method);
-    void init(List<DiscoveredInputType> inputTypes);
+    void init(List<DiscoveredType> discoveredTypes);
 }

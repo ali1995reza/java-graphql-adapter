@@ -11,6 +11,7 @@ public interface MappedClass {
         OBJECT_TYPE,
         UNION ,
         INPUT_TYPE ,
+        SCALAR ,
         QUERY,
         MUTATION ,
         SUBSCRIPTION;

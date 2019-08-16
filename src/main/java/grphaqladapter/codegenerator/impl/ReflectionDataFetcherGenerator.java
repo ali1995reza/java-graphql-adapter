@@ -1,7 +1,10 @@
 package grphaqladapter.codegenerator.impl;
 
+import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.GraphqlQueryHandler;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
+import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredScalarType;
+import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
@@ -20,19 +23,34 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
         private final MappedMethod method;
         private final Map<Class, DiscoveredInputType> inputTypesMap;
+        private final Set<Class> scalars;
         private final List<MappedParameter> parameters;
         private final Object source;
 
-        private ReflectionDataFetcher(MappedMethod m, List<DiscoveredInputType> inputTypes, Object source)
+        private ReflectionDataFetcher(MappedMethod m, List<DiscoveredType> allTypes, Object source)
         {
             method = m;
             this.source = source;
 
             Map<Class , DiscoveredInputType> map = new HashMap<>();
 
-            for(DiscoveredInputType inputType:inputTypes){
-                map.put(inputType.asMappedClass().baseClass() , inputType);
+            for(DiscoveredType t:allTypes){
+
+                if(t instanceof DiscoveredInputType) {
+                    map.put(t.asMappedClass().baseClass(), (DiscoveredInputType) t);
+                }
             }
+
+            HashSet<Class> scalars = new HashSet<>();
+
+            for(DiscoveredType t:allTypes)
+            {
+                if(t instanceof DiscoveredScalarType) {
+                    scalars.add(t.asMappedClass().baseClass());
+                }
+            }
+
+            this.scalars = Collections.unmodifiableSet(scalars);
 
             inputTypesMap = Collections.unmodifiableMap(map);
             parameters = method.parameters();
@@ -44,13 +62,6 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             return cls.newInstance();
         }
 
-        private final static boolean isScalar(Class c)
-        {
-            return c==String.class||c==Integer.class||c==int.class||c==Float.class||c==float.class
-                    ||c==Double.class||c==double.class||c==Character.class||c==char.class
-                    ||c==Long.class||c==long.class||c==Byte.class||c==byte.class
-                    ||c==Short.class||c==short.class;
-        }
 
 
         private final Object buildUsingMap(Map<String , Object> map , DiscoveredInputType inputType) throws InstantiationException, IllegalAccessException, InvocationTargetException {
@@ -65,7 +76,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                 if(method.isList())
                 {
                     //so lets handle it again!
-                    if(isScalar(method.type()))
+                    if(scalars.contains(method.type()))
                     {
                         method.setter()
                                 .invoke(instance, map.get(method.fieldName()));
@@ -75,7 +86,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                         method.setter().invoke(instance, buildList((List) map.get(method.fieldName()),
                                         inputTypesMap.get(method.type())));
                     }
-                }else if(isScalar(method.type()))
+                }else if(scalars.contains(method.type()))
                 {
                     method.setter()
                             .invoke(instance , map.get(method.fieldName()));
@@ -145,13 +156,13 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                 for (int i = 0; i < parameters.size(); i++) {
                     MappedParameter parameter = parameters.get(i);
                     if (parameter.isList()) {
-                        if (isScalar(parameter.type())) {
+                        if (scalars.contains(method.type())) {
                             args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
                         } else {
                             args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
                                     inputTypesMap.get(parameter.type()));
                         }
-                    } else if (isScalar(parameter.type()) || parameter.type().isEnum()) {
+                    } else if (scalars.contains(method.type()) || parameter.type().isEnum()) {
                         args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
                     } else {
                         args[i] = buildUsingMap(dataFetchingEnvironment.getArgument(parameter.argumentName()),
@@ -176,7 +187,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
 
 
-    private List<DiscoveredInputType> inputTypes;
+    private List<DiscoveredType> allTypes;
 
 
     @Override
@@ -186,17 +197,18 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             try {
                 System.err.println(cls.baseClass());
                 Object source = cls.baseClass().newInstance();
-                return new ReflectionDataFetcher(method, inputTypes, source);
+                return new ReflectionDataFetcher(method, allTypes, source);
             } catch (Throwable e) {
                 throw new IllegalStateException(e);
             }
         }else {
-            return new ReflectionDataFetcher(method , inputTypes , null);
+            return new ReflectionDataFetcher(method , allTypes , null);
         }
     }
 
     @Override
-    public void init(List<DiscoveredInputType> inputTypes) {
-        this.inputTypes = inputTypes;
+    public void init(List<DiscoveredType> allTypes) {
+        this.allTypes = allTypes;
     }
+
 }
