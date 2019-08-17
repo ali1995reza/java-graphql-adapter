@@ -51,6 +51,7 @@ final class BuildingContextImpl implements BuildingContext {
         private final Map<Class , GraphQLScalarType> scalars;
         private final GraphQLSchema.Builder schema;
         private final List<DiscoveredScalarType> discoveredScalarTypes;
+        private final Set<GraphQLScalarType> addedScalars;
 
         private ScalarAddController(GraphQLSchema.Builder builder , Map<Class , GraphQLScalarType> providedScalars)
         {
@@ -71,22 +72,28 @@ final class BuildingContextImpl implements BuildingContext {
 
             discoveredScalarTypes = new ArrayList<>();
 
-            for (Class cls:this.scalars.keySet())
+            addedScalars = new HashSet<>();
+
+        }
+        private  GraphQLScalarType findScalarTypeFor(Class c)
+        {
+
+            GraphQLScalarType scalarType =  scalars.get(c);
+
+            if(scalarType!=null && !addedScalars.contains(scalarType))
             {
-                GraphQLScalarType scalarType = this.scalars.get(cls);
                 schema.additionalType(scalarType);
+                addedScalars.add(scalarType);
                 discoveredScalarTypes.add(
                         new DiscoveredScalarTypeImpl(
-                                cls ,
+                                c ,
                                 scalarType.getName() ,
                                 scalarType
                         )
                 );
             }
-        }
-        private  GraphQLScalarType findScalarTypeFor(Class c)
-        {
-            return scalars.get(c);
+
+            return scalarType;
         }
 
     }
