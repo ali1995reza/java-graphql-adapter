@@ -144,13 +144,14 @@ public class MappingStatics {
         if(methods!=null)
         {
             for(Method method:methods) {
-                list.add(method);
+                if(!method.isSynthetic())
+                    list.add(method);
             }
         }
 
         if(declaredMethods!=null) {
             for (Method method : declaredMethods) {
-                if(!list.contains(method))
+                if(!list.contains(method) && !method.isSynthetic())
                     list.add(method);
             }
         }
