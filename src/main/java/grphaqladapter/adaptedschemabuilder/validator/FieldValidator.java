@@ -24,6 +24,7 @@ public final class FieldValidator {
         Assert.ifModifierNotValidForAFieldMethod(mappedMethod.method());
         Assert.ifNull(mappedMethod.parameters() , "provided parameters is null");
         Assert.ifNameNotValid(mappedMethod.fieldName());
+        if(mappedMethod.isNullable())Assert.ifCantBeNullable(mappedMethod.type());
         if(mappedMethod.isQueryHandler())
         {
 
