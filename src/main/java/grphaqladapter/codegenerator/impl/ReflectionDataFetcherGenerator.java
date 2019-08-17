@@ -162,7 +162,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                             args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
                                     inputTypesMap.get(parameter.type()));
                         }
-                    } else if (scalars.contains(method.type()) || parameter.type().isEnum()) {
+                    } else if (scalars.contains(parameter.type()) || parameter.type().isEnum()) {
                         args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
                     } else {
                         args[i] = buildUsingMap(dataFetchingEnvironment.getArgument(parameter.argumentName()),
