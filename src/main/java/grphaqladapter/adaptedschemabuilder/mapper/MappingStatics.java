@@ -137,7 +137,7 @@ public class MappingStatics {
 
     public final static List<Method> getAllMethods(Class cls)
     {
-        Method[] methods = cls.getDeclaredMethods();
+        Method[] methods = cls.getMethods();
         Method[] declaredMethods = cls.getDeclaredMethods();
         List<Method> list = new ArrayList<>();
 
