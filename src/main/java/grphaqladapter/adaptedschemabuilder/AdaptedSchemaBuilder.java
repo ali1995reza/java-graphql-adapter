@@ -7,17 +7,14 @@ import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapper.ClassMapper;
 import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
-import grphaqladapter.annotations.GraphqlType;
 import grphaqladapter.codegenerator.DataFetcherGenerator;
 import grphaqladapter.codegenerator.TypeResolverGenerator;
 import grphaqladapter.codegenerator.impl.ReflectionDataFetcherGenerator;
 import grphaqladapter.codegenerator.impl.SimpleTypeResolverGenerator;
-import graphql.Scalars;
 import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 
 import java.util.*;
-import java.util.function.Function;
 
 public final class AdaptedSchemaBuilder {
 
