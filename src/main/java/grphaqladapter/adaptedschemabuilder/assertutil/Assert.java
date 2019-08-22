@@ -58,7 +58,7 @@ public class Assert {
 
     public static void ifNull(Object o)
     {
-        ifNull(o);
+        ifNull(o , null);
     }
 
     public static void ifNotNull(Object o , String msg)
