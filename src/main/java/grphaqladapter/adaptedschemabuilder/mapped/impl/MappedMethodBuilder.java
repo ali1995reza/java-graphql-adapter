@@ -128,6 +128,19 @@ public final class MappedMethodBuilder {
         return this;
     }
 
+    public synchronized MappedMethodBuilder refresh()
+    {
+        isQueryHandler = false;
+        nullable = false;
+        setter = null;
+        fieldName = null;
+        type = null;
+        dimensions = 0;
+        mappedParameters.clear();
+        method = null;
+        return this;
+    }
+
     private final List<MappedParameter> getParametersList()
     {
         if(mappedParameters.size()==0)
