@@ -53,7 +53,7 @@ public class Assert {
     public static void ifNull(Object o , String msg)
     {
         if(o==null)
-            new NullPointerException(msg);
+            throw new NullPointerException(msg);
     }
 
     public static void ifNull(Object o)
