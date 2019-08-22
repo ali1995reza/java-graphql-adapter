@@ -329,7 +329,7 @@ public final class ClassMapper {
 
         String fieldName = Utils.stringNullifyOrGetDefault(annotation.fieldName() , method.getName());
 
-        methodBuilder.clearMappedParameters();
+        methodBuilder.refresh();
         for (int index = 0 ;index<method.getParameters().length;index++)
         {
             methodBuilder.addMappedParameter(
@@ -392,7 +392,7 @@ public final class ClassMapper {
             throw new IllegalStateException("no setter method found for ["+method+"]");
         }
 
-        methodBuilder.clearMappedParameters();
+        methodBuilder.refresh();
         for (int index = 0 ;index<method.getParameters().length;index++)
         {
             methodBuilder.addMappedParameter(
