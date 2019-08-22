@@ -19,7 +19,7 @@ public class StaticMethods {
 
 
 
-    private final static GraphQLList createList(GraphQLType type , int dims)
+    private final static GraphQLList createList(GraphQLTypeReference type , int dims)
     {
         if(dims<1)
             throw new IllegalStateException("can not create a list with dimensions <1");
@@ -43,23 +43,19 @@ public class StaticMethods {
         //so handle it please !
         GraphQLArgument.Builder argument = GraphQLArgument.newArgument();
         argument.name(parameter.argumentName());
-        GraphQLInputType inputType = context.getInputTypeFor(parameter.type());
+        GraphQLTypeReference inputType = context.getInputTypeFor(parameter.type());
 
         Assert.ifNull(inputType , "provided input type for ["+parameter.type()+"] is null");
 
 
-        if(parameter.isList())
-        {
-            inputType = createList(inputType , parameter.dimensions());
-        }
-
-        if(!parameter.isNullable())
-        {
-            inputType = new GraphQLNonNull(inputType);
-        }
-
-
-        argument.type(inputType);
+        argument.type(
+                parameter.isNullable()?
+                        (parameter.isList()?
+                                (createList(inputType , parameter.dimensions())):inputType)
+                        :
+                        new GraphQLNonNull((parameter.isList()?
+                                (createList(inputType , parameter.dimensions())):inputType))
+        );
 
         return argument.build();
     }
@@ -70,19 +66,19 @@ public class StaticMethods {
         //so handle it please !
         GraphQLFieldDefinition.Builder definition = GraphQLFieldDefinition.newFieldDefinition();
         definition.name(method.fieldName());
-        GraphQLOutputType outputType = context.geOutputTypeFor(method.type());
+        GraphQLTypeReference outputType = context.geOutputTypeFor(method.type());
         Assert.ifNull(outputType , "provided input type for ["+method.type()+"] is null");
 
 
-        if(method.isList())
-        {
-            outputType = createList(outputType  , method.dimensions());
-        }
 
-        if(!method.isNullable())
-            outputType = new GraphQLNonNull(outputType);
-
-        definition.type(outputType);
+        definition.type(
+                method.isNullable()?
+                        (method.isList()?
+                                (createList(outputType , method.dimensions())):outputType)
+                        :
+                        new GraphQLNonNull((method.isList()?
+                                (createList(outputType , method.dimensions())):outputType))
+        );
 
 
         for(MappedParameter parameter:method.parameters())
@@ -110,21 +106,18 @@ public class StaticMethods {
 
         field.name(method.fieldName());
 
-        GraphQLInputType inputType = context.getInputObjectTypeFor(method.type());
+        GraphQLTypeReference inputType = context.getInputTypeFor(method.type());
 
 
-        if(method.isList())
-        {
-            inputType = createList(inputType , method.dimensions());
-        }
 
-        if(!method.isNullable())
-        {
-            inputType = new GraphQLNonNull(inputType);
-        }
-
-
-        field.type(inputType);
+        field.type(
+                method.isNullable()?
+                        (method.isList()?
+                                (createList(inputType , method.dimensions())):inputType)
+                        :
+                        new GraphQLNonNull((method.isList()?
+            (createList(inputType , method.dimensions())):inputType))
+        );
 
         return field.build();
     }

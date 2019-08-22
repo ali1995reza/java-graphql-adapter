@@ -152,17 +152,17 @@ public class Assert {
     }
 
 
-    public static void ifNotAValidSetterMethod(Class paramType , Method method , String msg)
+    public static void ifNotAValidSetterMethod(Method fieldMethod , Method setterMethod , String msg)
     {
-        if(method.getParameterCount()!=1 || paramType!=method.getParameterTypes()[0])
+        if(setterMethod.getParameterCount()!=1 || fieldMethod.getReturnType()!=setterMethod.getParameters()[0].getType())
         {
             throw new IllegalStateException(msg);
         }
     }
 
-    public static void ifNotAValidSetterMethod(Class paramType , Method method)
+    public static void ifNotAValidSetterMethod(Method fieldMethod  , Method setterMethod)
     {
-        ifNotAValidSetterMethod(paramType, method , "method ["+method+"] not a valid setter - valid setter method must contain exactly one parameter equal to return type of field method");
+        ifNotAValidSetterMethod(fieldMethod, setterMethod , "method ["+setterMethod+"] not a valid setter for ["+fieldMethod+"] - valid setter method must contain exactly one parameter equal to return type of field method");
     }
 
     public static void ifModifierNotValidForAFieldMethod(Method method  , String msg)

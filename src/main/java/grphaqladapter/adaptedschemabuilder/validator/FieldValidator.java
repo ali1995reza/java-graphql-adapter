@@ -43,7 +43,7 @@ public final class FieldValidator {
         {
 
             Assert.ifModifierNotValidForASetterMethod(mappedMethod.setter());
-            Assert.ifNotAValidSetterMethod(mappedMethod.method().getReturnType() , mappedMethod.setter());
+            Assert.ifNotAValidSetterMethod(mappedMethod.method() , mappedMethod.setter());
         }
 
         for(MappedParameter parameter:mappedMethod.parameters())
