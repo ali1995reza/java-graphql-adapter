@@ -20,6 +20,18 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
     private final static class ReflectionDataFetcher implements DataFetcher{
 
+        private final static Map<Class , Class> SameTypes = new HashMap<>();
+        static {
+            SameTypes.put(Integer.class , int.class);
+            SameTypes.put(Character.class , char.class);
+            SameTypes.put(Double.class , double.class);
+            SameTypes.put(Float.class , float.class);
+            SameTypes.put(Long.class , long.class);
+            SameTypes.put(Boolean.class , boolean.class);
+            SameTypes.put(Byte.class , byte.class);
+            SameTypes.put(Short.class , short.class);
+        }
+
         private final MappedMethod method;
         private final Map<Class, DiscoveredInputType> inputTypesMap;
         private final Set<Class> scalars;
@@ -50,6 +62,19 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                     scalars.add(t.asMappedClass().baseClass());
                 }
             }
+
+            SameTypes.forEach((key , value)->{
+
+                if(scalars.contains(key))
+                {
+                    scalars.add(value);
+                }else if(scalars.contains(value))
+                {
+                    scalars.add(key);
+                }
+
+
+            });
 
             this.scalars = Collections.unmodifiableSet(scalars);
 
