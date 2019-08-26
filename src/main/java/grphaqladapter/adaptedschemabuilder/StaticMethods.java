@@ -67,7 +67,7 @@ public class StaticMethods {
         GraphQLFieldDefinition.Builder definition = GraphQLFieldDefinition.newFieldDefinition();
         definition.name(method.fieldName());
         GraphQLTypeReference outputType = context.geOutputTypeFor(method.type());
-        Assert.ifNull(outputType , "provided input type for ["+method.type()+"] is null");
+        Assert.ifNull(outputType , "provided output type for ["+method.type()+"] is null");
 
 
 
