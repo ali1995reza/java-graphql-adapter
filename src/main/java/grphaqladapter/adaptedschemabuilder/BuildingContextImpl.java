@@ -205,6 +205,13 @@ final class BuildingContextImpl implements BuildingContext {
     }
 
     @Override
+    public GraphQLTypeReference getUnionTypeFor(Class c) {
+        MappedClass mappedClass =
+                getMappedClassFor(c , MappedClass.MappedType.UNION);
+        return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
+    }
+
+    @Override
     public boolean isAnInterface(Class cls)
     {
         return mappedClasses.get(cls)!=null &&
