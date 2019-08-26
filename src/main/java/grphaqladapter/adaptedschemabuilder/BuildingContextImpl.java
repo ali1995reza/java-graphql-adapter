@@ -148,6 +148,8 @@ final class BuildingContextImpl implements BuildingContext {
         if(reference!=null)return reference;
         reference = getEnumFor(c);
         if(reference!=null)return reference;
+        reference = getUnionTypeFor(c);
+        if(reference!=null)return reference;
         reference = getInterfaceFor(c);
         if(reference!=null)return reference;
         reference = getScalarTypeFor(c);
