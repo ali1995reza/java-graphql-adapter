@@ -359,6 +359,9 @@ public final class ClassMapper {
 
         FieldValidator.validate(cls , method , annotations);
 
+        if(annotations.inputFiledAnnotation()==null && !annotations.fieldAnnotation().inputField())
+            return null;
+        
         GraphqlInputFieldAnnotation annotation =
                 annotations.inputFiledAnnotation()!=null?
                         annotations.inputFiledAnnotation():
