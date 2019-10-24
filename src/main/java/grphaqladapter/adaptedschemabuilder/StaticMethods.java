@@ -108,6 +108,8 @@ public class StaticMethods {
 
         GraphQLTypeReference inputType = context.getInputTypeFor(method.type());
 
+        Assert.ifNull(inputType , "can not find InputType for ["+method.type()+"]");
+
 
 
         field.type(

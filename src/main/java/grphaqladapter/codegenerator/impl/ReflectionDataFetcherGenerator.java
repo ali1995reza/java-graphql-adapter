@@ -20,6 +20,18 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
     private final static class ReflectionDataFetcher implements DataFetcher{
 
+        private final static Map<Class , Class> SameTypes = new HashMap<>();
+        static {
+            SameTypes.put(Integer.class , int.class);
+            SameTypes.put(Character.class , char.class);
+            SameTypes.put(Double.class , double.class);
+            SameTypes.put(Float.class , float.class);
+            SameTypes.put(Long.class , long.class);
+            SameTypes.put(Boolean.class , boolean.class);
+            SameTypes.put(Byte.class , byte.class);
+            SameTypes.put(Short.class , short.class);
+        }
+
         private final MappedMethod method;
         private final Map<Class, DiscoveredInputType> inputTypesMap;
         private final Set<Class> scalars;
@@ -51,6 +63,19 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                 }
             }
 
+            SameTypes.forEach((key , value)->{
+
+                if(scalars.contains(key))
+                {
+                    scalars.add(value);
+                }else if(scalars.contains(value))
+                {
+                    scalars.add(key);
+                }
+
+
+            });
+
             this.scalars = Collections.unmodifiableSet(scalars);
 
             inputTypesMap = Collections.unmodifiableMap(map);
@@ -73,26 +98,14 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             MappedClass mappedClass = inputType.asMappedClass();
             for(MappedMethod method:mappedClass.mappedMethods().values())
             {
-
                 if(method.isList())
                 {
-                    //so lets handle it again!
-                    if(scalars.contains(method.type()))
-                    {
-                        method.setter()
-                                .invoke(instance, map.get(method.fieldName()));
+                    method.setter().invoke(instance, buildList((List) map.get(method.fieldName()), method));
 
-                    }else {
+                }else if(scalars.contains(method.type()) || method.type().isEnum()){
 
-                        method.setter().invoke(instance, buildList((List) map.get(method.fieldName()),
-                                        inputTypesMap.get(method.type())));
-                    }
-                }else if(scalars.contains(method.type()))
-                {
-                    method.setter()
-                            .invoke(instance , map.get(method.fieldName()));
-                }else
-                {
+                    method.setter().invoke(instance , map.get(method.fieldName()));
+                }else {
                     method.setter()
                             .invoke(instance , buildUsingMap((Map)map.get(method.fieldName()) ,
                                     inputTypesMap.get(method.type())));
@@ -101,38 +114,81 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
             return instance;
         }
-        private final List buildList(List argList , DiscoveredInputType inputType) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        private final List buildList(List argList , MappedParameter parameter , int dim) throws IllegalAccessException, InvocationTargetException, InstantiationException {
             if(argList==null)
                 return null;
             if(argList.size()<1)
             {
                 return new ArrayList(0);
+            }
+
+            if(scalars.contains(parameter.type()) || parameter.type().isEnum())
+                return argList;
+
+
+
+            --dim;
+            List buildingList = new ArrayList();
+
+            if(dim==0)
+            {
+                for(Object o : argList)
+                {
+                    buildingList.add(buildUsingMap((Map<String, Object>) o, inputTypesMap.get(parameter.type())));
+                }
             }else
             {
-
-                List buildingList = new ArrayList();
-                if(argList.get(0) instanceof List)
+                for(Object o : argList)
                 {
-                    //so inner list her !
-                    for(int i=0;i<argList.size();i++)
-                    {
-                        buildingList.add(buildList((List) argList.get(i) ,inputType));
-                    }
-                }else {
-                    //so it must be a map really !
-                    //i dont care guys !
-                    for(Object o:argList)
-                    {
-                        Map<String  , Object> map = (Map)o;
-                        buildingList.add(
-                                buildUsingMap(map , inputType)
-                        );
-                    }
+                    buildingList.add(buildList((List)o , parameter , dim));
                 }
-
-                return buildingList;
             }
+
+            return buildingList;
         }
+
+        private final List buildList(List argList , MappedParameter parameter ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            return buildList(argList , parameter , parameter.dimensions());
+        }
+
+
+        private final List buildList(List argList , MappedMethod method , int dim) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            if(argList==null)
+                return null;
+            if(argList.size()<1)
+            {
+                return new ArrayList(0);
+            }
+
+            if(scalars.contains(method.type()) || method.type().isEnum())
+                return argList;
+
+
+
+            --dim;
+            List buildingList = new ArrayList();
+
+            if(dim==0)
+            {
+                for(Object o : argList)
+                {
+                    buildingList.add(buildUsingMap((Map<String, Object>) o, inputTypesMap.get(method.type())));
+                }
+            }else
+            {
+                for(Object o : argList)
+                {
+                    buildingList.add(buildList((List)o , method , dim));
+                }
+            }
+
+            return buildingList;
+        }
+
+        private final List buildList(List argList , MappedMethod method ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            return buildList(argList , method , method.dimensions());
+        }
+
         @Override
         public Object get(DataFetchingEnvironment dataFetchingEnvironment) throws Exception {
 
@@ -157,12 +213,10 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                     for (int i = 0; i < parameters.size(); i++) {
                         MappedParameter parameter = parameters.get(i);
                         if (parameter.isList()) {
-                            if (scalars.contains(method.type())) {
-                                args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
-                            } else {
-                                args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
-                                        inputTypesMap.get(parameter.type()));
-                            }
+
+                            args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
+                                    parameter);
+
                         } else if (scalars.contains(parameter.type()) || parameter.type().isEnum()) {
                             args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
                         } else {

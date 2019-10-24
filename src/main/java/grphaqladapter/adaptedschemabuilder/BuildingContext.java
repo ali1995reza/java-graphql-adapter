@@ -21,6 +21,8 @@ interface BuildingContext {
 
     GraphQLTypeReference getEnumFor(Class c);
 
+    GraphQLTypeReference getUnionTypeFor(Class c);
+
     boolean isAnInterface(Class cls);
 
     boolean isAnUnion(Class cls);

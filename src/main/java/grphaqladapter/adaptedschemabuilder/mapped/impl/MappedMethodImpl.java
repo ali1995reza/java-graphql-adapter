@@ -83,7 +83,7 @@ final class MappedMethodImpl implements MappedMethod {
 
     @Override
     public String toString() {
-        return "[method:"+method+" , field-argumentName:"+fieldName+" , parameters:"+parameters+"]";
+        return "[method:"+method+" , field-name:"+fieldName+" , parameters:"+parameters+" , is-list:"+isList+" , type:"+type+"]";
     }
 
 

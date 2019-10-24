@@ -148,6 +148,8 @@ final class BuildingContextImpl implements BuildingContext {
         if(reference!=null)return reference;
         reference = getEnumFor(c);
         if(reference!=null)return reference;
+        reference = getUnionTypeFor(c);
+        if(reference!=null)return reference;
         reference = getInterfaceFor(c);
         if(reference!=null)return reference;
         reference = getScalarTypeFor(c);
@@ -201,6 +203,13 @@ final class BuildingContextImpl implements BuildingContext {
         MappedClass mappedClass =
                 getMappedClassFor(c , MappedClass.MappedType.ENUM);
 
+        return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
+    }
+
+    @Override
+    public GraphQLTypeReference getUnionTypeFor(Class c) {
+        MappedClass mappedClass =
+                getMappedClassFor(c , MappedClass.MappedType.UNION);
         return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
     }
 
