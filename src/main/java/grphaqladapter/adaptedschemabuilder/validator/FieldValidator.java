@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 public final class FieldValidator {
 
 
-    public final static void validate(MappedMethod mappedMethod)
+    public final static void validate(MappedMethod mappedMethod , boolean skipSetter)
     {
 
         Assert.ifNegative(mappedMethod.dimensions() , "can not create mapped method with dimensions <0");
@@ -39,11 +39,12 @@ public final class FieldValidator {
                     mappedMethod.type(), "parameter type and mapped type not equal");
         }
 
-        if(mappedMethod.setter()!=null)
-        {
+        if(!skipSetter)
+            Assert.ifNull(mappedMethod.setter() , "setter can't be null - method ["+mappedMethod.method()+"]");
 
+        if(!skipSetter || mappedMethod.setter()!=null) {
             Assert.ifModifierNotValidForASetterMethod(mappedMethod.setter());
-            Assert.ifNotAValidSetterMethod(mappedMethod.method() , mappedMethod.setter());
+            Assert.ifNotAValidSetterMethod(mappedMethod.method(), mappedMethod.setter());
         }
 
         for(MappedParameter parameter:mappedMethod.parameters())
@@ -65,12 +66,16 @@ public final class FieldValidator {
 
     }
 
+    public final static void validate(MappedMethod mappedMethod){
+        validate(mappedMethod , false);
+    }
+
     public final static void validate(GraphqlFieldAnnotation annotation , boolean skipIfNull)
     {
         if(annotation==null && skipIfNull)
             return;
         Assert.ifNull(annotation , "provided annotation is null");
-        Assert.ifConditionTrue("annotation enable input field but setter method didn't set" ,
+        Assert.ifConditionTrue("setter method didn't set" ,
                 annotation.inputField() , Assert.isNullString(annotation.setter()));
 
         if(Assert.isNoNullString(annotation.fieldName()))
@@ -106,7 +111,7 @@ public final class FieldValidator {
 
     public final static void validate(Class cls , Method method , FieldAnnotations annotations)
     {
-
+        //todo fix it !
     }
 
 }

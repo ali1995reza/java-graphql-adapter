@@ -52,10 +52,17 @@ public final class TypeValidator {
                         !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
                 mappedClass.mappedType().is(MappedClass.MappedType.SUBSCRIPTION));
 
+        Assert.ifConditionTrue("just a class with public default constructor can map to object-type" ,
+                mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
+                !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
+                !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
+                mappedClass.mappedType().is(MappedClass.MappedType.OBJECT_TYPE));
+
 
         for(MappedMethod method:mappedClass.mappedMethods().values())
         {
-            FieldValidator.validate(method);
+            FieldValidator.validate(method,mappedClass.mappedType().is(MappedClass.MappedType.INTERFACE)||
+                    mappedClass.mappedType().isTopLevelType());
             Assert.ifMethodNotMemberOfClass(method.method() , mappedClass.baseClass());
         }
 

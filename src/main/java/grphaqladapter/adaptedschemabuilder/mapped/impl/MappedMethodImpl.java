@@ -38,7 +38,7 @@ final class MappedMethodImpl implements MappedMethod {
         isList = dimensions>0;
         isInputField = setter!=null;
 
-        FieldValidator.validate(this);
+        FieldValidator.validate(this , true);
     }
 
 

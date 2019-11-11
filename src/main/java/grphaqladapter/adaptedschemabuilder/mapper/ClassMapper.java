@@ -327,7 +327,15 @@ public final class ClassMapper {
         MappingStatics.TypeDetails typeDetails =
                 MappingStatics.findTypeDetails(method);
 
+
         String fieldName = Utils.stringNullifyOrGetDefault(annotation.fieldName() , method.getName());
+
+
+
+        String setter = annotation.setter();
+
+        Method setterMethod = Assert.isNoNullString(setter)?
+                detectSetter(setter , method , cls):null;
 
         methodBuilder.refresh();
         for (int index = 0 ;index<method.getParameters().length;index++)
@@ -343,6 +351,7 @@ public final class ClassMapper {
                 .setFieldName(fieldName)
                 .setNullable(annotation.nullable())
                 .setQueryHandler(typeDetails.isQueryHandler())
+                .setSetter(setterMethod)
                 .setMethod(method)
                 .build();
     }
@@ -380,28 +389,20 @@ public final class ClassMapper {
 
         String fieldName = Utils.stringNullifyOrGetDefault(annotation.inputFieldName() , method.getName());
 
-        Method setterMethod = null;
+        Method setterMethod = detectSetter(setter , method , cls);
 
-        try {
-            setterMethod = cls.getMethod(setter , method.getReturnType());
-            FieldValidator.validateSetterMethodModifier(setterMethod);
 
-            Assert.ifConditionTrue("setter method not match with field method ["+method+
-                    "]", !setterMethod.getParameters()[0].getParameterizedType()
-                    .equals(method.getGenericReturnType()));
-
-        } catch (NoSuchMethodException e) {
-
-            throw new IllegalStateException("no setter method found for ["+method+"]");
-        }
 
         methodBuilder.refresh();
+
+        //cant contains parameters
+        /*
         for (int index = 0 ;index<method.getParameters().length;index++)
         {
             methodBuilder.addMappedParameter(
                     mapParameter(method , method.getParameters()[index] , index)
             );
-        }
+        }*/
 
         return methodBuilder
                 .setMethod(method)
@@ -415,6 +416,23 @@ public final class ClassMapper {
 
     }
 
+
+    private Method detectSetter(String setter , Method field , Class cls)
+    {
+        try {
+            Method setterMethod = cls.getMethod(setter , field.getReturnType());
+            FieldValidator.validateSetterMethodModifier(setterMethod);
+
+            Assert.ifConditionTrue("setter method not match with field method ["+field+
+                    "]", !setterMethod.getParameters()[0].getParameterizedType()
+                    .equals(field.getGenericReturnType()));
+
+            return setterMethod;
+        } catch (NoSuchMethodException e) {
+
+            throw new IllegalStateException("no setter method found for ["+field+"]");
+        }
+    }
 
 
 
