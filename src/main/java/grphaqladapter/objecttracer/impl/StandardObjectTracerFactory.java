@@ -32,14 +32,15 @@ public class StandardObjectTracerFactory implements ObjectTracerFactory {
                         inputType.asMappedClass().baseClass()
                 )){
                     all.put(inputType.asMappedClass().baseClass() ,
-                            new ObjectTracerImpl(inputType , objectType, factory));
+                            new ObjectTracerImpl(inputType , objectType, this));
                     created = true;
                     break;
                 }
             }
             if(!created)
             {
-                all.put(inputType.asMappedClass().baseClass() , new ObjectTracerImpl(inputType, factory));
+                all.put(inputType.asMappedClass().baseClass() ,
+                        new ObjectTracerImpl(inputType, this));
             }
         }
 
@@ -48,7 +49,7 @@ public class StandardObjectTracerFactory implements ObjectTracerFactory {
             if(all.get(objectType.asMappedClass().baseClass())==null)
             {
                 all.put(objectType.asMappedClass().baseClass() ,
-                        new ObjectTracerImpl(objectType, factory));
+                        new ObjectTracerImpl(objectType, this));
             }
         }
 
