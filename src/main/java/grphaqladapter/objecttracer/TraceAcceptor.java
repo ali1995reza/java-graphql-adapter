@@ -2,5 +2,6 @@ package grphaqladapter.objecttracer;
 
 public interface TraceAcceptor {
 
-    public void accept(ObjectTraceContext context , Object value);
+    public void acceptGet(ObjectTraceContext context , Object value);
+    public void acceptSet(ObjectTraceContext context);
 }

@@ -46,7 +46,7 @@ final class ObjectTracerImpl implements ObjectTracer {
         for(MappedMethod method:inputType.asMappedClass().mappedMethods().values())
         {
             try {
-                acceptor.accept(context.setField(method) , method.method().invoke(value));
+                acceptor.acceptGet(context.setField(method) , method.method().invoke(value));
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -58,6 +58,17 @@ final class ObjectTracerImpl implements ObjectTracer {
     @Override
     public void setTrace(Object attachment , TraceAcceptor acceptor) {
         assertIfSetTraceNotPossible();
+        ObjectTraceContextImpl context = new ObjectTraceContextImpl(factory);
+
+        for(MappedMethod method:objectType.asMappedClass().mappedMethods().values())
+        {
+            try{
+                acceptor.acceptSet(context.setField(method));
+            }catch (Exception e)
+            {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
     @Override
@@ -69,7 +80,7 @@ final class ObjectTracerImpl implements ObjectTracer {
         for(MappedMethod method:inputType.asMappedClass().mappedMethods().values())
         {
             try {
-                acceptor.accept(context.setField(method) , method.method().invoke(value));
+                acceptor.acceptGet(context.setField(method) , method.method().invoke(value));
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
