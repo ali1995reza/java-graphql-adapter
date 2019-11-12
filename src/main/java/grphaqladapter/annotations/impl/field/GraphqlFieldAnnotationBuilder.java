@@ -40,6 +40,16 @@ public class GraphqlFieldAnnotationBuilder {
         return this;
     }
 
+    public synchronized GraphqlFieldAnnotationBuilder refresh()
+    {
+        fieldName = null;
+        nullable = false;
+        inputField = false;
+        setter = null;
+
+        return this;
+    }
+
     public synchronized GraphqlFieldAnnotation build()
     {
         return new GraphqlFieldAnnotationImpl(fieldName , nullable , inputField , setter);

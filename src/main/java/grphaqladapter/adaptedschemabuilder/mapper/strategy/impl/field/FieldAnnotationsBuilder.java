@@ -31,6 +31,13 @@ public final class FieldAnnotationsBuilder {
         return this;
     }
 
+    public FieldAnnotationsBuilder refresh()
+    {
+        inputFieldAnnotation = null;
+        fieldAnnotation = null;
+        return this;
+    }
+
     public FieldAnnotations build()
     {
         return new FieldAnnotationsImpl(fieldAnnotation , inputFieldAnnotation);

@@ -35,6 +35,15 @@ public class GraphqlInputFieldAnnotationBuilder {
     }
 
 
+    public synchronized GraphqlInputFieldAnnotationBuilder refresh()
+    {
+        inputFieldName = null;
+        nullable = false;
+        setter = null;
+
+        return this;
+    }
+
     public synchronized GraphqlInputFieldAnnotation build()
     {
         return new GraphqlInputFieldAnnotationImpl(inputFieldName , nullable , setter);
