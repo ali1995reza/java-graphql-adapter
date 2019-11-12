@@ -5,40 +5,41 @@ import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.objecttracer.ObjectTracer;
+import grphaqladapter.objecttracer.ObjectTracerFactory;
 import grphaqladapter.objecttracer.TraceAcceptor;
-
-import java.lang.reflect.InvocationTargetException;
 
 final class ObjectTracerImpl implements ObjectTracer {
 
     private final DiscoveredInputType inputType;
     private final DiscoveredObjectType objectType;
+    private final ObjectTracerFactory factory;
     private final boolean rejectGetTrace;
     private final boolean rejectSetTrace;
 
 
-    ObjectTracerImpl(DiscoveredInputType inputType, DiscoveredObjectType objectType) {
+    ObjectTracerImpl(DiscoveredInputType inputType, DiscoveredObjectType objectType, ObjectTracerFactory factory) {
         this.inputType = inputType;
         this.objectType = objectType;
         rejectGetTrace = inputType==null;
         rejectSetTrace = objectType==null;
+        this.factory = factory;
     }
 
-    public ObjectTracerImpl(DiscoveredInputType inputType)
+    public ObjectTracerImpl(DiscoveredInputType inputType, ObjectTracerFactory factory)
     {
-        this(inputType , null);
+        this(inputType , null, factory);
     }
 
-    public ObjectTracerImpl(DiscoveredObjectType objectType)
+    public ObjectTracerImpl(DiscoveredObjectType objectType, ObjectTracerFactory factory)
     {
-        this(null , objectType);
+        this(null , objectType, factory);
     }
 
     @Override
     public void getTrace(Object value, Object attachment , TraceAcceptor acceptor) {
         assertIfGetTraceNotPossible();
 
-        ObjectTraceContextImpl context = new ObjectTraceContextImpl(null);
+        ObjectTraceContextImpl context = new ObjectTraceContextImpl(factory);
         context.attach(attachment);
 
         //so trace object !
@@ -62,7 +63,7 @@ final class ObjectTracerImpl implements ObjectTracer {
     @Override
     public void getTrace(Object value , TraceAcceptor acceptor) {
         assertIfGetTraceNotPossible();
-        ObjectTraceContextImpl context = new ObjectTraceContextImpl(null);
+        ObjectTraceContextImpl context = new ObjectTraceContextImpl(factory);
 
         //so trace object !
         for(MappedMethod method:inputType.asMappedClass().mappedMethods().values())

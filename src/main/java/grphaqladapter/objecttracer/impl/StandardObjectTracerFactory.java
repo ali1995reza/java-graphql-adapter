@@ -6,8 +6,6 @@ import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
 import grphaqladapter.objecttracer.ObjectTracer;
 import grphaqladapter.objecttracer.ObjectTracerFactory;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,14 +32,14 @@ public class StandardObjectTracerFactory implements ObjectTracerFactory {
                         inputType.asMappedClass().baseClass()
                 )){
                     all.put(inputType.asMappedClass().baseClass() ,
-                            new ObjectTracerImpl(inputType , objectType));
+                            new ObjectTracerImpl(inputType , objectType, factory));
                     created = true;
                     break;
                 }
             }
             if(!created)
             {
-                all.put(inputType.asMappedClass().baseClass() , new ObjectTracerImpl(inputType));
+                all.put(inputType.asMappedClass().baseClass() , new ObjectTracerImpl(inputType, factory));
             }
         }
 
@@ -50,7 +48,7 @@ public class StandardObjectTracerFactory implements ObjectTracerFactory {
             if(all.get(objectType.asMappedClass().baseClass())==null)
             {
                 all.put(objectType.asMappedClass().baseClass() ,
-                        new ObjectTracerImpl(objectType));
+                        new ObjectTracerImpl(objectType, factory));
             }
         }
 
