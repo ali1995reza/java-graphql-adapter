@@ -12,7 +12,6 @@ import grphaqladapter.adaptedschemabuilder.mapper.strategy.*;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument.ParameterAutomaticAnnotationBuilder;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument.ParameterRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.chain.ChainBuilder;
-import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field.MethodAnnotationLookup;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field.MethodRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.type.ClassRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
@@ -107,14 +106,14 @@ public final class ClassMapper {
 
         return annotations;
     }
-    private final FieldAnnotations detect(Method method)
+    private final FieldAnnotations detect(Method method , Class clazz , MappedClass.MappedType mappedType)
     {
 
         FieldAnnotations annotations = null;
 
         for(MethodAnnotationDetector detector:methodAnnotationDetectorChain)
         {
-            annotations = detector.detectAnnotationFor(method);
+            annotations = detector.detectAnnotationFor(method,clazz,mappedType);
             if(annotations!=null)
                 break;
         }
@@ -216,7 +215,7 @@ public final class ClassMapper {
 
         if(type.isTopLevelType() || type.is(MappedClass.MappedType.OBJECT_TYPE) || type.is(MappedClass.MappedType.INTERFACE)) {
             for (Method method : MappingStatics.getAllMethods(cls)) {
-                MappedMethod mappedMethod = mapFieldMethod(cls, method);
+                MappedMethod mappedMethod = mapFieldMethod(cls, method , type);
 
                 if(mappedMethod==null)continue;
 
@@ -308,10 +307,10 @@ public final class ClassMapper {
         }
     }
 
-    private MappedMethod mapFieldMethod(Class cls , Method method)
+    private MappedMethod mapFieldMethod(Class cls , Method method , MappedClass.MappedType mappedType)
     {
 
-        FieldAnnotations annotations = detect(method);
+        FieldAnnotations annotations = detect(method , cls , mappedType);
 
         if(annotations==null || annotations.fieldAnnotation()==null)return null;
 
@@ -359,7 +358,7 @@ public final class ClassMapper {
     private MappedMethod mapInputFieldMethod(Class cls , Method method)
     {
 
-        FieldAnnotations annotations = detect(method);
+        FieldAnnotations annotations = detect(method , cls , MappedClass.MappedType.INPUT_TYPE);
 
 
         if(annotations==null || (annotations.fieldAnnotation()==null &&

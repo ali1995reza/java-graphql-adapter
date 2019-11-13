@@ -1,12 +1,12 @@
 package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field;
 
+import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.FieldAnnotations;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.MethodAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 class MethodAnnotationDetectorImpl implements MethodAnnotationDetector {
@@ -19,7 +19,7 @@ class MethodAnnotationDetectorImpl implements MethodAnnotationDetector {
 
 
     @Override
-    public FieldAnnotations detectAnnotationFor(Method method) {
+    public FieldAnnotations detectAnnotationFor(Method method, Class clazz, MappedClass.MappedType mappedType) {
         return explicitAnnotations.get(method);
     }
 }
