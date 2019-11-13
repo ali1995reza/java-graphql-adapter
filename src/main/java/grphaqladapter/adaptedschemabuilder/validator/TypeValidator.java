@@ -61,8 +61,7 @@ public final class TypeValidator {
 
         for(MappedMethod method:mappedClass.mappedMethods().values())
         {
-            FieldValidator.validate(method,mappedClass.mappedType().is(MappedClass.MappedType.INTERFACE)||
-                    mappedClass.mappedType().isTopLevelType());
+            FieldValidator.validate(method);
             Assert.ifMethodNotMemberOfClass(method.method() , mappedClass.baseClass());
         }
 

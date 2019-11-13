@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 public final class FieldValidator {
 
 
-    public final static void validate(MappedMethod mappedMethod , boolean skipSetter)
+    public final static void validate(MappedMethod mappedMethod)
     {
 
         Assert.ifNegative(mappedMethod.dimensions() , "can not create mapped method with dimensions <0");
@@ -39,10 +39,7 @@ public final class FieldValidator {
                     mappedMethod.type(), "parameter type and mapped type not equal");
         }
 
-        if(!skipSetter)
-            Assert.ifNull(mappedMethod.setter() , "setter can't be null - method ["+mappedMethod.method()+"]");
-
-        if(!skipSetter || mappedMethod.setter()!=null) {
+        if(mappedMethod.setter()!=null) {
             Assert.ifModifierNotValidForASetterMethod(mappedMethod.setter());
             Assert.ifNotAValidSetterMethod(mappedMethod.method(), mappedMethod.setter());
         }
@@ -66,9 +63,6 @@ public final class FieldValidator {
 
     }
 
-    public final static void validate(MappedMethod mappedMethod){
-        validate(mappedMethod , false);
-    }
 
     public final static void validate(GraphqlFieldAnnotation annotation , boolean skipIfNull)
     {
