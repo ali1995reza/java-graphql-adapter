@@ -18,41 +18,41 @@ public final class TypeValidator {
         Assert.ifNull(mappedClass.baseClass() , "base class is null");
         Assert.ifModifierNotValidForATypeClass(mappedClass.baseClass());
         Assert.ifNameNotValid(mappedClass.typeName());
-        Assert.ifConditionTrue("an union mapped class can not contains mapped methods" ,
+        Assert.ifConditionTrue("an union mapped class can not contains mapped methods ["+mappedClass.baseClass()+"]" ,
                 mappedClass.mappedType().is(MappedClass.MappedType.UNION),
                 mappedClass.mappedMethods().size()>0);
-        Assert.ifConditionTrue("just interfaces can map to union" ,
+        Assert.ifConditionTrue("just interfaces can map to union ["+mappedClass.baseClass()+"]" ,
                 !mappedClass.baseClass().isInterface() ,
                 mappedClass.mappedType().is(MappedClass.MappedType.UNION));
-        Assert.ifConditionTrue("just interfaces can map to interface" ,
+        Assert.ifConditionTrue("just interfaces can map to interface ["+mappedClass.baseClass()+"]" ,
                 !mappedClass.baseClass().isInterface() ,
                 mappedClass.mappedType().is(MappedClass.MappedType.INTERFACE));
-        Assert.ifConditionTrue("just a class with public default constructor can map to input type" ,
+        Assert.ifConditionTrue("just a class with public default constructor can map to input type ["+mappedClass.baseClass()+"]" ,
                 mappedClass.baseClass().isInterface()||mappedClass.baseClass().isEnum()||
                         !Modifier.isPublic(mappedClass.baseClass().getModifiers())||
                         !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
                 mappedClass.mappedType().is(MappedClass.MappedType.INPUT_TYPE));
 
 
-        Assert.ifConditionTrue("just a class with public default constructor can map to query type" ,
+        Assert.ifConditionTrue("just a class with public default constructor can map to query type ["+mappedClass.baseClass()+"]" ,
                 mappedClass.baseClass().isInterface()||mappedClass.baseClass().isEnum()||
                         !Modifier.isPublic(mappedClass.baseClass().getModifiers())||
                         !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
                 mappedClass.mappedType().is(MappedClass.MappedType.QUERY));
 
-        Assert.ifConditionTrue("just a class with public default constructor can map to mutation type" ,
+        Assert.ifConditionTrue("just a class with public default constructor can map to mutation type ["+mappedClass.baseClass()+"]" ,
                 mappedClass.baseClass().isInterface()||mappedClass.baseClass().isEnum()||
                         !Modifier.isPublic(mappedClass.baseClass().getModifiers())||
                         !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
                 mappedClass.mappedType().is(MappedClass.MappedType.MUTATION));
 
-        Assert.ifConditionTrue("just a class with public default constructor can map to subscription type" ,
+        Assert.ifConditionTrue("just a class with public default constructor can map to subscription type ["+mappedClass.baseClass()+"]" ,
                 mappedClass.baseClass().isInterface()||mappedClass.baseClass().isEnum()||
                         !Modifier.isPublic(mappedClass.baseClass().getModifiers())||
                         !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
                 mappedClass.mappedType().is(MappedClass.MappedType.SUBSCRIPTION));
 
-        Assert.ifConditionTrue("just a class with public default constructor can map to object-type" ,
+        Assert.ifConditionTrue("just a class with public default constructor can map to object-type ["+mappedClass.baseClass()+"]" ,
                 mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
                 !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
                 !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()) ,
