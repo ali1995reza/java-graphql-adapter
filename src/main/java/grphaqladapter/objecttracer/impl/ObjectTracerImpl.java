@@ -59,6 +59,7 @@ final class ObjectTracerImpl implements ObjectTracer {
     public void setTrace(Object attachment , TraceAcceptor acceptor) {
         assertIfSetTraceNotPossible();
         ObjectTraceContextImpl context = new ObjectTraceContextImpl(factory);
+        context.attach(attachment);
 
         for(MappedMethod method:objectType.asMappedClass().mappedMethods().values())
         {
@@ -72,19 +73,13 @@ final class ObjectTracerImpl implements ObjectTracer {
     }
 
     @Override
-    public void getTrace(Object value , TraceAcceptor acceptor) {
-        assertIfGetTraceNotPossible();
-        ObjectTraceContextImpl context = new ObjectTraceContextImpl(factory);
+    public void setTrace(TraceAcceptor acceptor) {
+        setTrace(null , acceptor);
+    }
 
-        //so trace object !
-        for(MappedMethod method:inputType.asMappedClass().mappedMethods().values())
-        {
-            try {
-                acceptor.acceptGet(context.setField(method) , method.method().invoke(value));
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
+    @Override
+    public void getTrace(Object value , TraceAcceptor acceptor) {
+        getTrace(value , null , acceptor);
     }
 
     @Override
