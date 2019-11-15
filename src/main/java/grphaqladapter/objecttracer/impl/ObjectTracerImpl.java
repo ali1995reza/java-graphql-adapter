@@ -4,14 +4,20 @@ package grphaqladapter.objecttracer.impl;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
+import grphaqladapter.objecttracer.FieldDetails;
 import grphaqladapter.objecttracer.ObjectTracer;
 import grphaqladapter.objecttracer.ObjectTracerFactory;
 import grphaqladapter.objecttracer.TraceAcceptor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 final class ObjectTracerImpl implements ObjectTracer {
 
     private final DiscoveredInputType inputType;
+    private final List<FieldDetails> inputTypeFields;
     private final DiscoveredObjectType objectType;
+    private final List<FieldDetails> objectTypeFields;
     private final ObjectTracerFactory factory;
     private final boolean rejectGetTrace;
     private final boolean rejectSetTrace;
@@ -20,6 +26,24 @@ final class ObjectTracerImpl implements ObjectTracer {
     ObjectTracerImpl(DiscoveredInputType inputType, DiscoveredObjectType objectType, ObjectTracerFactory factory) {
         this.inputType = inputType;
         this.objectType = objectType;
+        if(inputType!=null)
+        {
+            inputTypeFields = new ArrayList<>();
+            for(MappedMethod method:inputType.asMappedClass().mappedMethods().values())
+            {
+                inputTypeFields.add(new FieldDetailsImpl(inputType.asMappedClass() , method));
+            }
+        }else inputTypeFields = null;
+
+        if(objectType!=null)
+        {
+            objectTypeFields = new ArrayList<>();
+            for(MappedMethod method:objectType.asMappedClass().mappedMethods().values())
+            {
+                objectTypeFields.add(new FieldDetailsImpl(objectType.asMappedClass() , method));
+            }
+        }else objectTypeFields = null;
+
         rejectGetTrace = inputType==null;
         rejectSetTrace = objectType==null;
         this.factory = factory;
@@ -43,10 +67,10 @@ final class ObjectTracerImpl implements ObjectTracer {
         context.attach(attachment);
 
         //so trace object !
-        for(MappedMethod method:inputType.asMappedClass().mappedMethods().values())
+        for(FieldDetails details:inputTypeFields)
         {
             try {
-                acceptor.acceptGet(context.setField(method) , method.method().invoke(value));
+                acceptor.acceptGet(context.setField(details) , details.field().method().invoke(value));
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
@@ -61,10 +85,10 @@ final class ObjectTracerImpl implements ObjectTracer {
         ObjectTraceContextImpl context = new ObjectTraceContextImpl(factory);
         context.attach(attachment);
 
-        for(MappedMethod method:objectType.asMappedClass().mappedMethods().values())
+        for(FieldDetails field:objectTypeFields)
         {
             try{
-                acceptor.acceptSet(context.setField(method));
+                acceptor.acceptSet(context.setField(field));
             }catch (Exception e)
             {
                 throw new IllegalStateException(e);

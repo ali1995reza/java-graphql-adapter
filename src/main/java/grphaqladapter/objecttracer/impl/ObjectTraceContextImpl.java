@@ -1,6 +1,7 @@
 package grphaqladapter.objecttracer.impl;
 
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
+import grphaqladapter.objecttracer.FieldDetails;
 import grphaqladapter.objecttracer.ObjectTraceContext;
 import grphaqladapter.objecttracer.ObjectTracerFactory;
 
@@ -10,7 +11,7 @@ class ObjectTraceContextImpl implements ObjectTraceContext {
 
 
     private Object attachment;
-    private MappedMethod field;
+    private FieldDetails field;
     private final ObjectTracerFactory factory;
 
     ObjectTraceContextImpl(ObjectTracerFactory factory){
@@ -31,10 +32,6 @@ class ObjectTraceContextImpl implements ObjectTraceContext {
         return (A)attachment;
     }
 
-    @Override
-    public List<Object> hierarchy() {
-        return null;
-    }
 
     @Override
     public ObjectTracerFactory tracerFactory() {
@@ -42,11 +39,11 @@ class ObjectTraceContextImpl implements ObjectTraceContext {
     }
 
     @Override
-    public MappedMethod field() {
+    public FieldDetails fieldDetails() {
         return field;
     }
 
-    final ObjectTraceContextImpl setField(MappedMethod field) {
+    final ObjectTraceContextImpl setField(FieldDetails field) {
         this.field = field;
         return this;
     }
