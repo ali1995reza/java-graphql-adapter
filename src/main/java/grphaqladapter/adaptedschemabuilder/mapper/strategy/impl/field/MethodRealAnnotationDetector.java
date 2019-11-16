@@ -87,31 +87,29 @@ public class MethodRealAnnotationDetector implements MethodAnnotationDetector {
         if(field==null && inputField==null)
             return null;
 
+        GraphqlFieldAnnotation fieldAnnotation = null;
+        GraphqlInputFieldAnnotation inputFieldAnnotation = null;
+
         if(field!=null) {
-            builder.setFieldAnnotation(
-                    new UnValidatedFiledAnnotation(
-                            field.fieldName() ,
-                            field.nullable() ,
-                            field.inputField() ,
-                            field.setter()
-                    )
+
+            fieldAnnotation = new UnValidatedFiledAnnotation(
+                    field.fieldName() ,
+                    field.nullable() ,
+                    field.inputField() ,
+                    field.setter()
             );
         }
 
         if(inputField!=null)
         {
-            builder.setInputFieldAnnotation(
-                    new UnValidatedInputFieldAnnotation(
-                            inputField.inputFieldName() ,
-                            inputField.nullable() ,
-                            inputField.setter()
-                    )
+            inputFieldAnnotation = new UnValidatedInputFieldAnnotation(
+                    inputField.inputFieldName() ,
+                    inputField.nullable() ,
+                    inputField.setter()
             );
         }
 
-        FieldAnnotations annotations = builder.build();
-        builder.refresh();
-        return annotations;
+        return new UnValidatedFieldAnnotations(fieldAnnotation , inputFieldAnnotation);
     }
 
 
@@ -179,6 +177,28 @@ public class MethodRealAnnotationDetector implements MethodAnnotationDetector {
         @Override
         public String setter() {
             return setter;
+        }
+    }
+
+    private static class UnValidatedFieldAnnotations implements FieldAnnotations{
+
+        private final GraphqlFieldAnnotation fieldAnnotation;
+        private final GraphqlInputFieldAnnotation inputFieldAnnotation;
+
+        private UnValidatedFieldAnnotations(GraphqlFieldAnnotation fieldAnnotation,
+                                            GraphqlInputFieldAnnotation inputFieldAnnotation) {
+            this.fieldAnnotation = fieldAnnotation;
+            this.inputFieldAnnotation = inputFieldAnnotation;
+        }
+
+        @Override
+        public GraphqlFieldAnnotation fieldAnnotation() {
+            return fieldAnnotation;
+        }
+
+        @Override
+        public GraphqlInputFieldAnnotation inputFiledAnnotation() {
+            return inputFieldAnnotation;
         }
     }
 }
