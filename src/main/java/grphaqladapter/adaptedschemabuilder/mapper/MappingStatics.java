@@ -1,6 +1,5 @@
 package grphaqladapter.adaptedschemabuilder.mapper;
 
-import grphaqladapter.adaptedschemabuilder.GraphqlQueryHandler;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.annotations.GraphqlFieldAnnotation;
 import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
@@ -12,6 +11,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MappingStatics {
 
@@ -23,8 +23,8 @@ public class MappingStatics {
 
         private TypeDetails(Class type, int dimension, boolean isQueryHandler) {
             this.isQueryHandler = isQueryHandler;
-            Assert.ifNegative(dimension , "an array dimension can not be <0");
-            Assert.ifNull(type , "provided type is null");
+            Assert.ifNegative(dimension, "an array dimension can not be <0");
+            Assert.ifNull(type, "provided type is null");
             this.type = type;
             this.dimension = dimension;
         }
@@ -44,28 +44,24 @@ public class MappingStatics {
 
         @Override
         public String toString() {
-            return "[type:"+type+" , dims:"+dimension+" , query-handler:"+isQueryHandler+"]";
+            return "[type:" + type + " , dims:" + dimension + " , query-handler:" + isQueryHandler + "]";
         }
     }
 
-    public static TypeDetails findTypeDetails(Method method)
-    {
+    public static TypeDetails findTypeDetails(Method method) {
         Type type = method.getGenericReturnType();
 
-        if(method.getReturnType()==GraphqlQueryHandler.class)
-        {
-            if(type instanceof ParameterizedType)
-            {
+        if (CompletableFuture.class.isAssignableFrom(method.getReturnType())) {
+            if (type instanceof ParameterizedType) {
                 //so handle it please !
-                ParameterizedType paraType =  (ParameterizedType)type;
+                ParameterizedType paraType = (ParameterizedType) type;
                 Type inner = paraType.getActualTypeArguments()[0];
-                TypeDetails details =  findTypeDetails(inner);
+                TypeDetails details = findTypeDetails(inner);
 
-                return new TypeDetails(details.type , details.dimension , true);
+                return new TypeDetails(details.type, details.dimension, true);
 
-            }else
-            {
-                return new TypeDetails(Object.class , 0 , true);
+            } else {
+                return new TypeDetails(Object.class, 0, true);
             }
         }
 
@@ -73,28 +69,25 @@ public class MappingStatics {
         return findTypeDetails(type);
     }
 
-    public static TypeDetails findTypeDetails(Parameter parameter)
-    {
+    public static TypeDetails findTypeDetails(Parameter parameter) {
         return findTypeDetails(parameter.getParameterizedType());
     }
 
 
-    public static TypeDetails findTypeDetails(Type type)
-    {
-        if(type==null)
+    public static TypeDetails findTypeDetails(Type type) {
+        if (type == null)
             return null;
 
-        if(type instanceof ParameterizedType) {
+        if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            if(parameterizedType.getRawType()!=List.class)
-                return new TypeDetails((Class) parameterizedType.getRawType(), 0 , false);
+            if (parameterizedType.getRawType() != List.class)
+                return new TypeDetails((Class) parameterizedType.getRawType(), 0, false);
 
             Type innerType = parameterizedType.getActualTypeArguments()[0];
-            return detectDimsDetails(innerType , 1);
-        }else
-        {
-            if(type==List.class)
-                return new TypeDetails(Object.class , 1, false);
+            return detectDimsDetails(innerType, 1);
+        } else {
+            if (type == List.class)
+                return new TypeDetails(Object.class, 1, false);
             else
                 return new TypeDetails((Class) type, 0, false);
         }
@@ -102,30 +95,25 @@ public class MappingStatics {
 
     }
 
-    private static final TypeDetails detectDimsDetails(Type type , int dims)
-    {
-        if(type instanceof ParameterizedType)
-        {
+    private static final TypeDetails detectDimsDetails(Type type, int dims) {
+        if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
-            if(parameterizedType.getRawType()==List.class)
-            {
-                return detectDimsDetails(parameterizedType.getActualTypeArguments()[0]  , dims+1);
-            }else {
-                return new TypeDetails((Class)parameterizedType.getRawType() , dims, false);
+            if (parameterizedType.getRawType() == List.class) {
+                return detectDimsDetails(parameterizedType.getActualTypeArguments()[0], dims + 1);
+            } else {
+                return new TypeDetails((Class) parameterizedType.getRawType(), dims, false);
             }
-        }else
-        {
-            if(type==List.class)
-                return new TypeDetails(Object.class , dims+1, false);
+        } else {
+            if (type == List.class)
+                return new TypeDetails(Object.class, dims + 1, false);
             else
-                return new TypeDetails((Class)type , dims, false);
+                return new TypeDetails((Class) type, dims, false);
         }
     }
 
 
-    public static GraphqlInputFieldAnnotation convertFieldAnnotationToInputFieldAnnotation(GraphqlFieldAnnotation annotation)
-    {
-        Assert.ifNull(annotation , "provided annotation is null");
+    public static GraphqlInputFieldAnnotation convertFieldAnnotationToInputFieldAnnotation(GraphqlFieldAnnotation annotation) {
+        Assert.ifNull(annotation, "provided annotation is null");
         return GraphqlInputFieldAnnotationBuilder
                 .newBuilder()
                 .setNullable(annotation.nullable())
@@ -135,23 +123,21 @@ public class MappingStatics {
     }
 
 
-    public final static List<Method> getAllMethods(Class cls)
-    {
+    public final static List<Method> getAllMethods(Class cls) {
         Method[] methods = cls.getMethods();
         Method[] declaredMethods = cls.getDeclaredMethods();
         List<Method> list = new ArrayList<>();
 
-        if(methods!=null)
-        {
-            for(Method method:methods) {
-                if(!method.isSynthetic())
+        if (methods != null) {
+            for (Method method : methods) {
+                if (!method.isSynthetic())
                     list.add(method);
             }
         }
 
-        if(declaredMethods!=null) {
+        if (declaredMethods != null) {
             for (Method method : declaredMethods) {
-                if(!list.contains(method) && !method.isSynthetic())
+                if (!list.contains(method) && !method.isSynthetic())
                     list.add(method);
             }
         }

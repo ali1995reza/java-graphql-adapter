@@ -63,7 +63,6 @@ public final class MappedMethodBuilder {
     private Class type;
     private int dimensions;
     private Method setter;
-    private boolean isQueryHandler;
 
 
 
@@ -123,14 +122,8 @@ public final class MappedMethodBuilder {
         return this;
     }
 
-    public synchronized MappedMethodBuilder setQueryHandler(boolean queryHandler) {
-        isQueryHandler = queryHandler;
-        return this;
-    }
-
     public synchronized MappedMethodBuilder refresh()
     {
-        isQueryHandler = false;
         nullable = false;
         setter = null;
         fieldName = null;
@@ -151,6 +144,6 @@ public final class MappedMethodBuilder {
 
     public synchronized MappedMethod build()
     {
-        return new MappedMethodImpl(fieldName , method , nullable , getParametersList() , type , dimensions , setter, isQueryHandler);
+        return new MappedMethodImpl(fieldName , method , nullable , getParametersList() , type , dimensions , setter);
     }
 }

@@ -349,7 +349,6 @@ public final class ClassMapper {
                 .setType(typeDetails.type())
                 .setFieldName(fieldName)
                 .setNullable(annotation.nullable())
-                .setQueryHandler(typeDetails.isQueryHandler())
                 .setSetter(setterMethod)
                 .setMethod(method)
                 .build();
@@ -410,7 +409,6 @@ public final class ClassMapper {
                 .setFieldName(fieldName)
                 .setDimensions(typeDetails.dimension())
                 .setType(typeDetails.type())
-                .setQueryHandler(typeDetails.isQueryHandler())
                 .build();
 
     }

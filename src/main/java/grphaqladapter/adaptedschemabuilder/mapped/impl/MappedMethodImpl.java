@@ -22,10 +22,9 @@ final class MappedMethodImpl implements MappedMethod {
     private final boolean isList;
     private final Method setter;
     private final boolean isInputField;
-    private final boolean isQueryHandler;
 
 
-    public MappedMethodImpl(String f, Method m, boolean n, List<MappedParameter> p, Class t, int dims, Method setter, boolean isQueryHandler)
+    public MappedMethodImpl(String f, Method m, boolean n, List<MappedParameter> p, Class t, int dims, Method setter)
     {
         fieldName  = f;
         method = m;
@@ -34,7 +33,6 @@ final class MappedMethodImpl implements MappedMethod {
         type = t;
         dimensions = dims;
         this.setter = setter;
-        this.isQueryHandler = isQueryHandler;
         isList = dimensions>0;
         isInputField = setter!=null;
 
@@ -68,11 +66,6 @@ final class MappedMethodImpl implements MappedMethod {
         return dimensions;
     }
 
-    @Override
-    public boolean isQueryHandler() {
-        return isQueryHandler;
-    }
-
     public Class type() {
         return type;
     }
@@ -87,7 +80,7 @@ final class MappedMethodImpl implements MappedMethod {
     }
 
 
-    final static grphaqladapter.adaptedschemabuilder.mapped.MappedMethod clone(grphaqladapter.adaptedschemabuilder.mapped.MappedMethod method)
+    static grphaqladapter.adaptedschemabuilder.mapped.MappedMethod clone(grphaqladapter.adaptedschemabuilder.mapped.MappedMethod method)
     {
         Assert.ifConditionTrue("an input mapped method must contains setter method" , method.isInputField()
                 , method.setter()==null);
@@ -99,7 +92,6 @@ final class MappedMethodImpl implements MappedMethod {
                 method.parameters()==null?null:Collections.unmodifiableList(Utils.copy(method.parameters())),
                 method.type() ,
                 method.dimensions() ,
-                method.setter(),
-                method.isQueryHandler());
+                method.setter());
     }
 }

@@ -1,6 +1,7 @@
 package grphaqladapter.codegenerator.impl;
 
-import grphaqladapter.adaptedschemabuilder.GraphqlQueryHandler;
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredScalarType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
@@ -8,9 +9,6 @@ import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
 import grphaqladapter.codegenerator.DataFetcherGenerator;
-import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
-
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -200,11 +198,11 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
                     Object result = method.method().invoke(source);
 
-                    if (method.isQueryHandler()) {
+                    /*if (method.isQueryHandler()) {
                         GraphqlQueryHandler handler = (GraphqlQueryHandler) result;
                         handler.initialize(dataFetchingEnvironment.getSelectionSet());
                         return handler.execute();
-                    }
+                    }*/
 
 
                     return result;
@@ -227,11 +225,11 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
                     Object result = method.method().invoke(source, args);
 
-                    if (method.isQueryHandler()) {
+                    /*if (method.isQueryHandler()) {
                         GraphqlQueryHandler handler = (GraphqlQueryHandler) result;
                         handler.initialize(dataFetchingEnvironment.getSelectionSet());
                         return handler.execute();
-                    }
+                    }*/
 
                     return result;
                 }
@@ -262,7 +260,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
     @Override
     public DataFetcher generate(MappedClass cls, MappedMethod method) {
-
+        System.out.println(method);
         if(cls.mappedType().isTopLevelType()) {
             try {
                 Object source = cls.baseClass().newInstance();

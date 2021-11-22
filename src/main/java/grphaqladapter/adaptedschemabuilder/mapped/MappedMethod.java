@@ -5,7 +5,6 @@ import java.util.List;
 
 public interface MappedMethod {
 
-
     Method method();
 
     String fieldName();
@@ -19,8 +18,6 @@ public interface MappedMethod {
     boolean isList();
 
     int dimensions();
-
-    boolean isQueryHandler();
 
     Class type();
 
