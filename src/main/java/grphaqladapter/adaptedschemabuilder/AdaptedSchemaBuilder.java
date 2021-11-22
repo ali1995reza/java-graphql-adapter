@@ -223,7 +223,7 @@ public final class AdaptedSchemaBuilder {
                 .stream()
                 .forEach(mappedClass -> {
 
-                    GraphQLType type = context.rawTypeOf(mappedClass);
+                    GraphQLNamedType type = context.rawTypeOf(mappedClass);
                     discoveredTypes.put(mappedClass , buildDiscoveredType(mappedClass , type));
 
                 });
@@ -339,7 +339,7 @@ public final class AdaptedSchemaBuilder {
 
     private final GraphQLType discover(MappedClass mappedClass , BuildingContextImpl context)
     {
-        GraphQLType type = null;
+        GraphQLNamedType type = null;
         if(mappedClass.mappedType() == MappedClass.MappedType.OBJECT_TYPE)
         {
 
@@ -380,7 +380,7 @@ public final class AdaptedSchemaBuilder {
         return unionType;
     }
 
-    public DiscoveredType buildDiscoveredType(MappedClass cls , GraphQLType type)
+    public DiscoveredType buildDiscoveredType(MappedClass cls , GraphQLNamedType type)
     {
         if(cls.mappedType().is(MappedClass.MappedType.OBJECT_TYPE))
         {

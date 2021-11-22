@@ -41,7 +41,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
         private ReflectionDataFetcher(MappedMethod m, List<DiscoveredType> allTypes, Object source, boolean printExceptions)
         {
-            method = m;
+            this.method = m;
             this.source = source;
             this.printExceptions = printExceptions;
 
@@ -84,8 +84,8 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
 
 
-        private <T> T crateNewInstance(Class<T> cls) throws IllegalAccessException, InstantiationException {
-            return cls.newInstance();
+        private <T> T crateNewInstance(Class<T> cls) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+            return cls.getConstructor().newInstance();
         }
 
 

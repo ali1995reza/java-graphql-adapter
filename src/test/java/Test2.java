@@ -5,8 +5,6 @@ import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.annotations.*;
 
-import javax.xml.ws.FaultAction;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

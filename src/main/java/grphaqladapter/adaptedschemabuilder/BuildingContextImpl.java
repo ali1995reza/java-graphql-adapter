@@ -1,6 +1,7 @@
 package grphaqladapter.adaptedschemabuilder;
 
 import graphql.Scalars;
+import graphql.scalars.java.JavaPrimitives;
 import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
@@ -25,20 +26,20 @@ final class BuildingContextImpl implements BuildingContext {
             scalars.put(String.class , Scalars.GraphQLString);
             scalars.put(Integer.class , Scalars.GraphQLInt);
             scalars.put(int.class , Scalars.GraphQLInt);
-            scalars.put(Long.class , Scalars.GraphQLLong);
-            scalars.put(long.class , Scalars.GraphQLLong);
-            scalars.put(Double.class , Scalars.GraphQLBigDecimal);
-            scalars.put(double.class , Scalars.GraphQLBigDecimal);
+            scalars.put(Long.class , JavaPrimitives.GraphQLLong);
+            scalars.put(long.class , JavaPrimitives.GraphQLLong);
+            scalars.put(Double.class , JavaPrimitives.GraphQLBigDecimal);
+            scalars.put(double.class , JavaPrimitives.GraphQLBigDecimal);
             scalars.put(Float.class , Scalars.GraphQLFloat);
             scalars.put(float.class , Scalars.GraphQLFloat);
             scalars.put(Boolean.class , Scalars.GraphQLBoolean);
             scalars.put(boolean.class , Scalars.GraphQLBoolean);
-            scalars.put(Character.class , Scalars.GraphQLChar);
-            scalars.put(char.class , Scalars.GraphQLChar);
-            scalars.put(Byte.class , Scalars.GraphQLByte);
-            scalars.put(byte.class , Scalars.GraphQLByte);
-            scalars.put(Short.class , Scalars.GraphQLShort);
-            scalars.put(short.class , Scalars.GraphQLShort);
+            scalars.put(Character.class , JavaPrimitives.GraphQLChar);
+            scalars.put(char.class , JavaPrimitives.GraphQLChar);
+            scalars.put(Byte.class , JavaPrimitives.GraphQLByte);
+            scalars.put(byte.class , JavaPrimitives.GraphQLByte);
+            scalars.put(Short.class , JavaPrimitives.GraphQLShort);
+            scalars.put(short.class , JavaPrimitives.GraphQLShort);
             scalars.put(ID.class , ID.ScalarType);
 
 
@@ -102,7 +103,7 @@ final class BuildingContextImpl implements BuildingContext {
 
 
     private final Map<Class , Map<MappedClass.MappedType , MappedClass>> mappedClasses ;
-    private final Map<MappedClass , GraphQLType> rawTypes;
+    private final Map<MappedClass , GraphQLNamedType> rawTypes;
     private final Map<MappedClass , List<MappedClass>> possibleTypes;
     private final ScalarAddController scalarAddController;
 
@@ -173,7 +174,7 @@ final class BuildingContextImpl implements BuildingContext {
         return mappedClass==null?null:new GraphQLTypeReference(mappedClass.typeName());
     }
 
-    public GraphQLType rawTypeOf(MappedClass mappedClass)
+    public GraphQLNamedType rawTypeOf(MappedClass mappedClass)
     {
         return rawTypes.get(mappedClass);
     }
@@ -183,7 +184,7 @@ final class BuildingContextImpl implements BuildingContext {
         return possibleTypes.get(mappedClass);
     }
 
-    public Map<MappedClass, GraphQLType> rawTypes() {
+    public Map<MappedClass, GraphQLNamedType> rawTypes() {
         return rawTypes;
     }
 
@@ -258,7 +259,7 @@ final class BuildingContextImpl implements BuildingContext {
         return mappedClasses.get(cls).get(mappedType);
     }
 
-    public void setGraphQLTypeFor(MappedClass cls , GraphQLType type)
+    public void setGraphQLTypeFor(MappedClass cls , GraphQLNamedType type)
     {
 
         Assert.ifConditionTrue("class ["+cls+"] discovered multiple times",

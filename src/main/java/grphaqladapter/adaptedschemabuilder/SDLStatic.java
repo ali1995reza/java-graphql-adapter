@@ -53,17 +53,17 @@ public class SDLStatic {
         if(type instanceof GraphQLNonNull)
         {
             //so has an inner
-            getTypeAsString(((GraphQLNonNull)type).getWrappedType() , buffer);
+            getTypeAsString(((GraphQLNonNull)type).getWrappedType(), buffer);
             buffer.append(NONE_NULL);
         }else if(type instanceof GraphQLList)
         {
             //so handle it please !
-            getTypeAsString(((GraphQLList)type).getWrappedType() , buffer);
+            getTypeAsString(((GraphQLList)type).getWrappedType(), buffer);
             buffer.insert(0 , START_LIST);
             buffer.append(END_LIST);
         }else{
 
-            buffer.append(type.getName());
+            buffer.append(((GraphQLNamedType)type).getName());
         }
     }
 
@@ -72,7 +72,7 @@ public class SDLStatic {
         StringBuffer buffer = new StringBuffer();
         buffer.append(argument.getName());
         buffer.append(DOUBLE_DOT);
-        buffer.append(getTypeAsString(argument.getType()));
+        buffer.append(getTypeAsString((GraphQLNamedType) argument.getType()));
         return buffer.toString();
     }
 
@@ -97,6 +97,7 @@ public class SDLStatic {
         }
 
         buffer.append(DOUBLE_DOT);
+
         buffer.append(getTypeAsString(field.getType()));
 
         return buffer.toString();
@@ -107,12 +108,12 @@ public class SDLStatic {
         buffer.append(field.getName());
 
         buffer.append(DOUBLE_DOT);
-        buffer.append(getTypeAsString(field.getType()));
+        buffer.append(getTypeAsString((GraphQLNamedType) field.getType()));
 
         return buffer.toString();
     }
 
-    public final static String from(GraphQLType type)
+    public final static String from(GraphQLNamedType type)
     {
         StringBuffer buffer =  new StringBuffer();
         if(type instanceof GraphQLScalarType)
@@ -154,7 +155,7 @@ public class SDLStatic {
 
             for(int i=0;i<numberOfInterfaces;i++)
             {
-                GraphQLOutputType interfaceType =
+                GraphQLNamedOutputType interfaceType =
                         objectType.getInterfaces().get(i);
                 buffer.append(interfaceType.getName());
                 if(i!=numberOfInterfaces-1)
@@ -218,7 +219,7 @@ public class SDLStatic {
 
             for(int i=0;i<numberOfPossibleTypes;i++)
             {
-                GraphQLOutputType outputType = unionType.getTypes().get(i);
+                GraphQLNamedOutputType outputType = unionType.getTypes().get(i);
                 buffer.append(outputType.getName());
                 if(i!=numberOfPossibleTypes-1)
                 {
@@ -243,7 +244,7 @@ public class SDLStatic {
 
         buffer.append(NEW_LINE).append(NEW_LINE);
 
-        for(GraphQLType type:schema.getAllTypesAsList())
+        for(GraphQLNamedType type:schema.getAllTypesAsList())
         {
             if(BuiltInTypes.contains(type.getName()))
                 continue;
