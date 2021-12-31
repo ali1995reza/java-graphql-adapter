@@ -260,7 +260,6 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
     @Override
     public DataFetcher generate(MappedClass cls, MappedMethod method) {
-        System.out.println(method);
         if(cls.mappedType().isTopLevelType()) {
             try {
                 Object source = cls.baseClass().newInstance();

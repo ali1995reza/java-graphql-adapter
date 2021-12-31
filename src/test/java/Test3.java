@@ -12,6 +12,8 @@ import grphaqladapter.adaptedschemabuilder.scalar.impl.ScalarEntryBuilder;
 import grphaqladapter.annotations.GraphqlArgument;
 import grphaqladapter.annotations.GraphqlField;
 import grphaqladapter.annotations.GraphqlQuery;
+import grphaqladapter.parser.PackageParser;
+import grphaqladapter.parser.filter.NameFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -198,7 +200,7 @@ public class Test3 {
 
         AdaptedGraphQLSchema schema = AdaptedSchemaBuilder
                 .newBuilder()
-                .add(MyQuery.class)
+                .addAll(PackageParser.getAllGraphqlAnnotatedClasses("", NameFilter.startWith("Test3")))
                 .addScalar(
                         ScalarEntryBuilder.newBuilder()
                         .setName("Period")

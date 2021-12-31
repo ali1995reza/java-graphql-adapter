@@ -4,14 +4,13 @@ import graphql.GraphQL;
 import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
 import grphaqladapter.annotations.*;
+import grphaqladapter.parser.PackageParser;
+import grphaqladapter.parser.filter.NameFilter;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Test1 {
 
@@ -45,7 +44,6 @@ public class Test1 {
 
         @GraphqlField(nullable = false)
         public CompletableFuture<List<User>> someUsers(@GraphqlArgument(argumentName = "name") String name) {
-            System.out.println("GERE");
             MyF f = new MyF();
             service.schedule(new Runnable() {
                 @Override
@@ -59,15 +57,15 @@ public class Test1 {
     }
 
     public static class MyF<T> extends CompletableFuture<T> {
-        public MyF(T t){
+        public MyF(T t) {
             complete(t);
         }
 
-        public MyF() {}
+        public MyF() {
+        }
 
         @Override
         public <U> CompletableFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
-            System.out.println("HANDLING THIS !");
             return super.handle(fn);
         }
     }
@@ -75,7 +73,7 @@ public class Test1 {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         AdaptedGraphQLSchema schema = AdaptedSchemaBuilder
                 .newBuilder()
-                .add(NameContainer.class, User.class, MyQuery.class)
+                .addAll(PackageParser.getAllGraphqlAnnotatedClasses("", NameFilter.startWith("Test1")))
                 .build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema.getSchema()).build();

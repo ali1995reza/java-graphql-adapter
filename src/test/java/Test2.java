@@ -4,6 +4,8 @@ import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.annotations.*;
+import grphaqladapter.parser.PackageParser;
+import grphaqladapter.parser.filter.NameFilter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -118,11 +120,7 @@ public class Test2 {
     public static void main(String[] args)
     {
         AdaptedGraphQLSchema schema = AdaptedSchemaBuilder.newBuilder()
-                .add(Character.class
-                        , Human.class
-                        , Droid.class
-                        , Episode.class
-                        , QueryType.class)
+                .addAll(PackageParser.getAllGraphqlAnnotatedClasses("", NameFilter.startWith("Test2")))
                 .build();
 
         System.out.println(schema.asSchemaDefinitionLanguage());
