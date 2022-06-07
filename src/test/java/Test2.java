@@ -1,5 +1,6 @@
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
@@ -13,6 +14,7 @@ import java.util.List;
 public class Test2 {
 
     @GraphqlInterface
+    @GraphqlDescription("represent a character")
     public static interface Character{
 
         @GraphqlField(nullable = false)
@@ -101,11 +103,13 @@ public class Test2 {
     public static class QueryType{
 
         @GraphqlField
-        public Character hero(@GraphqlArgument(argumentName = "episode") Episode episode){
+        @GraphqlDescription("to get a hero by episode")
+        public Character hero(@GraphqlArgument(argumentName = "episode") Episode episode, DataFetchingEnvironment environment){
             return new Droid();
         }
 
         @GraphqlField
+        @GraphqlDescription("to get a Human")
         public Human human(@GraphqlArgument(argumentName = "id")ID id){
             return null;
         }
@@ -120,7 +124,7 @@ public class Test2 {
     public static void main(String[] args)
     {
         AdaptedGraphQLSchema schema = AdaptedSchemaBuilder.newBuilder()
-                .addAll(PackageParser.getAllGraphqlAnnotatedClasses("", NameFilter.startWith("Test2")))
+                .addPackage("", NameFilter.startWith("Test2"))
                 .build();
 
         System.out.println(schema.asSchemaDefinitionLanguage());

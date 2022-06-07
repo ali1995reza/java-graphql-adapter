@@ -200,7 +200,7 @@ public class Test3 {
 
         AdaptedGraphQLSchema schema = AdaptedSchemaBuilder
                 .newBuilder()
-                .addAll(PackageParser.getAllGraphqlAnnotatedClasses("", NameFilter.startWith("Test3")))
+                .addPackage("", NameFilter.startWith("Test3"))
                 .addScalar(
                         ScalarEntryBuilder.newBuilder()
                         .setName("Period")

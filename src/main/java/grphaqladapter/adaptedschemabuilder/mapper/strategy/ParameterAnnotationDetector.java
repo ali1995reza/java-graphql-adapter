@@ -7,6 +7,6 @@ import java.lang.reflect.Parameter;
 
 public interface ParameterAnnotationDetector {
 
-    GraphqlArgumentAnnotation detectAnnotationFor(Method method , Parameter parameter , int parameterIndex);
+    GraphqlArgumentAnnotation detectAnnotationFor(Method method, Parameter parameter, int parameterIndex);
 
 }

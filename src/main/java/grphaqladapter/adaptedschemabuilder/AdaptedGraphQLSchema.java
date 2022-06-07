@@ -4,8 +4,10 @@ import graphql.schema.GraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.discovered.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class AdaptedGraphQLSchema {
 
@@ -19,104 +21,25 @@ public final class AdaptedGraphQLSchema {
     private final List<DiscoveredEnumType> discoveredEnumTypes;
     private final List<DiscoveredScalarType> discoveredScalarTypes;
 
-    AdaptedGraphQLSchema(GraphQLSchema schema  , List<DiscoveredType> types)
-    {
+    AdaptedGraphQLSchema(GraphQLSchema schema, List<DiscoveredType> types) {
         this.schema = schema;
-        sdl = SDLStatic.from(schema);
-        discoveredTypes = types;
-        discoveredInputTypes = separateAllInputTypes();
-        discoveredInterfacesTypes = separateAllInterfaceTypes();
-        discoveredObjectTypes = separateAllObjectTypes();
-        discoveredUnionTypes = separateAllUnionTypes();
-        discoveredEnumTypes = separateAllEnumTypes();
-        discoveredScalarTypes = separateAllScalarTypes();
+        this.sdl = SDLStatic.from(schema);
+        this.discoveredTypes = types;
+        this.discoveredInputTypes = separate(discoveredTypes, DiscoveredInputType.class);
+        this.discoveredInterfacesTypes = separate(discoveredTypes, DiscoveredInterfaceType.class);
+        this.discoveredObjectTypes = separate(discoveredTypes, DiscoveredObjectType.class);
+        this.discoveredUnionTypes = separate(discoveredTypes, DiscoveredUnionType.class);
+        this.discoveredEnumTypes = separate(discoveredTypes, DiscoveredEnumType.class);
+        this.discoveredScalarTypes = separate(discoveredTypes, DiscoveredScalarType.class);
 
     }
 
-    private List<DiscoveredInterfaceType> separateAllInterfaceTypes()
-    {
-        List<DiscoveredInterfaceType> list = new ArrayList<>();
-        for(DiscoveredType type:discoveredTypes)
-        {
-            if(type instanceof DiscoveredInterfaceType)
-            {
-                list.add((DiscoveredInterfaceTypeImpl)type);
-            }
-        }
+    private static <T extends DiscoveredType> List<T> separate(List<DiscoveredType> types, Class<T> cls) {
+        List<T> list = types.stream().filter(type->cls.isAssignableFrom(type.getClass()))
+                .map(type->(T)type).collect(Collectors.toList());
 
         return Collections.unmodifiableList(list);
     }
-
-    private List<DiscoveredScalarType> separateAllScalarTypes()
-    {
-        List<DiscoveredScalarType> list = new ArrayList<>();
-        for(DiscoveredType type:discoveredTypes)
-        {
-            if(type instanceof DiscoveredScalarType)
-            {
-                list.add((DiscoveredScalarType)type);
-            }
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
-    private List<DiscoveredObjectType> separateAllObjectTypes()
-    {
-        List<DiscoveredObjectType> list = new ArrayList<>();
-        for(DiscoveredType type:discoveredTypes)
-        {
-            if(type instanceof DiscoveredObjectType)
-            {
-                list.add((DiscoveredObjectType)type);
-            }
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
-    private List<DiscoveredUnionType> separateAllUnionTypes()
-    {
-        List<DiscoveredUnionType> list = new ArrayList<>();
-        for(DiscoveredType type:discoveredTypes)
-        {
-            if(type instanceof DiscoveredUnionType)
-            {
-                list.add((DiscoveredUnionType)type);
-            }
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
-    private List<DiscoveredEnumType> separateAllEnumTypes()
-    {
-        List<DiscoveredEnumType> list = new ArrayList<>();
-        for(DiscoveredType type:discoveredTypes)
-        {
-            if(type instanceof DiscoveredEnumType)
-            {
-                list.add((DiscoveredEnumType)type);
-            }
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
-    private List<DiscoveredInputType> separateAllInputTypes()
-    {
-        List<DiscoveredInputType> list = new ArrayList<>();
-        for(DiscoveredType type:discoveredTypes)
-        {
-            if(type instanceof DiscoveredInputType)
-            {
-                list.add((DiscoveredInputType)type);
-            }
-        }
-
-        return Collections.unmodifiableList(list);
-    }
-
 
     public GraphQLSchema getSchema() {
         return schema;

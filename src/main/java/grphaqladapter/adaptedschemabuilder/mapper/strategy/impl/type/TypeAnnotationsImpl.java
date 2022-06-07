@@ -15,8 +15,9 @@ class TypeAnnotationsImpl implements TypeAnnotations {
     private final GraphqlQueryAnnotation queryAnnotation;
     private final GraphqlMutationAnnotation mutationAnnotation;
     private final GraphqlSubscriptionAnnotation subscriptionAnnotation;
+    private final GraphqlDescriptionAnnotation descriptionAnnotation;
 
-    TypeAnnotationsImpl(GraphqlTypeAnnotation typeAnnotation, GraphqlInputTypeAnnotation inputTypeAnnotation, GraphqlInterfaceAnnotation interfaceAnnotation, GraphqlUnionAnnotation unionAnnotation, GraphqlEnumAnnotation enumAnnotation, GraphqlQueryAnnotation queryAnnotation, GraphqlMutationAnnotation mutationAnnotation, GraphqlSubscriptionAnnotation subscriptionAnnotation) {
+    TypeAnnotationsImpl(GraphqlTypeAnnotation typeAnnotation, GraphqlInputTypeAnnotation inputTypeAnnotation, GraphqlInterfaceAnnotation interfaceAnnotation, GraphqlUnionAnnotation unionAnnotation, GraphqlEnumAnnotation enumAnnotation, GraphqlQueryAnnotation queryAnnotation, GraphqlMutationAnnotation mutationAnnotation, GraphqlSubscriptionAnnotation subscriptionAnnotation, GraphqlDescriptionAnnotation descriptionAnnotation) {
         this.typeAnnotation = typeAnnotation;
         this.inputTypeAnnotation = inputTypeAnnotation;
         this.interfaceAnnotation = interfaceAnnotation;
@@ -25,20 +26,21 @@ class TypeAnnotationsImpl implements TypeAnnotations {
         this.queryAnnotation = queryAnnotation;
         this.mutationAnnotation = mutationAnnotation;
         this.subscriptionAnnotation = subscriptionAnnotation;
+        this.descriptionAnnotation = descriptionAnnotation;
 
-        Assert.ifConditionTrue("at least one type annotation needed" ,
-                typeAnnotation==null , inputTypeAnnotation==null ,
-                interfaceAnnotation==null , unionAnnotation==null ,
-                enumAnnotation==null , queryAnnotation==null ,
-                mutationAnnotation==null , subscriptionAnnotation==null);
+        Assert.isOneFalse("at least one type annotation needed",
+                typeAnnotation == null, inputTypeAnnotation == null,
+                interfaceAnnotation == null, unionAnnotation == null,
+                enumAnnotation == null, queryAnnotation == null,
+                mutationAnnotation == null, subscriptionAnnotation == null);
 
-        TypeValidator.validate(typeAnnotation , true);
-        TypeValidator.validate(inputTypeAnnotation , true);
-        TypeValidator.validate(interfaceAnnotation , true);
-        TypeValidator.validate(unionAnnotation , true);
-        TypeValidator.validate(queryAnnotation ,true);
-        TypeValidator.validate(mutationAnnotation , true);
-        TypeValidator.validate(subscriptionAnnotation , true);
+        TypeValidator.validate(typeAnnotation, true);
+        TypeValidator.validate(inputTypeAnnotation, true);
+        TypeValidator.validate(interfaceAnnotation, true);
+        TypeValidator.validate(unionAnnotation, true);
+        TypeValidator.validate(queryAnnotation, true);
+        TypeValidator.validate(mutationAnnotation, true);
+        TypeValidator.validate(subscriptionAnnotation, true);
     }
 
 
@@ -80,5 +82,10 @@ class TypeAnnotationsImpl implements TypeAnnotations {
     @Override
     public GraphqlSubscriptionAnnotation subscriptionAnnotation() {
         return subscriptionAnnotation;
+    }
+
+    @Override
+    public GraphqlDescriptionAnnotation descriptionAnnotation() {
+        return descriptionAnnotation;
     }
 }

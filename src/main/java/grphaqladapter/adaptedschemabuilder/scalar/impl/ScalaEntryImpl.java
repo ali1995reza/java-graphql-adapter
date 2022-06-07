@@ -9,21 +9,22 @@ class ScalaEntryImpl implements ScalarEntry {
 
     private final Class type;
     private final String name;
+    private final String description;
     private final Coercing coercing;
 
-    ScalaEntryImpl(Class type, String name, Coercing coercing) {
+    ScalaEntryImpl(Class type, String name, String description, Coercing coercing) {
         this.type = type;
         this.name = name;
+        this.description = description;
         this.coercing = coercing;
         validate();
     }
 
 
-    private final void validate()
-    {
-        Assert.ifNull(type , "provided type is null");
-        Assert.ifConditionTrue("null name" , Assert.isNullString(name));
-        Assert.ifNull(coercing , "provided coercing is null");
+    private final void validate() {
+        Assert.isNotNull(type, "provided type is null");
+        Assert.isOneFalse("null name", Assert.isNullString(name));
+        Assert.isNotNull(coercing, "provided coercing is null");
     }
 
     @Override
@@ -34,6 +35,11 @@ class ScalaEntryImpl implements ScalarEntry {
     @Override
     public String name() {
         return name;
+    }
+
+    @Override
+    public String description() {
+        return description;
     }
 
     @Override

@@ -9,6 +9,8 @@ public interface MappedMethod {
 
     String fieldName();
 
+    String description();
+
     boolean isInputField();
 
     Method setter();

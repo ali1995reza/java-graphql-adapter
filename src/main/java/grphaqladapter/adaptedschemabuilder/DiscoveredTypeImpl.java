@@ -8,11 +8,9 @@ import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 
 abstract class DiscoveredTypeImpl<T extends GraphQLType> implements DiscoveredType<T> {
 
-
     private final MappedClass mappedClass;
     private final String name;
     private final T graphQLType;
-
 
     public DiscoveredTypeImpl(MappedClass mappedClass, String name, T graphQLType) {
         this.mappedClass = mappedClass;

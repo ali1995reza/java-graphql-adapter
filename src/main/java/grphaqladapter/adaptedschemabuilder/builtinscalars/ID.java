@@ -7,44 +7,37 @@ public final class ID {
 
     public final static GraphQLScalarType ScalarType =
             GraphQLScalarType.newScalar()
-            .name("ID")
-            .coercing(new Coercing() {
-                @Override
-                public Object serialize(Object o) throws CoercingSerializeException {
-                    if(o instanceof ID)
-                    {
-                        return o.toString();
-                    }
+                    .name("ID")
+                    .coercing(new Coercing() {
+                        @Override
+                        public Object serialize(Object o) throws CoercingSerializeException {
+                            if (o instanceof ID) {
+                                return o.toString();
+                            }
 
-                    throw new CoercingSerializeException("Expect ID but found ["+o.getClass()+"]");
-                }
+                            throw new CoercingSerializeException("Expect ID but found [" + o.getClass() + "]");
+                        }
 
-                @Override
-                public Object parseValue(Object o) throws CoercingParseValueException {
-                    if(o instanceof String)
-                    {
-                        return new ID(o.toString());
-                    }
+                        @Override
+                        public Object parseValue(Object o) throws CoercingParseValueException {
+                            if (o instanceof String) {
+                                return new ID(o.toString());
+                            }
 
 
-                    throw new CoercingParseValueException("Expect String but found ["+o.getClass()+"]");
-                }
+                            throw new CoercingParseValueException("Expect String but found [" + o.getClass() + "]");
+                        }
 
-                @Override
-                public Object parseLiteral(Object o) throws CoercingParseLiteralException {
-                    if(o instanceof StringValue)
-                    {
-                        return new ID(((StringValue) o).getValue());
-                    }
+                        @Override
+                        public Object parseLiteral(Object o) throws CoercingParseLiteralException {
+                            if (o instanceof StringValue) {
+                                return new ID(((StringValue) o).getValue());
+                            }
 
-                    throw new CoercingParseLiteralException("Expect StringValue but found ["+o.getClass()+"]");
+                            throw new CoercingParseLiteralException("Expect StringValue but found [" + o.getClass() + "]");
 
-                }
-            }).build();
-
-
-
-
+                        }
+                    }).build();
 
 
     private final String id;
@@ -52,7 +45,6 @@ public final class ID {
     public ID(String id) {
         this.id = id;
     }
-
 
     @Override
     public String toString() {

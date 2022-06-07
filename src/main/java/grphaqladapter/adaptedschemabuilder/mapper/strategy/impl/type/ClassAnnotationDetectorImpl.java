@@ -10,11 +10,10 @@ import java.util.Map;
 class ClassAnnotationDetectorImpl implements ClassAnnotationDetector {
 
 
-
-    private final Map<Class , TypeAnnotations> explicitAnnotations;
+    private final Map<Class, TypeAnnotations> explicitAnnotations;
 
     ClassAnnotationDetectorImpl(Map<Class, TypeAnnotations> explicitAnnotations) {
-        this.explicitAnnotations = Utils.nullifyOrGetDefault(explicitAnnotations , Collections.EMPTY_MAP);
+        this.explicitAnnotations = Utils.nullifyOrGetDefault(explicitAnnotations, Collections.EMPTY_MAP);
     }
 
 

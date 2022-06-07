@@ -6,7 +6,5 @@ import java.util.List;
 
 public interface DiscoveredObjectType extends DiscoveredType<GraphQLObjectType> {
 
-
-
     List<DiscoveredInterfaceType> implementedInterfaces();
 }

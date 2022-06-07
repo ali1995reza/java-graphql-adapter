@@ -6,6 +6,7 @@ import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredUnionType;
 
 public interface TypeResolverGenerator {
 
-    public TypeResolver generate(DiscoveredUnionType unionType);
-    public TypeResolver generate(DiscoveredInterfaceType interfaceType);
+    TypeResolver generate(DiscoveredUnionType unionType);
+
+    TypeResolver generate(DiscoveredInterfaceType interfaceType);
 }

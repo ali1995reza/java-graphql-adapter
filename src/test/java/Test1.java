@@ -73,7 +73,7 @@ public class Test1 {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         AdaptedGraphQLSchema schema = AdaptedSchemaBuilder
                 .newBuilder()
-                .addAll(PackageParser.getAllGraphqlAnnotatedClasses("", NameFilter.startWith("Test1")))
+                .addPackage("", NameFilter.startWith("Test1"))
                 .build();
 
         GraphQL graphQL = GraphQL.newGraphQL(schema.getSchema()).build();

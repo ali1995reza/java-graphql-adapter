@@ -17,5 +17,4 @@ final class DiscoveredInputTypeImpl extends DiscoveredTypeImpl<GraphQLInputObjec
 
     }
 
-
 }

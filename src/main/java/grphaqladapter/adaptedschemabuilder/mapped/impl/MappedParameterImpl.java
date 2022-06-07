@@ -1,16 +1,15 @@
 package grphaqladapter.adaptedschemabuilder.mapped.impl;
 
-import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
 import grphaqladapter.adaptedschemabuilder.validator.ArgumentValidator;
 
 import java.lang.reflect.Parameter;
-import java.util.List;
 
 final class MappedParameterImpl implements MappedParameter {
 
 
     private final String argumentName;
+    private final boolean isEnv;
     private final boolean nullable;
     private final Parameter parameter;
     private final int dimensions;
@@ -18,26 +17,37 @@ final class MappedParameterImpl implements MappedParameter {
     private final boolean isList;
 
 
-
-
-    MappedParameterImpl(String name, boolean nullable, Parameter parameter , Class type , int dims) {
+    MappedParameterImpl(String name, boolean isEnv, boolean nullable, Parameter parameter, Class type, int dims) {
 
         this.argumentName = name;
+        this.isEnv = isEnv;
         this.nullable = nullable;
         this.parameter = parameter;
         this.type = type;
         dimensions = dims;
-        isList = dimensions>0;
+        isList = dimensions > 0;
 
         ArgumentValidator.validate(this);
     }
 
-
-
-
+    final static MappedParameter clone(MappedParameter parameter) {
+        return new MappedParameterImpl(
+                parameter.argumentName(),
+                parameter.isEnv(),
+                parameter.isNullable(),
+                parameter.parameter(),
+                parameter.type(),
+                parameter.dimensions()
+        );
+    }
 
     public String argumentName() {
         return argumentName;
+    }
+
+    @Override
+    public boolean isEnv() {
+        return isEnv;
     }
 
     public boolean isNullable() {
@@ -48,8 +58,7 @@ final class MappedParameterImpl implements MappedParameter {
         return parameter;
     }
 
-    public boolean isList()
-    {
+    public boolean isList() {
         return isList;
     }
 
@@ -57,25 +66,12 @@ final class MappedParameterImpl implements MappedParameter {
         return dimensions;
     }
 
-    public Class type()
-    {
+    public Class type() {
         return type;
     }
 
     @Override
     public String toString() {
-        return "[parameter:"+parameter+" , argumentName:"+ argumentName +"]";
-    }
-
-
-    final static MappedParameter clone(MappedParameter parameter)
-    {
-        return new MappedParameterImpl(
-                parameter.argumentName() ,
-                parameter.isNullable() ,
-                parameter.parameter() ,
-                parameter.type() ,
-                parameter.dimensions()
-        );
+        return "[parameter:" + parameter + " , argumentName:" + argumentName + "]";
     }
 }

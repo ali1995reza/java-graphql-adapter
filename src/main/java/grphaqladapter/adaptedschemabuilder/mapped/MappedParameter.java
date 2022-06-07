@@ -4,17 +4,17 @@ import java.lang.reflect.Parameter;
 
 public interface MappedParameter {
 
+    String argumentName();
 
+    boolean isEnv();
 
-    public String argumentName();
+    boolean isNullable();
 
-    public boolean isNullable();
+    Parameter parameter();
 
-    public Parameter parameter();
+    boolean isList();
 
-    public boolean isList();
+    int dimensions();
 
-    public int dimensions();
-
-    public Class type();
+    Class type();
 }

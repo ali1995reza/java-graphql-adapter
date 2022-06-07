@@ -3,9 +3,8 @@ package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.type;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.ClassAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.TypeAnnotations;
 import grphaqladapter.annotations.*;
+import grphaqladapter.annotations.impl.GraphqlDescriptionAnnotationImpl;
 import grphaqladapter.annotations.impl.type.TypesAnnotationBuilder;
-
-import java.net.StandardSocketOptions;
 
 public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
@@ -20,44 +19,41 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
     @Override
     public synchronized TypeAnnotations detectAnnotationFor(Class cls) {
-        refresh();
 
         GraphqlInterface interfaceAnnotation = (GraphqlInterface) cls.getAnnotation(GraphqlInterface.class);
         GraphqlInputType inputTypeAnnotation = (GraphqlInputType) cls.getAnnotation(GraphqlInputType.class);
-        GraphqlType typeAnnotation = (GraphqlType)cls.getAnnotation(GraphqlType.class);
+        GraphqlType typeAnnotation = (GraphqlType) cls.getAnnotation(GraphqlType.class);
         GraphqlUnion unionAnnotation = (GraphqlUnion) cls.getAnnotation(GraphqlUnion.class);
         GraphqlEnum enumAnnotation = (GraphqlEnum) cls.getAnnotation(GraphqlEnum.class);
         GraphqlQuery queryAnnotation = (GraphqlQuery) cls.getAnnotation(GraphqlQuery.class);
-        GraphqlMutation mutationAnnotation = (GraphqlMutation)cls.getAnnotation(GraphqlMutation.class);
+        GraphqlMutation mutationAnnotation = (GraphqlMutation) cls.getAnnotation(GraphqlMutation.class);
         GraphqlSubscription subscriptionAnnotation = (GraphqlSubscription) cls.getAnnotation(GraphqlSubscription.class);
+        GraphqlDescription descriptionAnnotation = (GraphqlDescription) cls.getAnnotation(GraphqlDescription.class);
 
+        builder.refresh();
 
-        if(interfaceAnnotation!=null)
-        {
+        if (interfaceAnnotation != null) {
             builder.setInterfaceAnnotation(
                     typeBuilder.setTypeName(interfaceAnnotation.typeName())
                             .buildInterfaceAnnotation()
             );
         }
 
-        if(inputTypeAnnotation!=null)
-        {
+        if (inputTypeAnnotation != null) {
             builder.setInputTypeAnnotation(
                     typeBuilder.setTypeName(inputTypeAnnotation.typeName())
                             .buildInputTypeAnnotation()
             );
         }
 
-        if(typeAnnotation!=null)
-        {
+        if (typeAnnotation != null) {
             builder.setTypeAnnotation(
                     typeBuilder.setTypeName(typeAnnotation.typeName())
                             .buildTypeAnnotation()
             );
         }
 
-        if(unionAnnotation!=null)
-        {
+        if (unionAnnotation != null) {
             builder.setUnionAnnotation(
                     typeBuilder.setTypeName(unionAnnotation.typeName())
                             .buildUnionAnnotation()
@@ -65,54 +61,43 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
         }
 
 
-        if(enumAnnotation!=null)
-        {
+        if (enumAnnotation != null) {
             builder.setEnumAnnotation(
                     typeBuilder.setTypeName(enumAnnotation.typeName())
                             .buildEnumAnnotation()
             );
         }
 
-        if(queryAnnotation!=null)
-        {
+        if (queryAnnotation != null) {
             builder.setQueryAnnotation(
                     typeBuilder.setTypeName(queryAnnotation.typeName())
-                    .buildQueryAnnotation()
+                            .buildQueryAnnotation()
             );
         }
 
-        if(mutationAnnotation!=null)
-        {
+        if (mutationAnnotation != null) {
             builder.setMutationAnnotation(
                     typeBuilder.setTypeName(mutationAnnotation.typeName())
                             .buildMutationAnnotation()
             );
         }
 
-        if(subscriptionAnnotation!=null)
-        {
+        if (subscriptionAnnotation != null) {
             builder.setSubscriptionAnnotation(
                     typeBuilder.setTypeName(subscriptionAnnotation.typeName())
                             .buildSubscriptionAnnotation()
             );
         }
 
+        if (descriptionAnnotation != null) {
+            builder.setDescriptionAnnotation(
+                    new GraphqlDescriptionAnnotationImpl(descriptionAnnotation.value())
+            );
+        }
 
         TypeAnnotations typeAnnotations = builder.build();
 
         return typeAnnotations;
     }
 
-
-    public void refresh()
-    {
-        builder.setEnumAnnotation(null)
-                .setTypeAnnotation(null)
-                .setInputTypeAnnotation(null)
-                .setInterfaceAnnotation(null)
-                .setQueryAnnotation(null)
-                .setMutationAnnotation(null)
-                .setSubscriptionAnnotation(null)
-                .setUnionAnnotation(null);
-    }
 }

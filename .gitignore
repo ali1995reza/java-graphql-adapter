@@ -1,0 +1,4 @@
+# Ignore intellij idea files
+.idea/
+# Ignore maven build target folder
+target/

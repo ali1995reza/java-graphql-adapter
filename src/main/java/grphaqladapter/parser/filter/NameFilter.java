@@ -4,10 +4,6 @@ import java.util.regex.Pattern;
 
 public class NameFilter implements ClassFilter {
 
-    public static ClassFilter startWith(String str) {
-        return new NameFilter("^"+str+".*");
-    }
-
     private final Pattern pattern;
 
     public NameFilter(Pattern pattern) {
@@ -16,6 +12,10 @@ public class NameFilter implements ClassFilter {
 
     public NameFilter(String regx) {
         this(Pattern.compile(regx));
+    }
+
+    public static ClassFilter startWith(String str) {
+        return new NameFilter("^" + str + ".*");
     }
 
     @Override

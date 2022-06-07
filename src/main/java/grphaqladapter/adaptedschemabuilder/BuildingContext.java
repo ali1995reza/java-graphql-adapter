@@ -1,7 +1,7 @@
 package grphaqladapter.adaptedschemabuilder;
 
 
-import graphql.schema.*;
+import graphql.schema.GraphQLTypeReference;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 
 
@@ -27,7 +27,7 @@ interface BuildingContext {
 
     boolean isAnUnion(Class cls);
 
-    void addToPossibleTypesOf(MappedClass mappedClass , MappedClass possible);
+    void addToPossibleTypesOf(MappedClass mappedClass, MappedClass possible);
 
-    MappedClass getMappedClassFor(Class cls , MappedClass.MappedType mappedType);
+    MappedClass getMappedClassFor(Class cls, MappedClass.MappedType mappedType);
 }

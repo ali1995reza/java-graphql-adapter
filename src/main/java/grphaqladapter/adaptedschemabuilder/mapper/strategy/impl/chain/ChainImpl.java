@@ -9,10 +9,10 @@ import java.util.List;
 
 final class ChainImpl<T> implements Chain<T> {
 
-    private final List<T> chainList ;
+    private final List<T> chainList;
 
     ChainImpl(List<T> chainList) {
-        this.chainList = Utils.nullifyOrGetDefault(chainList , Collections.EMPTY_LIST);
+        this.chainList = Utils.nullifyOrGetDefault(chainList, Collections.EMPTY_LIST);
     }
 
 

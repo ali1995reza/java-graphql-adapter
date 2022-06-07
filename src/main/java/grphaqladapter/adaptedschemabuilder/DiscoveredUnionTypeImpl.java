@@ -18,11 +18,9 @@ final class DiscoveredUnionTypeImpl extends DiscoveredTypeImpl<GraphQLUnionType>
         possibleTypes = new ArrayList<>();
     }
 
-
     public List<DiscoveredObjectType> possibleTypes() {
         return possibleTypes;
     }
-
 
     @Override
     void setUnmodifiable() {

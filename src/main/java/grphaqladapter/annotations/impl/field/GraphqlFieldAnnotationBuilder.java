@@ -5,20 +5,17 @@ import grphaqladapter.annotations.GraphqlFieldAnnotation;
 public class GraphqlFieldAnnotationBuilder {
 
 
-    public final static GraphqlFieldAnnotationBuilder newBuilder()
-    {
-        return new GraphqlFieldAnnotationBuilder();
-    }
-
-
-
     private String fieldName;
     private boolean nullable;
     private boolean inputField;
     private String setter;
 
-    private GraphqlFieldAnnotationBuilder(){}
+    private GraphqlFieldAnnotationBuilder() {
+    }
 
+    public final static GraphqlFieldAnnotationBuilder newBuilder() {
+        return new GraphqlFieldAnnotationBuilder();
+    }
 
     public synchronized GraphqlFieldAnnotationBuilder setNullable(boolean nullable) {
         this.nullable = nullable;
@@ -40,8 +37,7 @@ public class GraphqlFieldAnnotationBuilder {
         return this;
     }
 
-    public synchronized GraphqlFieldAnnotationBuilder refresh()
-    {
+    public synchronized GraphqlFieldAnnotationBuilder refresh() {
         fieldName = null;
         nullable = false;
         inputField = false;
@@ -50,8 +46,7 @@ public class GraphqlFieldAnnotationBuilder {
         return this;
     }
 
-    public synchronized GraphqlFieldAnnotation build()
-    {
-        return new GraphqlFieldAnnotationImpl(fieldName , nullable , inputField , setter);
+    public synchronized GraphqlFieldAnnotation build() {
+        return new GraphqlFieldAnnotationImpl(fieldName, nullable, inputField, setter);
     }
 }

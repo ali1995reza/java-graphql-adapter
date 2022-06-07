@@ -14,6 +14,7 @@ import java.util.List;
 final class MappedMethodImpl implements MappedMethod {
 
     private final String fieldName;
+    private final String description;
     private final Method method;
     private final boolean nullable;
     private final List<MappedParameter> parameters;
@@ -24,22 +25,35 @@ final class MappedMethodImpl implements MappedMethod {
     private final boolean isInputField;
 
 
-    public MappedMethodImpl(String f, Method m, boolean n, List<MappedParameter> p, Class t, int dims, Method setter)
-    {
-        fieldName  = f;
+    public MappedMethodImpl(String f, String description, Method m, boolean n, List<MappedParameter> p, Class t, int dims, Method setter) {
+        fieldName = f;
+        this.description = description;
         method = m;
         nullable = n;
-        this.parameters = Utils.nullifyOrGetDefault(p , Collections.EMPTY_LIST);
+        this.parameters = Utils.nullifyOrGetDefault(p, Collections.EMPTY_LIST);
         type = t;
         dimensions = dims;
         this.setter = setter;
-        isList = dimensions>0;
-        isInputField = setter!=null;
+        isList = dimensions > 0;
+        isInputField = setter != null;
 
         FieldValidator.validate(this);
     }
 
+    static grphaqladapter.adaptedschemabuilder.mapped.MappedMethod clone(grphaqladapter.adaptedschemabuilder.mapped.MappedMethod method) {
+        Assert.isOneFalse("an input mapped method must contains setter method", method.isInputField()
+                , method.setter() == null);
 
+        return new MappedMethodImpl(
+                method.fieldName(),
+                method.description(),
+                method.method(),
+                method.isNullable(),
+                method.parameters() == null ? null : Collections.unmodifiableList(Utils.copy(method.parameters())),
+                method.type(),
+                method.dimensions(),
+                method.setter());
+    }
 
     public Method method() {
         return method;
@@ -49,16 +63,24 @@ final class MappedMethodImpl implements MappedMethod {
         return fieldName;
     }
 
-    public boolean isInputField(){ return isInputField;}
+    @Override
+    public String description() {
+        return description;
+    }
 
-    public Method setter(){return setter;}
+    public boolean isInputField() {
+        return isInputField;
+    }
+
+    public Method setter() {
+        return setter;
+    }
 
     public boolean isNullable() {
         return nullable;
     }
 
-    public boolean isList()
-    {
+    public boolean isList() {
         return isList;
     }
 
@@ -70,28 +92,12 @@ final class MappedMethodImpl implements MappedMethod {
         return type;
     }
 
-    public List<MappedParameter>  parameters() {
+    public List<MappedParameter> parameters() {
         return parameters;
     }
 
     @Override
     public String toString() {
-        return "[method:"+method+" , field-name:"+fieldName+" , parameters:"+parameters+" , is-list:"+isList+" , type:"+type+"]";
-    }
-
-
-    static grphaqladapter.adaptedschemabuilder.mapped.MappedMethod clone(grphaqladapter.adaptedschemabuilder.mapped.MappedMethod method)
-    {
-        Assert.ifConditionTrue("an input mapped method must contains setter method" , method.isInputField()
-                , method.setter()==null);
-
-        return new MappedMethodImpl(
-                method.fieldName() ,
-                method.method() ,
-                method.isNullable() ,
-                method.parameters()==null?null:Collections.unmodifiableList(Utils.copy(method.parameters())),
-                method.type() ,
-                method.dimensions() ,
-                method.setter());
+        return "[method:" + method + " , field-name:" + fieldName + " , parameters:" + parameters + " , is-list:" + isList + " , type:" + type + "]";
     }
 }

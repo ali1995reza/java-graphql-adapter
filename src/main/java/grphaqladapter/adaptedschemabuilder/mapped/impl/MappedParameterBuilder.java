@@ -6,35 +6,30 @@ import java.lang.reflect.Parameter;
 
 public final class MappedParameterBuilder {
 
-    public final static MappedParameterBuilder newBuilder()
-    {
-        return new MappedParameterBuilder();
-    }
-
-
-    public static MappedParameter clone(MappedParameter parameter)
-    {
-        return MappedParameterImpl.clone(parameter);
-    }
-
-    public static MappedParameter cloneIfNotImmutable(MappedParameter parameter)
-    {
-        if(parameter instanceof MappedParameterImpl)
-            return parameter;
-
-        return clone(parameter);
-    }
-
-
     private Parameter parameter;
+    private boolean isEnv;
     private boolean nullable;
     private String argumentName;
     private Class type;
     private int dimensions = 0;
 
+    private MappedParameterBuilder() {
+    }
 
-    private MappedParameterBuilder(){}
+    public final static MappedParameterBuilder newBuilder() {
+        return new MappedParameterBuilder();
+    }
 
+    public static MappedParameter clone(MappedParameter parameter) {
+        return MappedParameterImpl.clone(parameter);
+    }
+
+    public static MappedParameter cloneIfNotImmutable(MappedParameter parameter) {
+        if (parameter instanceof MappedParameterImpl)
+            return parameter;
+
+        return clone(parameter);
+    }
 
     public synchronized MappedParameterBuilder setType(Class type) {
         this.type = type;
@@ -43,6 +38,11 @@ public final class MappedParameterBuilder {
 
     public synchronized MappedParameterBuilder setNullable(boolean nullable) {
         this.nullable = nullable;
+        return this;
+    }
+
+    public synchronized MappedParameterBuilder setEnv(boolean env) {
+        this.isEnv = env;
         return this;
     }
 
@@ -61,8 +61,7 @@ public final class MappedParameterBuilder {
         return this;
     }
 
-    public synchronized MappedParameter build()
-    {
-        return new MappedParameterImpl(argumentName , nullable , parameter , type , dimensions);
+    public synchronized MappedParameter build() {
+        return new MappedParameterImpl(argumentName, isEnv, nullable, parameter, type, dimensions);
     }
 }

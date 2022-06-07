@@ -4,8 +4,11 @@ import graphql.schema.Coercing;
 
 public interface ScalarEntry {
 
+    Class type();
 
-    public Class type();
-    public String name();
-    public Coercing coercing();
+    String name();
+
+    String description();
+
+    Coercing coercing();
 }

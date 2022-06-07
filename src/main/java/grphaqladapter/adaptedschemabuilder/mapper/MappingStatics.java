@@ -15,39 +15,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class MappingStatics {
 
-    public static final class TypeDetails {
-
-        private final Class type;
-        private final int dimension;
-        private final boolean isQueryHandler;
-
-        private TypeDetails(Class type, int dimension, boolean isQueryHandler) {
-            this.isQueryHandler = isQueryHandler;
-            Assert.ifNegative(dimension, "an array dimension can not be <0");
-            Assert.ifNull(type, "provided type is null");
-            this.type = type;
-            this.dimension = dimension;
-        }
-
-
-        public Class type() {
-            return type;
-        }
-
-        public int dimension() {
-            return dimension;
-        }
-
-        public boolean isQueryHandler() {
-            return isQueryHandler;
-        }
-
-        @Override
-        public String toString() {
-            return "[type:" + type + " , dims:" + dimension + " , query-handler:" + isQueryHandler + "]";
-        }
-    }
-
     public static TypeDetails findTypeDetails(Method method) {
         Type type = method.getGenericReturnType();
 
@@ -73,7 +40,6 @@ public class MappingStatics {
         return findTypeDetails(parameter.getParameterizedType());
     }
 
-
     public static TypeDetails findTypeDetails(Type type) {
         if (type == null)
             return null;
@@ -91,7 +57,6 @@ public class MappingStatics {
             else
                 return new TypeDetails((Class) type, 0, false);
         }
-
 
     }
 
@@ -111,9 +76,8 @@ public class MappingStatics {
         }
     }
 
-
     public static GraphqlInputFieldAnnotation convertFieldAnnotationToInputFieldAnnotation(GraphqlFieldAnnotation annotation) {
-        Assert.ifNull(annotation, "provided annotation is null");
+        Assert.isNotNull(annotation, "provided annotation is null");
         return GraphqlInputFieldAnnotationBuilder
                 .newBuilder()
                 .setNullable(annotation.nullable())
@@ -121,7 +85,6 @@ public class MappingStatics {
                 .setInputFieldName(annotation.fieldName())
                 .build();
     }
-
 
     public final static List<Method> getAllMethods(Class cls) {
         Method[] methods = cls.getMethods();
@@ -143,6 +106,39 @@ public class MappingStatics {
         }
 
         return list;
+    }
+
+    public static final class TypeDetails {
+
+        private final Class type;
+        private final int dimension;
+        private final boolean isQueryHandler;
+
+        private TypeDetails(Class type, int dimension, boolean isQueryHandler) {
+            this.isQueryHandler = isQueryHandler;
+            Assert.isNotNegative(dimension, "an array dimension can not be <0");
+            Assert.isNotNull(type, "provided type is null");
+            this.type = type;
+            this.dimension = dimension;
+        }
+
+
+        public Class type() {
+            return type;
+        }
+
+        public int dimension() {
+            return dimension;
+        }
+
+        public boolean isQueryHandler() {
+            return isQueryHandler;
+        }
+
+        @Override
+        public String toString() {
+            return "[type:" + type + " , dims:" + dimension + " , query-handler:" + isQueryHandler + "]";
+        }
     }
 
 }

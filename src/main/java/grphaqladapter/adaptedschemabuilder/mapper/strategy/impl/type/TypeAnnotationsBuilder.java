@@ -5,12 +5,6 @@ import grphaqladapter.annotations.*;
 
 public class TypeAnnotationsBuilder {
 
-    public final static TypeAnnotationsBuilder newBuilder()
-    {
-        return new TypeAnnotationsBuilder();
-    }
-
-
     private GraphqlTypeAnnotation typeAnnotation;
     private GraphqlInputTypeAnnotation inputTypeAnnotation;
     private GraphqlInterfaceAnnotation interfaceAnnotation;
@@ -19,9 +13,27 @@ public class TypeAnnotationsBuilder {
     private GraphqlQueryAnnotation queryAnnotation;
     private GraphqlMutationAnnotation mutationAnnotation;
     private GraphqlSubscriptionAnnotation subscriptionAnnotation;
+    private GraphqlDescriptionAnnotation descriptionAnnotation;
 
+    private TypeAnnotationsBuilder() {
+    }
 
-    private TypeAnnotationsBuilder(){}
+    public static TypeAnnotationsBuilder newBuilder() {
+        return new TypeAnnotationsBuilder();
+    }
+
+    public TypeAnnotationsBuilder refresh() {
+        typeAnnotation = null;
+        inputTypeAnnotation = null;
+        interfaceAnnotation = null;
+        unionAnnotation = null;
+        enumAnnotation = null;
+        queryAnnotation = null;
+        mutationAnnotation = null;
+        subscriptionAnnotation = null;
+        descriptionAnnotation = null;
+        return this;
+    }
 
 
     public TypeAnnotationsBuilder setInputTypeAnnotation(GraphqlInputTypeAnnotation inputTypeAnnotation) {
@@ -64,8 +76,20 @@ public class TypeAnnotationsBuilder {
         return this;
     }
 
-    public TypeAnnotations build()
-    {
-        return new TypeAnnotationsImpl(typeAnnotation , inputTypeAnnotation , interfaceAnnotation , unionAnnotation, enumAnnotation, queryAnnotation, mutationAnnotation, subscriptionAnnotation);
+    public TypeAnnotationsBuilder setDescriptionAnnotation(GraphqlDescriptionAnnotation descriptionAnnotation) {
+        this.descriptionAnnotation = descriptionAnnotation;
+        return this;
+    }
+
+    public TypeAnnotations build() {
+        return new TypeAnnotationsImpl(typeAnnotation,
+                inputTypeAnnotation,
+                interfaceAnnotation,
+                unionAnnotation,
+                enumAnnotation,
+                queryAnnotation,
+                mutationAnnotation,
+                subscriptionAnnotation,
+                descriptionAnnotation);
     }
 }

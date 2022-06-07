@@ -12,13 +12,12 @@ import java.util.List;
 final class DiscoveredObjectTypeImpl extends DiscoveredTypeImpl<GraphQLObjectType> implements DiscoveredObjectType {
 
 
-
     private List<DiscoveredInterfaceType> interfaces;
 
 
     public DiscoveredObjectTypeImpl(MappedClass mappedClass, String name, GraphQLObjectType graphQLType) {
         super(mappedClass, name, graphQLType);
-        interfaces = new ArrayList<>();
+        this.interfaces = new ArrayList<>();
     }
 
     @Override

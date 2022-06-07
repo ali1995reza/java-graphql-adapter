@@ -1,7 +1,6 @@
 package grphaqladapter.adaptedschemabuilder;
 
 import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredEnumType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 

@@ -16,18 +16,50 @@ import java.util.*;
 public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
 
-    private final static class ReflectionDataFetcher implements DataFetcher{
+    private final boolean printExceptions;
+    private List<DiscoveredType> allTypes;
 
-        private final static Map<Class , Class> SameTypes = new HashMap<>();
+    public ReflectionDataFetcherGenerator(boolean printExceptions) {
+        this.printExceptions = printExceptions;
+    }
+
+
+    public ReflectionDataFetcherGenerator() {
+        this(true);
+    }
+
+    @Override
+    public DataFetcher generate(MappedClass cls, MappedMethod method) {
+        if (cls.mappedType().isTopLevelType()) {
+            try {
+                Object source = cls.baseClass().getConstructor().newInstance();
+                return new ReflectionDataFetcher(method, allTypes, source, printExceptions);
+            } catch (Throwable e) {
+                throw new IllegalStateException(e);
+            }
+        } else {
+            return new ReflectionDataFetcher(method, allTypes, null, printExceptions);
+        }
+    }
+
+    @Override
+    public void init(List<DiscoveredType> allTypes) {
+        this.allTypes = allTypes;
+    }
+
+    private final static class ReflectionDataFetcher implements DataFetcher {
+
+        private final static Map<Class, Class> SameTypes = new HashMap<>();
+
         static {
-            SameTypes.put(Integer.class , int.class);
-            SameTypes.put(Character.class , char.class);
-            SameTypes.put(Double.class , double.class);
-            SameTypes.put(Float.class , float.class);
-            SameTypes.put(Long.class , long.class);
-            SameTypes.put(Boolean.class , boolean.class);
-            SameTypes.put(Byte.class , byte.class);
-            SameTypes.put(Short.class , short.class);
+            SameTypes.put(Integer.class, int.class);
+            SameTypes.put(Character.class, char.class);
+            SameTypes.put(Double.class, double.class);
+            SameTypes.put(Float.class, float.class);
+            SameTypes.put(Long.class, long.class);
+            SameTypes.put(Boolean.class, boolean.class);
+            SameTypes.put(Byte.class, byte.class);
+            SameTypes.put(Short.class, short.class);
         }
 
         private final MappedMethod method;
@@ -35,42 +67,37 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
         private final Set<Class> scalars;
         private final List<MappedParameter> parameters;
         private final Object source;
-        private boolean printExceptions;
+        private final boolean printExceptions;
 
-        private ReflectionDataFetcher(MappedMethod m, List<DiscoveredType> allTypes, Object source, boolean printExceptions)
-        {
+        private ReflectionDataFetcher(MappedMethod m, List<DiscoveredType> allTypes, Object source, boolean printExceptions) {
             this.method = m;
             this.source = source;
             this.printExceptions = printExceptions;
 
-            Map<Class , DiscoveredInputType> map = new HashMap<>();
+            Map<Class, DiscoveredInputType> map = new HashMap<>();
 
-            for(DiscoveredType t:allTypes){
+            for (DiscoveredType t : allTypes) {
 
-                if(t instanceof DiscoveredInputType) {
+                if (t instanceof DiscoveredInputType) {
                     map.put(t.asMappedClass().baseClass(), (DiscoveredInputType) t);
                 }
             }
 
             HashSet<Class> scalars = new HashSet<>();
 
-            for(DiscoveredType t:allTypes)
-            {
-                if(t instanceof DiscoveredScalarType) {
+            for (DiscoveredType t : allTypes) {
+                if (t instanceof DiscoveredScalarType) {
                     scalars.add(t.asMappedClass().baseClass());
                 }
             }
 
-            SameTypes.forEach((key , value)->{
+            SameTypes.forEach((key, value) -> {
 
-                if(scalars.contains(key))
-                {
+                if (scalars.contains(key)) {
                     scalars.add(value);
-                }else if(scalars.contains(value))
-                {
+                } else if (scalars.contains(value)) {
                     scalars.add(key);
                 }
-
 
             });
 
@@ -81,110 +108,95 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
         }
 
 
-
         private <T> T crateNewInstance(Class<T> cls) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
             return cls.getConstructor().newInstance();
         }
 
 
+        private Object buildUsingMap(Map<String, Object> map, DiscoveredInputType inputType) throws InstantiationException, IllegalAccessException, InvocationTargetException {
 
-        private final Object buildUsingMap(Map<String , Object> map , DiscoveredInputType inputType) throws InstantiationException, IllegalAccessException, InvocationTargetException {
-
-            if(map==null)return null;
+            if (map == null) return null;
 
             Object instance = inputType.asMappedClass().baseClass().newInstance();
             MappedClass mappedClass = inputType.asMappedClass();
-            for(MappedMethod method:mappedClass.mappedMethods().values())
-            {
-                if(method.isList())
-                {
+            for (MappedMethod method : mappedClass.mappedMethods().values()) {
+                if (method.isList()) {
                     method.setter().invoke(instance, buildList((List) map.get(method.fieldName()), method));
 
-                }else if(scalars.contains(method.type()) || method.type().isEnum()){
+                } else if (scalars.contains(method.type()) || method.type().isEnum()) {
 
-                    method.setter().invoke(instance , map.get(method.fieldName()));
-                }else {
+                    method.setter().invoke(instance, map.get(method.fieldName()));
+                } else {
                     method.setter()
-                            .invoke(instance , buildUsingMap((Map)map.get(method.fieldName()) ,
+                            .invoke(instance, buildUsingMap((Map) map.get(method.fieldName()),
                                     inputTypesMap.get(method.type())));
                 }
             }
 
             return instance;
         }
-        private final List buildList(List argList , MappedParameter parameter , int dim) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-            if(argList==null)
+
+        private List buildList(List argList, MappedParameter parameter, int dim) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            if (argList == null)
                 return null;
-            if(argList.size()<1)
-            {
+            if (argList.size() < 1) {
                 return new ArrayList(0);
             }
 
-            if(scalars.contains(parameter.type()) || parameter.type().isEnum())
+            if (scalars.contains(parameter.type()) || parameter.type().isEnum())
                 return argList;
-
 
 
             --dim;
             List buildingList = new ArrayList();
 
-            if(dim==0)
-            {
-                for(Object o : argList)
-                {
+            if (dim == 0) {
+                for (Object o : argList) {
                     buildingList.add(buildUsingMap((Map<String, Object>) o, inputTypesMap.get(parameter.type())));
                 }
-            }else
-            {
-                for(Object o : argList)
-                {
-                    buildingList.add(buildList((List)o , parameter , dim));
+            } else {
+                for (Object o : argList) {
+                    buildingList.add(buildList((List) o, parameter, dim));
                 }
             }
 
             return buildingList;
         }
 
-        private final List buildList(List argList , MappedParameter parameter ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-            return buildList(argList , parameter , parameter.dimensions());
+        private List buildList(List argList, MappedParameter parameter) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            return buildList(argList, parameter, parameter.dimensions());
         }
 
 
-        private final List buildList(List argList , MappedMethod method , int dim) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-            if(argList==null)
+        private List buildList(List argList, MappedMethod method, int dim) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            if (argList == null)
                 return null;
-            if(argList.size()<1)
-            {
+            if (argList.size() < 1) {
                 return new ArrayList(0);
             }
 
-            if(scalars.contains(method.type()) || method.type().isEnum())
+            if (scalars.contains(method.type()) || method.type().isEnum())
                 return argList;
-
 
 
             --dim;
             List buildingList = new ArrayList();
 
-            if(dim==0)
-            {
-                for(Object o : argList)
-                {
+            if (dim == 0) {
+                for (Object o : argList) {
                     buildingList.add(buildUsingMap((Map<String, Object>) o, inputTypesMap.get(method.type())));
                 }
-            }else
-            {
-                for(Object o : argList)
-                {
-                    buildingList.add(buildList((List)o , method , dim));
+            } else {
+                for (Object o : argList) {
+                    buildingList.add(buildList((List) o, method, dim));
                 }
             }
 
             return buildingList;
         }
 
-        private final List buildList(List argList , MappedMethod method ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-            return buildList(argList , method , method.dimensions());
+        private List buildList(List argList, MappedMethod method) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+            return buildList(argList, method, method.dimensions());
         }
 
         @Override
@@ -210,7 +222,9 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                     Object[] args = new Object[parameters.size()];
                     for (int i = 0; i < parameters.size(); i++) {
                         MappedParameter parameter = parameters.get(i);
-                        if (parameter.isList()) {
+                        if (parameter.isEnv()) {
+                            args[i] = dataFetchingEnvironment;
+                        } else if (parameter.isList()) {
 
                             args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
                                     parameter);
@@ -234,47 +248,11 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                     return result;
                 }
 
-            }catch (Throwable e)
-            {
+            } catch (Throwable e) {
                 e.printStackTrace();
                 throw e;
             }
         }
-    }
-
-
-
-
-    private List<DiscoveredType> allTypes;
-    private final boolean printExceptions;
-
-
-    public ReflectionDataFetcherGenerator(boolean printExceptions) {
-        this.printExceptions = printExceptions;
-    }
-    public ReflectionDataFetcherGenerator() {
-        this(true);
-    }
-
-
-
-    @Override
-    public DataFetcher generate(MappedClass cls, MappedMethod method) {
-        if(cls.mappedType().isTopLevelType()) {
-            try {
-                Object source = cls.baseClass().newInstance();
-                return new ReflectionDataFetcher(method, allTypes, source, printExceptions);
-            } catch (Throwable e) {
-                throw new IllegalStateException(e);
-            }
-        }else {
-            return new ReflectionDataFetcher(method , allTypes , null, printExceptions);
-        }
-    }
-
-    @Override
-    public void init(List<DiscoveredType> allTypes) {
-        this.allTypes = allTypes;
     }
 
 }

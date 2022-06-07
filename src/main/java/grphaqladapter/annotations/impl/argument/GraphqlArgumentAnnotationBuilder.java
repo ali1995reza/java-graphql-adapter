@@ -5,17 +5,15 @@ import grphaqladapter.annotations.GraphqlArgumentAnnotation;
 public class GraphqlArgumentAnnotationBuilder {
 
 
-    public static GraphqlArgumentAnnotationBuilder newBuilder()
-    {
-        return new GraphqlArgumentAnnotationBuilder();
-    }
-
-
     private String argumentName;
     private boolean nullable;
 
-    private GraphqlArgumentAnnotationBuilder(){}
+    private GraphqlArgumentAnnotationBuilder() {
+    }
 
+    public static GraphqlArgumentAnnotationBuilder newBuilder() {
+        return new GraphqlArgumentAnnotationBuilder();
+    }
 
     public synchronized GraphqlArgumentAnnotationBuilder setArgumentName(String argumentName) {
         this.argumentName = argumentName;
@@ -29,8 +27,7 @@ public class GraphqlArgumentAnnotationBuilder {
     }
 
 
-    public synchronized GraphqlArgumentAnnotation build()
-    {
-        return new GraphqlArgumentAnnotationImpl(argumentName , nullable);
+    public synchronized GraphqlArgumentAnnotation build() {
+        return new GraphqlArgumentAnnotationImpl(argumentName, nullable);
     }
 }

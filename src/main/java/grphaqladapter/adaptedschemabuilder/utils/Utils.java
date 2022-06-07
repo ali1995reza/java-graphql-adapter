@@ -8,13 +8,10 @@ import java.util.Map;
 public final class Utils {
 
 
+    public static <T> List copy(List<T> l) {
+        ArrayList<T> list = new ArrayList<>();
 
-    public final static List copy(List l)
-    {
-        ArrayList list = new ArrayList();
-
-        for(Object o:l)
-        {
+        for (T o : l) {
             list.add(o);
         }
 
@@ -22,29 +19,25 @@ public final class Utils {
     }
 
 
-    public final static Map copy(Map m)
-    {
+    public final static Map copy(Map m) {
         HashMap map = new HashMap();
 
-        for(Object o :m.keySet())
-        {
-            map.put(o , m.get(o));
+        for (Object o : m.keySet()) {
+            map.put(o, m.get(o));
         }
 
         return map;
     }
 
-    public final static <T> T nullifyOrGetDefault(T t , T d)
-    {
-        if(t==null)
+    public final static <T> T nullifyOrGetDefault(T t, T d) {
+        if (t == null)
             return d;
 
         return t;
     }
 
-    public final static String stringNullifyOrGetDefault(String s , String d)
-    {
-        if(s==null || s.isEmpty())
+    public final static String stringNullifyOrGetDefault(String s, String d) {
+        if (s == null || s.isEmpty())
             return d;
 
         return s;

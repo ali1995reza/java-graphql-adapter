@@ -5,19 +5,17 @@ import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 
 public final class ScalarEntryBuilder {
 
-    public static ScalarEntryBuilder newBuilder()
-    {
-        return new ScalarEntryBuilder();
-    }
-
-
     private Class type;
     private String name;
+    private String description;
     private Coercing coercing;
 
+    private ScalarEntryBuilder() {
+    }
 
-    private ScalarEntryBuilder(){}
-
+    public static ScalarEntryBuilder newBuilder() {
+        return new ScalarEntryBuilder();
+    }
 
     public ScalarEntryBuilder setType(Class type) {
         this.type = type;
@@ -34,9 +32,12 @@ public final class ScalarEntryBuilder {
         return this;
     }
 
+    public ScalarEntryBuilder setDescription(String description) {
+        this.description = description;
+        return this;
+    }
 
-    public ScalarEntry build()
-    {
-        return new ScalaEntryImpl(type , name , coercing);
+    public ScalarEntry build() {
+        return new ScalaEntryImpl(type, name, description, coercing);
     }
 }

@@ -18,8 +18,6 @@ final class GraphqlArgumentAnnotationImpl implements GraphqlArgumentAnnotation {
     }
 
 
-
-
     @Override
     public String argumentName() {
         return argumentName;

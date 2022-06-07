@@ -11,41 +11,33 @@ import java.util.Map;
 
 public class ExplicitMethodAnnotationDetectorBuilder {
 
-    public final static ExplicitMethodAnnotationDetectorBuilder newBuilder()
-    {
+    private final Map<Method, FieldAnnotations> annotationsMap = new HashMap<>();
+
+
+    private ExplicitMethodAnnotationDetectorBuilder() {
+
+    }
+
+    public final static ExplicitMethodAnnotationDetectorBuilder newBuilder() {
         return new ExplicitMethodAnnotationDetectorBuilder();
     }
 
-
-
-
-    private final Map<Method , FieldAnnotations> annotationsMap = new HashMap<>();
-
-    private ExplicitMethodAnnotationDetectorBuilder(){
-
-    }
-
-
-    public synchronized ExplicitMethodAnnotationDetectorBuilder setAnnotation(Method method , FieldAnnotations annotations)
-    {
-        annotationsMap.put(method , annotations);
+    public synchronized ExplicitMethodAnnotationDetectorBuilder setAnnotation(Method method, FieldAnnotations annotations) {
+        annotationsMap.put(method, annotations);
         return this;
     }
 
-    public synchronized ExplicitMethodAnnotationDetectorBuilder removeAnnotation(Method method)
-    {
+    public synchronized ExplicitMethodAnnotationDetectorBuilder removeAnnotation(Method method) {
         annotationsMap.remove(method);
         return this;
     }
 
-    public synchronized ExplicitMethodAnnotationDetectorBuilder clear()
-    {
+    public synchronized ExplicitMethodAnnotationDetectorBuilder clear() {
         annotationsMap.clear();
         return this;
     }
 
-    public synchronized MethodAnnotationDetector build()
-    {
+    public synchronized MethodAnnotationDetector build() {
 
         return new MethodAnnotationDetectorImpl(Collections.unmodifiableMap(Utils.copy(annotationsMap)));
     }

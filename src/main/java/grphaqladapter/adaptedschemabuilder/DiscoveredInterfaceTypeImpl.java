@@ -11,7 +11,6 @@ import java.util.List;
 
 final class DiscoveredInterfaceTypeImpl extends DiscoveredTypeImpl<GraphQLInterfaceType> implements DiscoveredInterfaceType {
 
-
     private List<DiscoveredObjectType> implementors;
 
     public DiscoveredInterfaceTypeImpl(MappedClass mappedClass, String name, GraphQLInterfaceType graphQLType) {
@@ -20,12 +19,10 @@ final class DiscoveredInterfaceTypeImpl extends DiscoveredTypeImpl<GraphQLInterf
         this.implementors = new ArrayList<>();
     }
 
-
     @Override
     public List<DiscoveredObjectType> implementors() {
         return implementors;
     }
-
 
     @Override
     void setUnmodifiable() {

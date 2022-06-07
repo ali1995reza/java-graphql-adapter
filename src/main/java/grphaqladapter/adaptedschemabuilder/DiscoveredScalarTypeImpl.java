@@ -10,11 +10,12 @@ public class DiscoveredScalarTypeImpl extends DiscoveredTypeImpl<GraphQLScalarTy
 
     public DiscoveredScalarTypeImpl(Class cls, String name, GraphQLScalarType graphQLType) {
         super(MappedClassBuilder
-                .newBuilder()
-                .setTypeName(name)
-                .setBaseClass(cls)
-                .setMappedType(MappedClass.MappedType.SCALAR)
-                .build()
+                        .newBuilder()
+                        .setTypeName(name)
+                        .setBaseClass(cls)
+                        .setDescription(graphQLType.getDescription())
+                        .setMappedType(MappedClass.MappedType.SCALAR)
+                        .build()
                 , name, graphQLType);
     }
 

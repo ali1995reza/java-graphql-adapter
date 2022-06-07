@@ -5,36 +5,35 @@ import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
 
-
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public final class MappedClassBuilder {
 
-    public final static MappedClassBuilder newBuilder()
-    {
+    private final Map<String, MappedMethod> mappedMethods = new HashMap<>();
+    private Class baseClass;
+    private MappedClass.MappedType mappedType;
+    private String typeName;
+    private String description;
+
+    private MappedClassBuilder() {
+    }
+
+    public static MappedClassBuilder newBuilder() {
         return new MappedClassBuilder();
     }
 
-    public final static MappedClass clone(MappedClass mappedClass)
-    {
+    public static MappedClass clone(MappedClass mappedClass) {
         return MappedClassImpl.clone(mappedClass);
     }
 
-    public final static MappedClass cloneIfNotImmutable(MappedClass mappedClass)
-    {
-        if(mappedClass instanceof MappedClassImpl)
+    public static MappedClass cloneIfNotImmutable(MappedClass mappedClass) {
+        if (mappedClass instanceof MappedClassImpl)
             return mappedClass;
 
         return clone(mappedClass);
     }
-
-    private final Map<String , MappedMethod> mappedMethods = new HashMap<>();
-    private Class baseClass;
-    private MappedClass.MappedType mappedType;
-    private String typeName;
-
-
-    private MappedClassBuilder(){}
 
     public synchronized MappedClassBuilder setBaseClass(Class baseClass) {
         this.baseClass = baseClass;
@@ -45,24 +44,31 @@ public final class MappedClassBuilder {
         this.mappedType = mappedType;
         return this;
     }
-    public synchronized MappedClassBuilder addMappedMethod(MappedMethod method)
-    {
-        Assert.ifConditionTrue("already a method with field typeName ["+method.fieldName()+
-                        "] exist - [exist:"+mappedMethods.get(method.fieldName())+"]",
+
+    public synchronized MappedClassBuilder addMappedMethod(MappedMethod method) {
+        Assert.isOneFalse("already a method with field typeName [" + method.fieldName() +
+                        "] exist - [exist:" + mappedMethods.get(method.fieldName()) + "]",
                 mappedMethods.containsKey(method.fieldName()));
 
-        mappedMethods.put(method.fieldName() , method);
+        mappedMethods.put(method.fieldName(), method);
         return this;
     }
 
-    public synchronized MappedClassBuilder removeMappedMethod(MappedMethod method)
-    {
-        mappedMethods.remove(method.fieldName() , method);
+    public synchronized MappedClassBuilder removeMappedMethod(MappedMethod method) {
+        mappedMethods.remove(method.fieldName(), method);
         return this;
     }
 
-    public synchronized MappedClassBuilder clearMappedMethods()
-    {
+    public synchronized MappedClassBuilder refresh() {
+        mappedMethods.clear();
+        baseClass = null;
+        mappedType = null;
+        typeName = null;
+        description = null;
+        return this;
+    }
+
+    public synchronized MappedClassBuilder clearMappedMethods() {
         mappedMethods.clear();
         return this;
     }
@@ -72,10 +78,13 @@ public final class MappedClassBuilder {
         return this;
     }
 
+    public synchronized MappedClassBuilder setDescription(String description) {
+        this.description = description;
+        return this;
+    }
 
-    private final Map<String , MappedMethod> getMappedMethods()
-    {
-        if(mappedMethods.size()==0)
+    private Map<String, MappedMethod> getMappedMethods() {
+        if (mappedMethods.size() == 0)
             return Collections.EMPTY_MAP;
 
 
@@ -83,16 +92,15 @@ public final class MappedClassBuilder {
     }
 
 
-    public synchronized MappedClass build()
-    {
+    public synchronized MappedClass build() {
         //so validate and build
         return new MappedClassImpl(
-                baseClass ,
-                typeName ,
-                mappedType ,
+                baseClass,
+                typeName,
+                description,
+                mappedType,
                 getMappedMethods()
         );
     }
-
 
 }

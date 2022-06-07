@@ -19,16 +19,16 @@ public class ParameterRealAnnotationDetector implements ParameterAnnotationDetec
 
 
     @Override
-    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method , Parameter parameter, int parameterIndex) {
+    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method, Parameter parameter, int parameterIndex) {
 
 
-        GraphqlArgument argument = ParameterAnnotationLookup.findFirstAppears(method , parameterIndex , GraphqlArgument.class);
+        GraphqlArgument argument = ParameterAnnotationLookup.findFirstAppears(method, parameterIndex, GraphqlArgument.class);
 
-        if(argument==null)
+        if (argument == null)
             return null;
 
 
-        String name = Assert.isNullString(argument.argumentName())?parameter.getName():argument.argumentName();
+        String name = Assert.isNullString(argument.argumentName()) ? parameter.getName() : argument.argumentName();
         return builder.setArgumentName(name)
                 .setNullable(argument.nullable())
                 .build();

@@ -1,9 +1,11 @@
 package grphaqladapter.adaptedschemabuilder;
 
+import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapper.ClassMapper;
 import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
@@ -11,43 +13,39 @@ import grphaqladapter.codegenerator.DataFetcherGenerator;
 import grphaqladapter.codegenerator.TypeResolverGenerator;
 import grphaqladapter.codegenerator.impl.ReflectionDataFetcherGenerator;
 import grphaqladapter.codegenerator.impl.SimpleTypeResolverGenerator;
-import graphql.schema.*;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
+import grphaqladapter.parser.PackageParser;
+import grphaqladapter.parser.filter.ClassFilter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class AdaptedSchemaBuilder {
 
-
-
-    public final static AdaptedSchemaBuilder newBuilder()
-    {
-        return new AdaptedSchemaBuilder();
-    }
-
     private final List<Class> allClasses = new ArrayList<>();
+    private final Map<Class, ScalarEntry> scalarEntries;
+    private final ClassMapper mapper;
     private DataFetcherGenerator dataFetcherGenerator;
     private TypeResolverGenerator typeResolverGenerator;
-    private final Map<Class , ScalarEntry> scalarEntries;
-    private final ClassMapper mapper;
 
-    private AdaptedSchemaBuilder(){
+    private AdaptedSchemaBuilder() {
         dataFetcherGenerator = new ReflectionDataFetcherGenerator();
         typeResolverGenerator = new SimpleTypeResolverGenerator();
         mapper = new ClassMapper();
         scalarEntries = new HashMap<>();
     }
 
-    private void addIfNotExists(Class c)
-    {
-        if(!allClasses.contains(c))
+    public static AdaptedSchemaBuilder newBuilder() {
+        return new AdaptedSchemaBuilder();
+    }
+
+    private void addIfNotExists(Class c) {
+        if (!allClasses.contains(c))
             allClasses.add(c);
     }
 
-    public synchronized AdaptedSchemaBuilder add(Class c, Class ... cls)
-    {
+    public synchronized AdaptedSchemaBuilder add(Class c, Class... cls) {
         addIfNotExists(c);
-        if(cls!=null) {
+        if (cls != null) {
             for (Class cl : cls) {
                 addIfNotExists(cl);
             }
@@ -56,8 +54,7 @@ public final class AdaptedSchemaBuilder {
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder addAll(Collection<Class> cls)
-    {
+    public synchronized AdaptedSchemaBuilder addAll(Collection<Class> cls) {
         for (Class cl : cls) {
             addIfNotExists(cl);
         }
@@ -65,8 +62,16 @@ public final class AdaptedSchemaBuilder {
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder remove(Class c)
-    {
+    public AdaptedSchemaBuilder addPackage(String packageName, ClassFilter filter) {
+        Set<Class> classes = PackageParser.getAllGraphqlAnnotatedClasses(packageName, filter);
+        return addAll(classes);
+    }
+
+    public AdaptedSchemaBuilder addPackage(String packageName) {
+        return addPackage(packageName, ClassFilter.ACCEPT_ALL);
+    }
+
+    public synchronized AdaptedSchemaBuilder remove(Class c) {
         allClasses.remove(c);
         return this;
     }
@@ -75,60 +80,51 @@ public final class AdaptedSchemaBuilder {
         return mapper;
     }
 
-    public synchronized AdaptedSchemaBuilder generator(TypeResolverGenerator generator)
-    {
-        Assert.ifNull(generator , "code generators can not be null");
+    public synchronized AdaptedSchemaBuilder generator(TypeResolverGenerator generator) {
+        Assert.isNotNull(generator, "code generators can not be null");
 
         typeResolverGenerator = generator;
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder generator(DataFetcherGenerator generator)
-    {
-        Assert.ifNull(generator , "data-fetcher generators can not be null");
+    public synchronized AdaptedSchemaBuilder generator(DataFetcherGenerator generator) {
+        Assert.isNotNull(generator, "data-fetcher generators can not be null");
 
 
         dataFetcherGenerator = generator;
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder clearClasses()
-    {
+    public synchronized AdaptedSchemaBuilder clearClasses() {
         allClasses.clear();
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder addScalar(ScalarEntry entry)
-    {
-        scalarEntries.put(entry.type() , entry);
+    public synchronized AdaptedSchemaBuilder addScalar(ScalarEntry entry) {
+        scalarEntries.put(entry.type(), entry);
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder removeScalar(ScalarEntry entry)
-    {
-        scalarEntries.remove(entry.type() , entry);
+    public synchronized AdaptedSchemaBuilder removeScalar(ScalarEntry entry) {
+        scalarEntries.remove(entry.type(), entry);
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder removeScalar(Class cls)
-    {
+    public synchronized AdaptedSchemaBuilder removeScalar(Class cls) {
         scalarEntries.remove(cls);
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder clearScalars()
-    {
+    public synchronized AdaptedSchemaBuilder clearScalars() {
         scalarEntries.clear();
         return this;
     }
 
-    private final Map<Class , GraphQLScalarType> getScalars()
-    {
-        Map<Class , GraphQLScalarType> scalarTypeMap = new HashMap<>();
+    private Map<Class, GraphQLScalarType> getScalars() {
+        Map<Class, GraphQLScalarType> scalarTypeMap = new HashMap<>();
 
-        for(Class cls : scalarEntries.keySet())
-        {
-            scalarTypeMap.put(cls ,
+        for (Class cls : scalarEntries.keySet()) {
+            scalarTypeMap.put(cls,
                     StaticMethods.buildScalarType(scalarEntries.get(cls)));
         }
 
@@ -136,76 +132,37 @@ public final class AdaptedSchemaBuilder {
     }
 
 
-
-    public synchronized AdaptedGraphQLSchema build()
-    {
-
-
-        Map<Class , Map<MappedClass.MappedType , MappedClass>> mappedClasses =
-                mapper.map(allClasses);
-
-        MappedClass query = null;
-        MappedClass mutation = null;
-        MappedClass subscription = null;
-
-        for(Map<MappedClass.MappedType , MappedClass> mapClass:mappedClasses.values())
-        {
-            if(mapClass.containsKey(MappedClass.MappedType.QUERY))
-            {
-                Assert.ifNotNull(query , "multiple query type found");
-                query = mapClass.get(MappedClass.MappedType.QUERY);
-            }
-
-            if(mapClass.containsKey(MappedClass.MappedType.MUTATION))
-            {
-                Assert.ifNotNull(mutation , "multiple mutation type found");
-                mutation = mapClass.get(MappedClass.MappedType.MUTATION);
-            }
-
-            if(mapClass.containsKey(MappedClass.MappedType.SUBSCRIPTION))
-            {
-                Assert.ifNotNull(mutation , "multiple subscription type found");
-                subscription = mapClass.get(MappedClass.MappedType.SUBSCRIPTION);
-            }
-        }
-
-
-
-        GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
-
-        final BuildingContextImpl context =
-                new BuildingContextImpl(mappedClasses , schema , getScalars());
-
-
+    private void discoverTypesExceptUnions(Map<Class, Map<MappedClass.MappedType, MappedClass>> mappedClasses, BuildingContextImpl context) {
         mappedClasses.values()
                 .stream()
-                .forEach(map ->{
+                .forEach(map -> {
 
                     map.values()
                             .stream()
                             .forEach(mappedClass -> {
 
-                                if(mappedClass.mappedType().
+                                if (mappedClass.mappedType().
                                         is(MappedClass.MappedType.UNION))
                                     return;
 
-                                discover(mappedClass , context);
+                                discover(mappedClass, context);
 
                             });
                 });
+    }
 
+    private void discoverUnionTypes(Map<Class, Map<MappedClass.MappedType, MappedClass>> mappedClasses, BuildingContextImpl context) {
         mappedClasses.values()
                 .stream()
-                .forEach(map ->{
+                .forEach(map -> {
 
                     map.values()
                             .stream()
                             .forEach(mappedClass -> {
 
-                                if(mappedClass.mappedType().
-                                        is(MappedClass.MappedType.UNION))
-                                {
-                                    discoverUnion(mappedClass ,
+                                if (mappedClass.mappedType().
+                                        is(MappedClass.MappedType.UNION)) {
+                                    discoverUnion(mappedClass,
                                             context.possibleTypesOf(mappedClass)
                                             , context);
 
@@ -213,223 +170,223 @@ public final class AdaptedSchemaBuilder {
 
                             });
                 });
+    }
 
-
-
-        Map<MappedClass , DiscoveredType> discoveredTypes = new HashMap<>();
-
+    private Map<MappedClass, DiscoveredType> getDiscoveredTypes(BuildingContextImpl context) {
+        Map<MappedClass, DiscoveredType> discoveredTypes = new HashMap<>();
 
         context.rawTypes().keySet()
                 .stream()
                 .forEach(mappedClass -> {
-
                     GraphQLNamedType type = context.rawTypeOf(mappedClass);
-                    discoveredTypes.put(mappedClass , buildDiscoveredType(mappedClass , type));
-
+                    discoveredTypes.put(mappedClass, buildDiscoveredType(mappedClass, type));
                 });
+        return discoveredTypes;
+    }
 
-        GraphQLCodeRegistry.Builder code = GraphQLCodeRegistry.newCodeRegistry();
-
+    private void predictPossibleTypes(Map<MappedClass, DiscoveredType> discoveredTypes, GraphQLCodeRegistry.Builder code, BuildingContextImpl context) {
         discoveredTypes.values()
                 .stream().forEach(discoveredType -> {
 
-            if(discoveredType.asMappedClass().mappedType().
-                    is(MappedClass.MappedType.INTERFACE))
-            {
-                DiscoveredInterfaceTypeImpl interfaceType = (DiscoveredInterfaceTypeImpl)discoveredType;
+                    if (discoveredType.asMappedClass().mappedType().
+                            is(MappedClass.MappedType.INTERFACE)) {
+                        DiscoveredInterfaceTypeImpl interfaceType = (DiscoveredInterfaceTypeImpl) discoveredType;
 
-                List<MappedClass> implementors = context.possibleTypesOf(discoveredType.asMappedClass());
+                        List<MappedClass> implementors = context.possibleTypesOf(discoveredType.asMappedClass());
 
-                if(implementors!=null)
-                {
-                    implementors.stream()
-                            .forEach(mappedClass -> {
+                        if (implementors != null) {
+                            implementors.stream()
+                                    .forEach(mappedClass -> {
 
-                                interfaceType.implementors().add((DiscoveredObjectType)
-                                        discoveredTypes.get(mappedClass));
-                            });
-                }
+                                        interfaceType.implementors().add((DiscoveredObjectType)
+                                                discoveredTypes.get(mappedClass));
+                                    });
+                        }
 
-                interfaceType.setUnmodifiable();
+                        interfaceType.setUnmodifiable();
 
-                code.typeResolver(interfaceType.typeName() ,
-                        typeResolverGenerator.generate(interfaceType));
-            }
-
-            if(discoveredType.asMappedClass().mappedType().
-                    is(MappedClass.MappedType.UNION))
-            {
-                DiscoveredUnionTypeImpl unionType = (DiscoveredUnionTypeImpl)discoveredType;
-
-                List<MappedClass> possiableTypes = context.possibleTypesOf(discoveredType.asMappedClass());
-
-                if(possiableTypes!=null)
-                {
-                    possiableTypes.stream()
-                            .forEach(mappedClass -> {
-
-                                unionType.possibleTypes().add((DiscoveredObjectType)
-                                        discoveredTypes.get(mappedClass));
-                            });
-                }
-
-                unionType.setUnmodifiable();
-
-                code.typeResolver(unionType.typeName() ,
-                        typeResolverGenerator.generate(unionType));
-            }
-
-        });
-
-
-        List<DiscoveredType> allTypes = new ArrayList<>();
-        List<DiscoveredInputType> inputTypes = new ArrayList<>();
-        discoveredTypes.values().stream()
-                .forEach(t ->{
-                    allTypes.add(t) ;
-
-                    if(t.asMappedClass().mappedType().isTopLevelType())
-                        return;
-
-                    schema.additionalType(t.asGraphQLType());
-
-                    if(t instanceof DiscoveredInputType)
-                    {
-                        inputTypes.add((DiscoveredInputType) t);
+                        code.typeResolver(interfaceType.typeName(),
+                                typeResolverGenerator.generate(interfaceType));
                     }
+
+                    if (discoveredType.asMappedClass().mappedType().
+                            is(MappedClass.MappedType.UNION)) {
+                        DiscoveredUnionTypeImpl unionType = (DiscoveredUnionTypeImpl) discoveredType;
+
+                        List<MappedClass> possiableTypes = context.possibleTypesOf(discoveredType.asMappedClass());
+
+                        if (possiableTypes != null) {
+                            possiableTypes.stream()
+                                    .forEach(mappedClass -> {
+
+                                        unionType.possibleTypes().add((DiscoveredObjectType)
+                                                discoveredTypes.get(mappedClass));
+                                    });
+                        }
+
+                        unionType.setUnmodifiable();
+
+                        code.typeResolver(unionType.typeName(),
+                                typeResolverGenerator.generate(unionType));
+                    }
+
                 });
+    }
 
-        allTypes.addAll(context.allScalars());
-        List<DiscoveredType> unmodifiableTypes = Collections.unmodifiableList(allTypes);
-
-        dataFetcherGenerator.init(unmodifiableTypes);
-
-        unmodifiableTypes.stream().forEach(d -> {
+    private void addDataFetchers(List<DiscoveredType> discoveredTypes, DataFetcherGenerator dataFetcherGenerator, GraphQLCodeRegistry.Builder code) {
+        discoveredTypes.stream().forEach(d -> {
 
             MappedClass mappedClass = d.asMappedClass();
-            for(MappedMethod method:mappedClass.mappedMethods().values())
-            {
+            for (MappedMethod method : mappedClass.mappedMethods().values()) {
                 code.dataFetcher(FieldCoordinates.coordinates(
-                        mappedClass.typeName() ,
+                        mappedClass.typeName(),
                         method.fieldName()
-                ) , dataFetcherGenerator.generate(mappedClass , method));
+                ), dataFetcherGenerator.generate(mappedClass, method));
             }
 
         });
+    }
 
-        GraphQLType queryType = query==null?null:context.rawTypeOf(query);
-        GraphQLType mutationType = mutation==null?null:context.rawTypeOf(mutation);
-        GraphQLType subscriptionType = subscription==null?null:context.rawTypeOf(subscription);
+    public synchronized AdaptedGraphQLSchema build() {
 
-        if(queryType!=null)
-            schema.query((GraphQLObjectType) queryType);
-        if(mutationType!=null)
-            schema.mutation((GraphQLObjectType) mutationType);
-        if(subscriptionType!=null)
-            schema.subscription((GraphQLObjectType) subscriptionType);
+        Map<Class, Map<MappedClass.MappedType, MappedClass>> mappedClasses =
+                mapper.map(allClasses);
 
+        MappedClass query = null;
+        MappedClass mutation = null;
+        MappedClass subscription = null;
+
+        for (Map<MappedClass.MappedType, MappedClass> mapClass : mappedClasses.values()) {
+            if (mapClass.containsKey(MappedClass.MappedType.QUERY)) {
+                Assert.isNull(query, "multiple query type found");
+                query = mapClass.get(MappedClass.MappedType.QUERY);
+            }
+
+            if (mapClass.containsKey(MappedClass.MappedType.MUTATION)) {
+                Assert.isNull(mutation, "multiple mutation type found");
+                mutation = mapClass.get(MappedClass.MappedType.MUTATION);
+            }
+
+            if (mapClass.containsKey(MappedClass.MappedType.SUBSCRIPTION)) {
+                Assert.isNull(mutation, "multiple subscription type found");
+                subscription = mapClass.get(MappedClass.MappedType.SUBSCRIPTION);
+            }
+        }
+
+
+        GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
+
+        final BuildingContextImpl context =
+                new BuildingContextImpl(mappedClasses, schema, getScalars());
+
+        discoverTypesExceptUnions(mappedClasses, context);
+
+        discoverUnionTypes(mappedClasses, context);
+
+        Map<MappedClass, DiscoveredType> discoveredTypes = getDiscoveredTypes(context);
+
+        GraphQLCodeRegistry.Builder code = GraphQLCodeRegistry.newCodeRegistry();
+
+        predictPossibleTypes(discoveredTypes, code, context);
+
+        List<DiscoveredType> allTypes = new ArrayList<>(discoveredTypes.values());
+        allTypes.addAll(context.allScalars());
+        allTypes = Collections.unmodifiableList(allTypes);
+
+        allTypes.forEach(type -> {
+            if (!type.asMappedClass().mappedType().isTopLevelType()) {
+                schema.additionalType(type.asGraphQLType());
+            }
+        });
+
+        dataFetcherGenerator.init(allTypes);
+
+        addDataFetchers(allTypes, dataFetcherGenerator, code);
+
+        if (query != null)
+            schema.query((GraphQLObjectType) context.rawTypeOf(query));
+        if (mutation != null)
+            schema.mutation((GraphQLObjectType) context.rawTypeOf(mutation));
+        if (subscription != null)
+            schema.subscription((GraphQLObjectType) context.rawTypeOf(subscription));
 
         schema.codeRegistry(code.build());
 
-        return new AdaptedGraphQLSchema(schema.build() , unmodifiableTypes);
+        return new AdaptedGraphQLSchema(schema.build(), allTypes);
 
     }
 
 
-
-    private final GraphQLType discover(MappedClass mappedClass , BuildingContextImpl context)
-    {
+    private GraphQLType discover(MappedClass mappedClass, BuildingContextImpl context) {
         GraphQLNamedType type = null;
-        if(mappedClass.mappedType() == MappedClass.MappedType.OBJECT_TYPE)
-        {
+        if (mappedClass.mappedType() == MappedClass.MappedType.OBJECT_TYPE) {
 
-            type = StaticMethods.buildOutputObjectType(mappedClass , context);
-            context.setGraphQLTypeFor(mappedClass , type);
+            type = StaticMethods.buildOutputObjectType(mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
             //setDiscoveredTypes !
 
-        }else if(mappedClass.mappedType() == MappedClass.MappedType.INTERFACE)
-        {
-            type = StaticMethods.buildInterface(mappedClass , context);
-            context.setGraphQLTypeFor(mappedClass , type);
-        }else if(mappedClass.mappedType() == MappedClass.MappedType.INPUT_TYPE)
-        {
-            type = StaticMethods.buildInputObjectType(mappedClass , context);
-            context.setGraphQLTypeFor(mappedClass , type);
-        }else if(mappedClass.mappedType() == MappedClass.MappedType.ENUM)
-        {
-            type = StaticMethods.buildEnumType(mappedClass , context);
-            context.setGraphQLTypeFor(mappedClass , type);
-        }else if(mappedClass.mappedType().is(MappedClass.MappedType.QUERY) ||
+        } else if (mappedClass.mappedType() == MappedClass.MappedType.INTERFACE) {
+            type = StaticMethods.buildInterface(mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType() == MappedClass.MappedType.INPUT_TYPE) {
+            type = StaticMethods.buildInputObjectType(mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType() == MappedClass.MappedType.ENUM) {
+            type = StaticMethods.buildEnumType(mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType().is(MappedClass.MappedType.QUERY) ||
                 mappedClass.mappedType().is(MappedClass.MappedType.MUTATION) ||
-                mappedClass.mappedType().is(MappedClass.MappedType.SUBSCRIPTION))
-        {
-            type = StaticMethods.buildOutputObjectType(mappedClass , context);
-            context.setGraphQLTypeFor(mappedClass , type);
+                mappedClass.mappedType().is(MappedClass.MappedType.SUBSCRIPTION)) {
+            type = StaticMethods.buildOutputObjectType(mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
         }
 
         return type;
     }
 
-    private final GraphQLType discoverUnion(MappedClass unionClass , List<MappedClass> possibles ,  BuildingContextImpl context)
-    {
+    private final GraphQLType discoverUnion(MappedClass unionClass, List<MappedClass> possibles, BuildingContextImpl context) {
         GraphQLUnionType unionType =
-                StaticMethods.buildUnionType(unionClass , possibles , context);
+                StaticMethods.buildUnionType(unionClass, possibles, context);
 
-        context.setGraphQLTypeFor(unionClass , unionType);
+        context.setGraphQLTypeFor(unionClass, unionType);
 
         return unionType;
     }
 
-    public DiscoveredType buildDiscoveredType(MappedClass cls , GraphQLNamedType type)
-    {
-        if(cls.mappedType().is(MappedClass.MappedType.OBJECT_TYPE))
-        {
-            Assert.ifConditionTrue("conflict - mapped class mapped to bad type - [MappedClass:"+cls+
-                    " , GraphQLType:"+type+"]" ,
+    public DiscoveredType buildDiscoveredType(MappedClass cls, GraphQLNamedType type) {
+        if (cls.mappedType().is(MappedClass.MappedType.OBJECT_TYPE) || cls.mappedType().isTopLevelType()) {
+            Assert.isOneFalse("conflict - class mapped to bad type - [MappedClass:" + cls +
+                            " , GraphQLType:" + type + "]",
                     !(type instanceof GraphQLObjectType));
 
-            return new DiscoveredObjectTypeImpl(cls , type.getName() , (GraphQLObjectType)type);
-        }else if(cls.mappedType().is(MappedClass.MappedType.INTERFACE))
-        {
-            Assert.ifConditionTrue("conflict - mapped class mapped to bad type - [MappedClass:"+cls+
-                            " , GraphQLType:"+type+"]" ,
+            return new DiscoveredObjectTypeImpl(cls, type.getName(), (GraphQLObjectType) type);
+        } else if (cls.mappedType().is(MappedClass.MappedType.INTERFACE)) {
+            Assert.isOneFalse("conflict - class mapped to bad type - [MappedClass:" + cls +
+                            " , GraphQLType:" + type + "]",
                     !(type instanceof GraphQLInterfaceType));
 
-            return new DiscoveredInterfaceTypeImpl(cls , type.getName() , (GraphQLInterfaceType) type);
-        }else if(cls.mappedType().is(MappedClass.MappedType.INPUT_TYPE))
-        {
-            Assert.ifConditionTrue("conflict - mapped class mapped to bad type - [MappedClass:"+cls+
-                            " , GraphQLType:"+type+"]" ,
+            return new DiscoveredInterfaceTypeImpl(cls, type.getName(), (GraphQLInterfaceType) type);
+        } else if (cls.mappedType().is(MappedClass.MappedType.INPUT_TYPE)) {
+            Assert.isOneFalse("conflict - class mapped to bad type - [MappedClass:" + cls +
+                            " , GraphQLType:" + type + "]",
                     !(type instanceof GraphQLInputObjectType));
 
-            return new DiscoveredInputTypeImpl(cls , type.getName() , (GraphQLInputObjectType)type);
-        }else if(cls.mappedType().is(MappedClass.MappedType.UNION))
-        {
-            Assert.ifConditionTrue("conflict - mapped class mapped to bad type - [MappedClass:"+cls+
-                            " , GraphQLType:"+type+"]" ,
+            return new DiscoveredInputTypeImpl(cls, type.getName(), (GraphQLInputObjectType) type);
+        } else if (cls.mappedType().is(MappedClass.MappedType.UNION)) {
+            Assert.isOneFalse("conflict - class mapped to bad type - [MappedClass:" + cls +
+                            " , GraphQLType:" + type + "]",
                     !(type instanceof GraphQLUnionType));
 
-            return new DiscoveredUnionTypeImpl(cls , type.getName() , (GraphQLUnionType)type);
-        }else if(cls.mappedType().is(MappedClass.MappedType.ENUM))
-        {
-            Assert.ifConditionTrue("conflict - mapped class mapped to bad type - [MappedClass:"+cls+
-                            " , GraphQLType:"+type+"]" ,
+            return new DiscoveredUnionTypeImpl(cls, type.getName(), (GraphQLUnionType) type);
+        } else if (cls.mappedType().is(MappedClass.MappedType.ENUM)) {
+            Assert.isOneFalse("conflict - class mapped to bad type - [MappedClass:" + cls +
+                            " , GraphQLType:" + type + "]",
                     !(type instanceof GraphQLEnumType));
 
-            return new DiscoveredEnumTypeImpl(cls , type.getName() , (GraphQLEnumType) type);
-        }else if(cls.mappedType().isTopLevelType())
-        {
-
-            Assert.ifConditionTrue("conflict - mapped class mapped to bad type - [MappedClass:"+cls+
-                            " , GraphQLType:"+type+"]" ,
-                    !(type instanceof GraphQLObjectType));
-
-            return new DiscoveredObjectTypeImpl(cls , type.getName() , (GraphQLObjectType) type);
+            return new DiscoveredEnumTypeImpl(cls, type.getName(), (GraphQLEnumType) type);
         }
-
 
         throw new IllegalStateException();
     }
-
 
 }

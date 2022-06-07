@@ -1,7 +1,6 @@
 package grphaqladapter.annotations.impl.field;
 
 
-
 import grphaqladapter.adaptedschemabuilder.validator.FieldValidator;
 import grphaqladapter.annotations.GraphqlFieldAnnotation;
 

@@ -11,10 +11,10 @@ import java.util.Map;
 
 class MethodAnnotationDetectorImpl implements MethodAnnotationDetector {
 
-    private final Map<Method , FieldAnnotations> explicitAnnotations;
+    private final Map<Method, FieldAnnotations> explicitAnnotations;
 
     MethodAnnotationDetectorImpl(Map<Method, FieldAnnotations> explicitAnnotations) {
-        this.explicitAnnotations = Utils.nullifyOrGetDefault(explicitAnnotations , Collections.EMPTY_MAP);
+        this.explicitAnnotations = Utils.nullifyOrGetDefault(explicitAnnotations, Collections.EMPTY_MAP);
     }
 
 

@@ -8,10 +8,6 @@ import java.util.Set;
 
 public class AnnotationFilter implements ClassFilter {
 
-    public static ClassFilter annotatedWith(Class<? extends Annotation>... annotations) {
-        return new AnnotationFilter(annotations);
-    }
-
     private final Set<Class<? extends Annotation>> annotations;
 
     public AnnotationFilter(Collection<Class<? extends Annotation>> annotations) {
@@ -20,6 +16,10 @@ public class AnnotationFilter implements ClassFilter {
 
     public AnnotationFilter(Class<? extends Annotation>... annotations) {
         this(Arrays.asList(annotations));
+    }
+
+    public static ClassFilter annotatedWith(Class<? extends Annotation>... annotations) {
+        return new AnnotationFilter(annotations);
     }
 
     @Override

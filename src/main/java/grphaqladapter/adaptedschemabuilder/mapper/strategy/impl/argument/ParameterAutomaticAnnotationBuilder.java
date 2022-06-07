@@ -7,7 +7,6 @@ import grphaqladapter.annotations.GraphqlArgumentAnnotation;
 import grphaqladapter.annotations.NotNull;
 import grphaqladapter.annotations.impl.argument.GraphqlArgumentAnnotationBuilder;
 
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -18,7 +17,7 @@ public class ParameterAutomaticAnnotationBuilder implements ParameterAnnotationD
     private final Class<? extends Annotation> notNullAnnotation;
 
     public ParameterAutomaticAnnotationBuilder(Class<? extends Annotation> notNullAnnotation) {
-        this.notNullAnnotation = Utils.nullifyOrGetDefault(notNullAnnotation , NotNull.class);
+        this.notNullAnnotation = Utils.nullifyOrGetDefault(notNullAnnotation, NotNull.class);
         builder = GraphqlArgumentAnnotationBuilder.newBuilder();
     }
 
@@ -27,12 +26,12 @@ public class ParameterAutomaticAnnotationBuilder implements ParameterAnnotationD
     }
 
     @Override
-    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method , Parameter parameter, int parameterIndex) {
+    public synchronized GraphqlArgumentAnnotation detectAnnotationFor(Method method, Parameter parameter, int parameterIndex) {
 
-        Assert.ifConditionTrue("can not find the typeName of parameter because parameter typeName not present" ,
+        Assert.isOneFalse("can not find the typeName of parameter because parameter typeName not present",
                 !parameter.isNamePresent());
 
-        boolean nullable = parameter.getAnnotation(notNullAnnotation)==null;
+        boolean nullable = parameter.getAnnotation(notNullAnnotation) == null;
         return builder.setArgumentName(parameter.getName())
                 .setNullable(nullable)
                 .build();

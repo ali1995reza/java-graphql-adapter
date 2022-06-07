@@ -7,10 +7,6 @@ import java.util.List;
 
 public class MultipleFilter implements ClassFilter {
 
-    public static ClassFilter of(ClassFilter... filters) {
-        return new MultipleFilter(filters);
-    }
-
     private final List<ClassFilter> filterList;
 
     public MultipleFilter(Collection<ClassFilter> filterList) {
@@ -21,6 +17,9 @@ public class MultipleFilter implements ClassFilter {
         this(Arrays.asList(filters));
     }
 
+    public static ClassFilter of(ClassFilter... filters) {
+        return new MultipleFilter(filters);
+    }
 
     @Override
     public boolean accept(Class cls) {
