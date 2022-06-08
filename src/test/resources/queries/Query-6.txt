@@ -1,0 +1,14 @@
+query {
+    getVehicle(isCar: false) {
+        __typename
+        ... on Car{
+            model
+            produceYear
+        }
+        ... on Bus {
+            model
+            produceYear
+            size
+        }
+    }
+}

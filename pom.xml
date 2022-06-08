@@ -4,15 +4,61 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>GraphqlJavaObjectAdapter</groupId>
-    <artifactId>GraphqlAdapter</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <name>JAVA GraphQL Adapter</name>
+
+    <description>
+        This is a library on top of java-graphql library will adapt java objects to graphql schema.
+    </description>
+
+    <url>https://github.com/ali1995reza/java-graphql-adapter</url>
+
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>https://raw.githubusercontent.com/ConvertAPI/convertapi-java/master/LICENSE.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>Alireza</id>
+            <name>Alireza Akhoundi</name>
+            <email>alirezaakhoundi73@gmail.com</email>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/ali1995reza/java-graphql-adapter</connection>
+        <developerConnection>scm:git:git://github.com/ali1995reza/java-graphql-adapter</developerConnection>
+        <url>https://github.com/ali1995reza/java-graphql-adapter</url>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
+    <groupId>io.github.ali1995reza</groupId>
+    <artifactId>graphql-adapter</artifactId>
+    <version>1.0</version>
 
 
     <dependencies>
@@ -21,13 +67,11 @@
             <artifactId>graphql-java</artifactId>
             <version>18.1</version>
         </dependency>
-
         <dependency>
             <groupId>com.graphql-java</groupId>
             <artifactId>graphql-java-extended-scalars</artifactId>
             <version>17.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -40,9 +84,7 @@
             <version>5.5.1</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
-
 
 
 </project>

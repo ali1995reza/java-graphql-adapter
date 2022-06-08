@@ -1,0 +1,9 @@
+query {
+    getUser(user:{name: "name", type: ADMIN}) {
+        name
+        type
+        ... on Admin {
+            token
+        }
+    }
+}

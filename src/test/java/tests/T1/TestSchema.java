@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tests.ExecutionResultParser;
 import tests.QueryResolver;
+import tests.T1.schema.Bus;
 import tests.T1.schema.IntPeriodScalar;
+import tests.T1.schema.UserType;
 
 import java.util.List;
 
@@ -73,5 +75,36 @@ public class TestSchema {
         assertNotNull(parser.getData("getList.size"));
         assertNull(parser.getData("getList.get"));
         assertNull(parser.getData("getList.isEmpty"));
+    }
+
+    @Test
+    public void testMultiDimensionArrays() {
+        ExecutionResultParser parser = execute("Query-4");
+        List<List<Integer>> resultMatrix = parser.getData("multiplyMatrix");
+
+        assertEquals(resultMatrix.size(), 2);
+        for (List<Integer> row : resultMatrix) {
+            assertEquals(row.size(), 2);
+            for (Integer i : row) {
+                assertEquals(i, 4);
+            }
+        }
+    }
+
+    @Test
+    public void testGetInterfaceAndInputType() {
+        ExecutionResultParser parser = execute("Query-5");
+        assertEquals(parser.getData("getUser.name"), "name");
+        assertEquals(parser.getData("getUser.type"), UserType.ADMIN.name());
+        assertNotNull(parser.getData("getUser.token"));
+    }
+
+    @Test
+    public void testGetVehicle() {
+        ExecutionResultParser parser = execute("Query-6");
+        assertEquals(parser.getData("getVehicle.__typename"), Bus.class.getSimpleName());
+        assertNotNull(parser.getData("getVehicle.model"));
+        assertNotNull(parser.getData("getVehicle.produceYear"));
+        assertNotNull(parser.getData("getVehicle.size"));
     }
 }
