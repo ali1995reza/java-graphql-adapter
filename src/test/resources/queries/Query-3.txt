@@ -1,0 +1,6 @@
+query {
+    getList(period: "[1:10]") {
+        data
+        size
+    }
+}

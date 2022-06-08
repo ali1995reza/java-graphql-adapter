@@ -1,0 +1,8 @@
+query {
+    getList(period: "[1:10]") {
+        data
+        isEmpty
+        size
+        get(index: 1)
+    }
+}
