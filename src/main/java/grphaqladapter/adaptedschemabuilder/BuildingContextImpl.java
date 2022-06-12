@@ -24,8 +24,8 @@ final class BuildingContextImpl implements BuildingContext {
     BuildingContextImpl(Map<Class, Map<MappedClass.MappedType, MappedClass>> mcs,
                         GraphQLSchema.Builder schemaBuilder,
                         Map<Class, GraphQLScalarType> providedScalars) {
-        Assert.isNotNull(mcs, "mapped classes is null");
-        Assert.isNotNull(schemaBuilder, "provided schema builder is null");
+        Assert.isNotNull(mcs, new IllegalStateException("mapped classes is null"));
+        Assert.isNotNull(schemaBuilder, new IllegalStateException("provided schema builder is null"));
         mappedClasses = mcs;
         rawTypes = new HashMap<>();
         possibleTypes = new HashMap<>();
@@ -160,7 +160,7 @@ final class BuildingContextImpl implements BuildingContext {
 
     public void setGraphQLTypeFor(MappedClass cls, GraphQLNamedType type) {
 
-        Assert.isOneFalse("class [" + cls + "] discovered multiple times",
+        Assert.isOneFalse(new IllegalStateException("class [" + cls + "] discovered multiple times"),
                 rawTypes.containsKey(cls));
 
         rawTypes.put(cls, type);

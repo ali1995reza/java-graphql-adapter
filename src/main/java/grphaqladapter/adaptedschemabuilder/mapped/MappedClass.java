@@ -31,6 +31,15 @@ public interface MappedClass {
             return this == other;
         }
 
+        public boolean isOneOf(MappedType... types) {
+            for (MappedType type : types) {
+                if (this == type) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public boolean isTopLevelType() {
             return this == QUERY || this == MUTATION || this == SUBSCRIPTION;
         }

@@ -1,8 +1,6 @@
 package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.type;
 
-import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.TypeAnnotations;
-import grphaqladapter.adaptedschemabuilder.validator.TypeValidator;
 import grphaqladapter.annotations.*;
 
 class TypeAnnotationsImpl implements TypeAnnotations {
@@ -28,7 +26,7 @@ class TypeAnnotationsImpl implements TypeAnnotations {
         this.subscriptionAnnotation = subscriptionAnnotation;
         this.descriptionAnnotation = descriptionAnnotation;
 
-        Assert.isOneFalse("at least one type annotation needed",
+     /*   Assert.isOneFalse("at least one type annotation needed",
                 typeAnnotation == null, inputTypeAnnotation == null,
                 interfaceAnnotation == null, unionAnnotation == null,
                 enumAnnotation == null, queryAnnotation == null,
@@ -40,7 +38,7 @@ class TypeAnnotationsImpl implements TypeAnnotations {
         TypeValidator.validate(unionAnnotation, true);
         TypeValidator.validate(queryAnnotation, true);
         TypeValidator.validate(mutationAnnotation, true);
-        TypeValidator.validate(subscriptionAnnotation, true);
+        TypeValidator.validate(subscriptionAnnotation, true);*/
     }
 
 

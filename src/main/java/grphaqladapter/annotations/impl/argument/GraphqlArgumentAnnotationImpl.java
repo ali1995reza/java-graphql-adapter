@@ -1,7 +1,6 @@
 package grphaqladapter.annotations.impl.argument;
 
 
-import grphaqladapter.adaptedschemabuilder.validator.ArgumentValidator;
 import grphaqladapter.annotations.GraphqlArgumentAnnotation;
 
 final class GraphqlArgumentAnnotationImpl implements GraphqlArgumentAnnotation {
@@ -14,7 +13,7 @@ final class GraphqlArgumentAnnotationImpl implements GraphqlArgumentAnnotation {
 
         this.argumentName = argumentName;
         this.nullable = nullable;
-        ArgumentValidator.validate(this);
+
     }
 
 

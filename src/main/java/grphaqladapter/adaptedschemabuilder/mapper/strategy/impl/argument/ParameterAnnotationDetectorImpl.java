@@ -20,7 +20,7 @@ class ParameterAnnotationDetectorImpl implements ParameterAnnotationDetector {
     }
 
     @Override
-    public GraphqlArgumentAnnotation detectAnnotationFor(Method method, Parameter parameter, int parameterIndex) {
+    public GraphqlArgumentAnnotation detectArgumentAnnotation(Method method, Parameter parameter, int parameterIndex) {
 
         GraphqlArgumentAnnotation argumentAnnotations = parameterMap.get(parameter);
         if (argumentAnnotations != null)

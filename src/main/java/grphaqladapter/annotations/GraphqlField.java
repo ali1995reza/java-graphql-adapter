@@ -14,7 +14,4 @@ public @interface GraphqlField {
 
     boolean nullable() default true;
 
-    boolean inputField() default false;
-
-    String setter() default "";
 }

@@ -1,6 +1,5 @@
 package grphaqladapter.adaptedschemabuilder.mapped.impl;
 
-import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
@@ -25,7 +24,7 @@ final class MappedMethodImpl implements MappedMethod {
     private final boolean isInputField;
 
 
-    public MappedMethodImpl(String f, String description, Method m, boolean n, List<MappedParameter> p, Class t, int dims, Method setter) {
+    public MappedMethodImpl(String f, String description, Method m, boolean n, List<MappedParameter> p, Class t, int dims, boolean isList, Method setter, boolean isInputField) {
         fieldName = f;
         this.description = description;
         method = m;
@@ -33,18 +32,13 @@ final class MappedMethodImpl implements MappedMethod {
         this.parameters = Utils.nullifyOrGetDefault(p, Collections.EMPTY_LIST);
         type = t;
         dimensions = dims;
+        this.isList = isList;
         this.setter = setter;
-        isList = dimensions > 0;
-        isInputField = setter != null;
-
-        FieldValidator.validate(this);
+        this.isInputField = isInputField;
     }
 
-    static grphaqladapter.adaptedschemabuilder.mapped.MappedMethod clone(grphaqladapter.adaptedschemabuilder.mapped.MappedMethod method) {
-        Assert.isOneFalse("an input mapped method must contains setter method", method.isInputField()
-                , method.setter() == null);
-
-        return new MappedMethodImpl(
+    static MappedMethod clone(MappedMethod method) {
+        MappedMethod mappedMethod = new MappedMethodImpl(
                 method.fieldName(),
                 method.description(),
                 method.method(),
@@ -52,7 +46,13 @@ final class MappedMethodImpl implements MappedMethod {
                 method.parameters() == null ? null : Collections.unmodifiableList(Utils.copy(method.parameters())),
                 method.type(),
                 method.dimensions(),
-                method.setter());
+                method.isList(),
+                method.setter(),
+                method.isInputField());
+
+        FieldValidator.validate(mappedMethod, null, mappedMethod.method());
+
+        return mappedMethod;
     }
 
     public Method method() {

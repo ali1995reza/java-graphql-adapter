@@ -23,6 +23,7 @@ public final class MappedMethodBuilder {
     private Class type;
     private int dimensions;
     private Method setter;
+    private boolean inputField;
 
     private MappedMethodBuilder() {
         mappedParameters = new ArrayList<>();
@@ -86,8 +87,7 @@ public final class MappedMethodBuilder {
     }
 
     public synchronized MappedMethodBuilder addMappedParameter(MappedParameter mappedParameter) {
-        Assert.isOneFalse("a parameter with argument typeName [" + mappedParameter.argumentName()
-                        + "] already exist",
+        Assert.isOneFalse(new IllegalStateException("a parameter with argument typeName [" + mappedParameter.argumentName() + "] already exist"),
                 mappedParameters.stream().anyMatch(ParameterNamePredict.of(mappedParameter)));
         this.mappedParameters.add(mappedParameter);
         return this;
@@ -123,7 +123,7 @@ public final class MappedMethodBuilder {
     }
 
     public synchronized MappedMethod build() {
-        return new MappedMethodImpl(fieldName, description, method, nullable, getParametersList(), type, dimensions, setter);
+        return new MappedMethodImpl(fieldName, description, method, nullable, getParametersList(), type, dimensions, dimensions > 0, setter, setter != null);
     }
 
     private static final class ParameterNamePredict implements Predicate<MappedParameter> {

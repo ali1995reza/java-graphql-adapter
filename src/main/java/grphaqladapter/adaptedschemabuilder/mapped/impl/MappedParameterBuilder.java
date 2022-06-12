@@ -16,19 +16,12 @@ public final class MappedParameterBuilder {
     private MappedParameterBuilder() {
     }
 
-    public final static MappedParameterBuilder newBuilder() {
+    public static MappedParameterBuilder newBuilder() {
         return new MappedParameterBuilder();
     }
 
     public static MappedParameter clone(MappedParameter parameter) {
         return MappedParameterImpl.clone(parameter);
-    }
-
-    public static MappedParameter cloneIfNotImmutable(MappedParameter parameter) {
-        if (parameter instanceof MappedParameterImpl)
-            return parameter;
-
-        return clone(parameter);
     }
 
     public synchronized MappedParameterBuilder setType(Class type) {

@@ -19,14 +19,8 @@ public final class Utils {
     }
 
 
-    public final static Map copy(Map m) {
-        HashMap map = new HashMap();
-
-        for (Object o : m.keySet()) {
-            map.put(o, m.get(o));
-        }
-
-        return map;
+    public static <K, V> Map<K, V> copy(Map<K, V> m) {
+        return new HashMap<>(m);
     }
 
     public final static <T> T nullifyOrGetDefault(T t, T d) {

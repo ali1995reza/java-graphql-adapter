@@ -2,128 +2,118 @@ package grphaqladapter.adaptedschemabuilder.validator;
 
 
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
+import grphaqladapter.adaptedschemabuilder.assertutil.NameValidator;
+import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlTypeException;
+import grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.TypeAnnotations;
+import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 import grphaqladapter.annotations.*;
-
-import java.lang.reflect.Modifier;
 
 public final class TypeValidator {
 
-    public final static void validate(MappedClass mappedClass) {
+    private final static SchemaExceptionBuilder<MappingGraphqlTypeException> EXCEPTION_BUILDER = new SchemaExceptionBuilder<>(MappingGraphqlTypeException.class);
 
+    private static MappingGraphqlTypeException exception(String message, Class clazz) {
+        return EXCEPTION_BUILDER.exception(message, clazz, null, null);
+    }
 
-        Assert.isNotNull(mappedClass.baseClass(), "base class is null");
+    public static void validate(MappedClass mappedClass) {
+        /*Assert.isNotNull(mappedClass.baseClass(), "base class is null");
         Assert.isModifierValidForATypeClass(mappedClass.baseClass());
         Assert.isNameValid(mappedClass.typeName());
-        Assert.isOneFalse("an union mapped class can not contains mapped methods [" + mappedClass.baseClass() + "]",
-                mappedClass.mappedType().is(MappedClass.MappedType.UNION),
-                mappedClass.mappedMethods().size() > 0);
-        Assert.isOneFalse("just interfaces can map to union [" + mappedClass.baseClass() + "]",
-                !mappedClass.baseClass().isInterface(),
-                mappedClass.mappedType().is(MappedClass.MappedType.UNION));
-        Assert.isOneFalse("just interfaces can map to interface [" + mappedClass.baseClass() + "]",
-                !mappedClass.baseClass().isInterface(),
-                mappedClass.mappedType().is(MappedClass.MappedType.INTERFACE));
-        Assert.isOneFalse("just a class with public default constructor can map to input type [" + mappedClass.baseClass() + "]",
-                mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
-                        !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
-                        !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()),
-                mappedClass.mappedType().is(MappedClass.MappedType.INPUT_TYPE));
-
-
-        Assert.isOneFalse("just a class with public default constructor can map to query type [" + mappedClass.baseClass() + "]",
-                mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
-                        !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
-                        !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()),
-                mappedClass.mappedType().is(MappedClass.MappedType.QUERY));
-
-        Assert.isOneFalse("just a class with public default constructor can map to mutation type [" + mappedClass.baseClass() + "]",
-                mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
-                        !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
-                        !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()),
-                mappedClass.mappedType().is(MappedClass.MappedType.MUTATION));
-
-        Assert.isOneFalse("just a class with public default constructor can map to subscription type [" + mappedClass.baseClass() + "]",
-                mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
-                        !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
-                        !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()),
-                mappedClass.mappedType().is(MappedClass.MappedType.SUBSCRIPTION));
-
-        Assert.isOneFalse("just a class with public default constructor can map to object-type [" + mappedClass.baseClass() + "]",
-                mappedClass.baseClass().isInterface() || mappedClass.baseClass().isEnum() ||
-                        !Modifier.isPublic(mappedClass.baseClass().getModifiers()) ||
-                        !Assert.hasDefaultPublicConstructor(mappedClass.baseClass()),
-                mappedClass.mappedType().is(MappedClass.MappedType.OBJECT_TYPE));
-
-
+        validateModifiers(mappedClass);
         for (MappedMethod method : mappedClass.mappedMethods().values()) {
             FieldValidator.validate(method);
             Assert.isMethodMemberOfClass(method.method(), mappedClass.baseClass());
-        }
+        }*/
 
     }
 
-    public final static void validate(GraphqlTypeAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(ScalarEntry entry) {
+        Assert.isNotNull(entry.type(), exception("provided type is null", entry.type()));
+        Assert.isTrue(NameValidator.isNameValid(entry.name()), exception("type name is invalid", entry.type()));
+        Assert.isNotNull(entry.coercing(), exception("provided coercing is null", entry.type()));
+    }
+
+    private static void validateModifiers(MappedClass mappedClass) {
+        /*if (mappedClass.mappedType().isOneOf(MappedClass.MappedType.INPUT_TYPE, MappedClass.MappedType.OBJECT_TYPE) ||
+                mappedClass.mappedType().isTopLevelType()) {
+
+            Assert.isAllTrue("just a public class can map to " + mappedClass.mappedType() + " [" + mappedClass.baseClass() + "]",
+                    !mappedClass.baseClass().isInterface(),
+                    !mappedClass.baseClass().isEnum(),
+                    Modifier.isPublic(mappedClass.baseClass().getModifiers()));
+        } else if (mappedClass.mappedType().is(MappedClass.MappedType.ENUM)) {
+            Assert.isAllTrue("just enum class can map to " + mappedClass.mappedType() + " [" + mappedClass.baseClass() + "]",
+                    Modifier.isPublic(mappedClass.baseClass().getModifiers()),
+                    mappedClass.baseClass().isEnum());
+        } else {
+            Assert.isOneTrue("just interfaces can map to " + mappedClass.mappedType() + " [" + mappedClass.baseClass() + "]",
+                    Modifier.isPublic(mappedClass.baseClass().getModifiers()),
+                    mappedClass.baseClass().isInterface());
+        }*/
+    }
+
+    public static void validate(GraphqlTypeAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlTypeAnnotation annotation) {
+    public static void validate(GraphqlTypeAnnotation annotation) {
         validate(annotation, false);
     }
 
 
-    public final static void validate(GraphqlInputTypeAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlInputTypeAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlInputTypeAnnotation annotation) {
+    public static void validate(GraphqlInputTypeAnnotation annotation) {
         validate(annotation, false);
     }
 
 
-    public final static void validate(GraphqlUnionAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlUnionAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlUnionAnnotation annotation) {
+    public static void validate(GraphqlUnionAnnotation annotation) {
         validate(annotation, false);
     }
 
 
-    public final static void validate(GraphqlInterfaceAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlInterfaceAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
 
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlInterfaceAnnotation annotation) {
+    public static void validate(GraphqlInterfaceAnnotation annotation) {
         validate(annotation, false);
     }
 
-    public final static void validate(GraphqlEnumAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlEnumAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
 
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
 
     }
 
@@ -133,8 +123,8 @@ public final class TypeValidator {
     }
 
 
-    public final static void validate(Class cls, TypeAnnotations annotations) {
-        Assert.isNotNull(cls, "provided class is null");
+    public static void validate(Class cls, TypeAnnotations annotations) {
+        /*Assert.isNotNull(cls, "provided class is null");
         Assert.isNotNull(annotations, "provided annotations is null");
         Assert.isModifierValidForATypeClass(cls);
 
@@ -232,42 +222,42 @@ public final class TypeValidator {
                 Assert.isModifierValidForAnInputTypeClass(cls);
             }
 
-        }
+        }*/
     }
 
-    public final static void validate(GraphqlQueryAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlQueryAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlQueryAnnotation annotation) {
+    public static void validate(GraphqlQueryAnnotation annotation) {
         validate(annotation, false);
     }
 
-    public final static void validate(GraphqlMutationAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlMutationAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlMutationAnnotation annotation) {
+    public static void validate(GraphqlMutationAnnotation annotation) {
         validate(annotation, false);
     }
 
-    public final static void validate(GraphqlSubscriptionAnnotation annotation, boolean skipIfNull) {
-        if (annotation == null && skipIfNull)
+    public static void validate(GraphqlSubscriptionAnnotation annotation, boolean skipIfNull) {
+        /*if (annotation == null && skipIfNull)
             return;
         Assert.isNotNull(annotation, "provided annotation is null");
         if (Assert.isNoNullString(annotation.typeName()))
-            Assert.isNameValid(annotation.typeName());
+            Assert.isNameValid(annotation.typeName());*/
     }
 
-    public final static void validate(GraphqlSubscriptionAnnotation annotation) {
+    public static void validate(GraphqlSubscriptionAnnotation annotation) {
         validate(annotation, false);
     }
 }

@@ -3,16 +3,21 @@ package grphaqladapter.adaptedschemabuilder;
 
 import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
+import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlArgumentException;
+import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlFieldException;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
 import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
+import grphaqladapter.adaptedschemabuilder.validator.TypeValidator;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder.exception;
 
 public class StaticMethods {
 
@@ -32,13 +37,13 @@ public class StaticMethods {
     }
 
 
-    public static GraphQLArgument buildArgument(MappedParameter parameter, BuildingContext context) {
+    public static GraphQLArgument buildArgument(MappedClass mappedClass, MappedMethod method, MappedParameter parameter, BuildingContext context) {
         //so handle it please !
         GraphQLArgument.Builder argument = GraphQLArgument.newArgument();
         argument.name(parameter.argumentName());
         GraphQLTypeReference inputType = context.getInputTypeFor(parameter.type());
 
-        Assert.isNotNull(inputType, "provided input type for [" + parameter.type() + "] is null");
+        Assert.isNotNull(inputType, exception(MappingGraphqlArgumentException.class, "provided input type for [" + parameter.type() + "] is null", mappedClass.baseClass(), method.method(), parameter.parameter()));
 
 
         argument.type(
@@ -54,12 +59,13 @@ public class StaticMethods {
     }
 
 
-    public static GraphQLFieldDefinition buildField(MappedMethod method, BuildingContext context) {
+    public static GraphQLFieldDefinition buildField(MappedClass mappedClass, MappedMethod method, BuildingContext context) {
         //so handle it please !
         GraphQLFieldDefinition.Builder definition = GraphQLFieldDefinition.newFieldDefinition();
         definition.name(method.fieldName());
         GraphQLTypeReference outputType = context.geOutputTypeFor(method.type());
-        Assert.isNotNull(outputType, "provided output type for [" + method.type() + "] is null");
+
+        Assert.isNotNull(outputType, exception(MappingGraphqlFieldException.class, "provided output type for [" + method.type() + "] is null", mappedClass.baseClass(), method.method()));
 
 
         definition.type(
@@ -74,7 +80,7 @@ public class StaticMethods {
 
         for (MappedParameter parameter : method.parameters()) {
             if (!parameter.isEnv()) {
-                definition.argument(buildArgument(parameter, context));
+                definition.argument(buildArgument(mappedClass, method, parameter, context));
             }
         }
 
@@ -84,7 +90,7 @@ public class StaticMethods {
     }
 
 
-    public static GraphQLInputObjectField buildInputField(MappedMethod method, BuildingContext context) {
+    public static GraphQLInputObjectField buildInputField(MappedClass mappedClass, MappedMethod method, BuildingContext context) {
         if (method.method().getParameterCount() > 0) {
             throw new IllegalStateException("an InputField mapped method can not contains parameters - [method"
                     + method.method() + "]");
@@ -97,8 +103,7 @@ public class StaticMethods {
 
         GraphQLTypeReference inputType = context.getInputTypeFor(method.type());
 
-        Assert.isNotNull(inputType, "can not find InputType for [" + method.type() + "]");
-
+        Assert.isNotNull(inputType, exception(MappingGraphqlFieldException.class, "can not find InputType for [" + method.type() + "]", mappedClass.baseClass(), method.method()));
 
         field.type(
                 method.isNullable() ?
@@ -126,7 +131,7 @@ public class StaticMethods {
 
 
         for (MappedMethod method : mappedClass.mappedMethods().values()) {
-            interfaceType.field(buildField(method, context));
+            interfaceType.field(buildField(mappedClass, method, context));
 
         }
 
@@ -145,7 +150,7 @@ public class StaticMethods {
         inputObjectType.name(mappedClass.typeName());
 
         for (MappedMethod method : mappedClass.mappedMethods().values()) {
-            inputObjectType.field(buildInputField(method, context));
+            inputObjectType.field(buildInputField(mappedClass, method, context));
         }
 
         inputObjectType.description(mappedClass.description());
@@ -164,7 +169,7 @@ public class StaticMethods {
 
 
         for (MappedMethod method : mappedClass.mappedMethods().values()) {
-            outputObjectType.field(buildField(method, context));
+            outputObjectType.field(buildField(mappedClass, method, context));
         }
 
         for (Class inter : mappedClass.baseClass().getInterfaces()) {
@@ -274,6 +279,7 @@ public class StaticMethods {
     }
 
     public static GraphQLScalarType buildScalarType(ScalarEntry entry) {
+        TypeValidator.validate(entry);
         return GraphQLScalarType.newScalar()
                 .name(entry.name())
                 .coercing(entry.coercing())

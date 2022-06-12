@@ -1,17 +1,19 @@
 package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field;
 
-import grphaqladapter.adaptedschemabuilder.mapper.strategy.FieldAnnotations;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.MethodAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
+import grphaqladapter.annotations.GraphqlFieldAnnotation;
+import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ExplicitMethodAnnotationDetectorBuilder {
 
-    private final Map<Method, FieldAnnotations> annotationsMap = new HashMap<>();
+    private final Map<Method, GraphqlFieldAnnotation> fieldAnnotations = new HashMap<>();
+    private final Map<Method, GraphqlInputFieldAnnotation> inputFieldAnnotations = new HashMap<>();
+    private ExplicitMethodAnnotationDetectorBuilder explicitMethodAnnotationDetectorBuilder;
 
 
     private ExplicitMethodAnnotationDetectorBuilder() {
@@ -22,23 +24,34 @@ public class ExplicitMethodAnnotationDetectorBuilder {
         return new ExplicitMethodAnnotationDetectorBuilder();
     }
 
-    public synchronized ExplicitMethodAnnotationDetectorBuilder setAnnotation(Method method, FieldAnnotations annotations) {
-        annotationsMap.put(method, annotations);
+    public synchronized ExplicitMethodAnnotationDetectorBuilder setFieldAnnotation(Method method, GraphqlFieldAnnotation annotation) {
+        this.fieldAnnotations.put(method, annotation);
         return this;
     }
 
-    public synchronized ExplicitMethodAnnotationDetectorBuilder removeAnnotation(Method method) {
-        annotationsMap.remove(method);
+    public synchronized ExplicitMethodAnnotationDetectorBuilder setInputFieldAnnotation(Method method, GraphqlInputFieldAnnotation annotation) {
+        this.inputFieldAnnotations.put(method, annotation);
+        return this;
+    }
+
+    public synchronized ExplicitMethodAnnotationDetectorBuilder removeFieldAnnotation(Method method) {
+        this.fieldAnnotations.remove(method);
+        return this;
+    }
+
+    public synchronized ExplicitMethodAnnotationDetectorBuilder removeInputFieldAnnotation(Method method) {
+        this.inputFieldAnnotations.remove(method);
         return this;
     }
 
     public synchronized ExplicitMethodAnnotationDetectorBuilder clear() {
-        annotationsMap.clear();
+        this.inputFieldAnnotations.clear();
+        this.fieldAnnotations.clear();
         return this;
     }
 
     public synchronized MethodAnnotationDetector build() {
 
-        return new MethodAnnotationDetectorImpl(Collections.unmodifiableMap(Utils.copy(annotationsMap)));
+        return new ExplicitMethodAnnotationDetector(Utils.copy(fieldAnnotations), Utils.copy(inputFieldAnnotations));
     }
 }

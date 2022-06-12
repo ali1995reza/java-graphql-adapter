@@ -1,7 +1,6 @@
 package grphaqladapter.adaptedschemabuilder.mapped.impl;
 
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
-import grphaqladapter.adaptedschemabuilder.validator.ArgumentValidator;
 
 import java.lang.reflect.Parameter;
 
@@ -27,10 +26,9 @@ final class MappedParameterImpl implements MappedParameter {
         dimensions = dims;
         isList = dimensions > 0;
 
-        ArgumentValidator.validate(this);
     }
 
-    final static MappedParameter clone(MappedParameter parameter) {
+    static MappedParameter clone(MappedParameter parameter) {
         return new MappedParameterImpl(
                 parameter.argumentName(),
                 parameter.isEnv(),

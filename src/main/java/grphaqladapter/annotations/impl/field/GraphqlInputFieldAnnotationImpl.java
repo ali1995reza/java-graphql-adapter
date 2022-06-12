@@ -1,6 +1,5 @@
 package grphaqladapter.annotations.impl.field;
 
-import grphaqladapter.adaptedschemabuilder.validator.FieldValidator;
 import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
 
 class GraphqlInputFieldAnnotationImpl implements GraphqlInputFieldAnnotation {
@@ -14,7 +13,6 @@ class GraphqlInputFieldAnnotationImpl implements GraphqlInputFieldAnnotation {
         this.inputFieldName = inputFieldName;
         this.nullable = nullable;
         this.setter = setter;
-        FieldValidator.validate(this);
     }
 
 

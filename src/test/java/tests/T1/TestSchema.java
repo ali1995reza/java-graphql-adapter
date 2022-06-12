@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import tests.ExecutionResultParser;
 import tests.QueryResolver;
 import tests.T1.schema.Bus;
+import tests.T1.schema.CustomObjectConstructor;
 import tests.T1.schema.IntPeriodScalar;
 import tests.T1.schema.UserType;
 
@@ -27,6 +28,7 @@ public class TestSchema {
         AdaptedGraphQLSchema adaptedSchema = AdaptedSchemaBuilder
                 .newBuilder()
                 .addPackage("tests.T1.schema")
+                .objectConstructor(new CustomObjectConstructor())
                 .addScalar(
                         ScalarEntryBuilder.newBuilder()
                                 .setName("Period")
@@ -106,5 +108,11 @@ public class TestSchema {
         assertNotNull(parser.getData("getVehicle.model"));
         assertNotNull(parser.getData("getVehicle.produceYear"));
         assertNotNull(parser.getData("getVehicle.size"));
+    }
+
+    @Test
+    public void testGetBankAccount() {
+        ExecutionResultParser parser = execute("Query-7");
+        System.out.println(parser);
     }
 }

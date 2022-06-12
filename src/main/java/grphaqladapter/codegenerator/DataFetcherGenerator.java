@@ -10,7 +10,7 @@ import java.util.List;
 public interface DataFetcherGenerator {
 
 
-    DataFetcher generate(MappedClass cls, MappedMethod method);
+    DataFetcher generate(MappedClass cls, MappedMethod method, ObjectConstructor objectConstructor);
 
     void init(List<DiscoveredType> discoveredTypes);
 }

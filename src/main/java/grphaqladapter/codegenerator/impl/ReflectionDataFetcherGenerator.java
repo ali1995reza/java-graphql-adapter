@@ -9,6 +9,7 @@ import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
 import grphaqladapter.codegenerator.DataFetcherGenerator;
+import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -16,30 +17,12 @@ import java.util.*;
 public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
 
-    private final boolean printExceptions;
     private List<DiscoveredType> allTypes;
 
-    public ReflectionDataFetcherGenerator(boolean printExceptions) {
-        this.printExceptions = printExceptions;
-    }
-
-
-    public ReflectionDataFetcherGenerator() {
-        this(true);
-    }
 
     @Override
-    public DataFetcher generate(MappedClass cls, MappedMethod method) {
-        if (cls.mappedType().isTopLevelType()) {
-            try {
-                Object source = cls.baseClass().getConstructor().newInstance();
-                return new ReflectionDataFetcher(method, allTypes, source, printExceptions);
-            } catch (Throwable e) {
-                throw new IllegalStateException(e);
-            }
-        } else {
-            return new ReflectionDataFetcher(method, allTypes, null, printExceptions);
-        }
+    public DataFetcher generate(MappedClass cls, MappedMethod method, ObjectConstructor constructor) {
+        return new ReflectionDataFetcher(cls, method, allTypes, constructor);
     }
 
     @Override
@@ -62,22 +45,21 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             SameTypes.put(Short.class, short.class);
         }
 
+        private final MappedClass mappedClass;
         private final MappedMethod method;
         private final Map<Class, DiscoveredInputType> inputTypesMap;
         private final Set<Class> scalars;
         private final List<MappedParameter> parameters;
-        private final Object source;
-        private final boolean printExceptions;
+        private final ObjectConstructor objectConstructor;
 
-        private ReflectionDataFetcher(MappedMethod m, List<DiscoveredType> allTypes, Object source, boolean printExceptions) {
-            this.method = m;
-            this.source = source;
-            this.printExceptions = printExceptions;
+        private ReflectionDataFetcher(MappedClass mappedClass, MappedMethod mappedMethod, List<DiscoveredType> allTypes, ObjectConstructor objectConstructor) {
+
+            this.mappedClass = mappedClass;
+            this.method = mappedMethod;
+            this.objectConstructor = objectConstructor;
 
             Map<Class, DiscoveredInputType> map = new HashMap<>();
-
             for (DiscoveredType t : allTypes) {
-
                 if (t instanceof DiscoveredInputType) {
                     map.put(t.asMappedClass().baseClass(), (DiscoveredInputType) t);
                 }
@@ -102,14 +84,8 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             });
 
             this.scalars = Collections.unmodifiableSet(scalars);
-
-            inputTypesMap = Collections.unmodifiableMap(map);
-            parameters = method.parameters();
-        }
-
-
-        private <T> T crateNewInstance(Class<T> cls) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-            return cls.getConstructor().newInstance();
+            this.inputTypesMap = Collections.unmodifiableMap(map);
+            this.parameters = method.parameters();
         }
 
 
@@ -117,7 +93,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
             if (map == null) return null;
 
-            Object instance = inputType.asMappedClass().baseClass().newInstance();
+            Object instance = objectConstructor.getInstance(inputType.asMappedClass());
             MappedClass mappedClass = inputType.asMappedClass();
             for (MappedMethod method : mappedClass.mappedMethods().values()) {
                 if (method.isList()) {
@@ -202,55 +178,34 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
         @Override
         public Object get(DataFetchingEnvironment dataFetchingEnvironment) throws Exception {
 
-            try {
+            final Object source = dataFetchingEnvironment.getSource() != null ? dataFetchingEnvironment.getSource() : objectConstructor.getInstance(mappedClass);
 
-                final Object source = this.source != null ? this.source : dataFetchingEnvironment.getSource();
+            if (parameters == null || parameters.size() < 1) {
 
-                if (parameters == null || parameters.size() < 1) {
+                Object result = method.method().invoke(source);
+                return result;
 
-                    Object result = method.method().invoke(source);
+            } else {
+                Object[] args = new Object[parameters.size()];
+                for (int i = 0; i < parameters.size(); i++) {
+                    MappedParameter parameter = parameters.get(i);
+                    if (parameter.isEnv()) {
+                        args[i] = dataFetchingEnvironment;
+                    } else if (parameter.isList()) {
 
-                    /*if (method.isQueryHandler()) {
-                        GraphqlQueryHandler handler = (GraphqlQueryHandler) result;
-                        handler.initialize(dataFetchingEnvironment.getSelectionSet());
-                        return handler.execute();
-                    }*/
+                        args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
+                                parameter);
 
-
-                    return result;
-                } else {
-                    Object[] args = new Object[parameters.size()];
-                    for (int i = 0; i < parameters.size(); i++) {
-                        MappedParameter parameter = parameters.get(i);
-                        if (parameter.isEnv()) {
-                            args[i] = dataFetchingEnvironment;
-                        } else if (parameter.isList()) {
-
-                            args[i] = buildList(dataFetchingEnvironment.getArgument(parameter.argumentName()),
-                                    parameter);
-
-                        } else if (scalars.contains(parameter.type()) || parameter.type().isEnum()) {
-                            args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
-                        } else {
-                            args[i] = buildUsingMap(dataFetchingEnvironment.getArgument(parameter.argumentName()),
-                                    inputTypesMap.get(parameter.type()));
-                        }
+                    } else if (scalars.contains(parameter.type()) || parameter.type().isEnum()) {
+                        args[i] = dataFetchingEnvironment.getArgument(parameter.argumentName());
+                    } else {
+                        args[i] = buildUsingMap(dataFetchingEnvironment.getArgument(parameter.argumentName()),
+                                inputTypesMap.get(parameter.type()));
                     }
-
-                    Object result = method.method().invoke(source, args);
-
-                    /*if (method.isQueryHandler()) {
-                        GraphqlQueryHandler handler = (GraphqlQueryHandler) result;
-                        handler.initialize(dataFetchingEnvironment.getSelectionSet());
-                        return handler.execute();
-                    }*/
-
-                    return result;
                 }
 
-            } catch (Throwable e) {
-                e.printStackTrace();
-                throw e;
+                Object result = method.method().invoke(source, args);
+                return result;
             }
         }
     }

@@ -1,63 +1,50 @@
 package grphaqladapter.adaptedschemabuilder.validator;
 
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
+import grphaqladapter.adaptedschemabuilder.assertutil.NameValidator;
+import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlArgumentException;
+import grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
-import grphaqladapter.annotations.GraphqlArgument;
 import grphaqladapter.annotations.GraphqlArgumentAnnotation;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
+
 public final class ArgumentValidator {
 
-    public static void validate(MappedParameter mappedParameter) {
-        Assert.isNotNull(mappedParameter.type(), "provided type is null");
-        Assert.isNotNull(mappedParameter.parameter(), "provided parameter is null");
+    private final static SchemaExceptionBuilder<MappingGraphqlArgumentException> EXCEPTION_BUILDER = new SchemaExceptionBuilder<>(MappingGraphqlArgumentException.class);
+
+    private static MappingGraphqlArgumentException exception(String message, Class clazz, Method method, Parameter parameter) {
+        return EXCEPTION_BUILDER.exception(message, clazz, method, parameter);
+    }
+
+    private static MappingGraphqlArgumentException exception(String message, Parameter parameter) {
+        return EXCEPTION_BUILDER.exception(message, null, null, parameter);
+    }
+
+    public static void validate(MappedParameter mappedParameter, Class clazz, Method method, Parameter parameter) {
+        Assert.isNotNull(mappedParameter.type(), exception("provided mapped type is null", clazz, method, parameter));
+        Assert.isNotNull(mappedParameter.parameter(), exception("provided parameter is null", clazz, method, parameter));
         if (mappedParameter.isEnv()) {
-            Assert.isEquals(mappedParameter.dimensions(), 0, "env parameter with dimensions >0");
+            Assert.isEquals(mappedParameter.dimensions(), 0, exception("env parameter with dimensions >0", clazz, method, parameter));
         } else {
-            Assert.isNotNegative(mappedParameter.dimensions(), "can not create parameter with dimensions <0");
-            Assert.isNameValid(mappedParameter.argumentName());
+            Assert.isNotNegative(mappedParameter.dimensions(), exception("can not create parameter with dimensions <0", clazz, method, parameter));
+            Assert.isTrue(NameValidator.isNameValid(mappedParameter.argumentName()), exception("mapped parameter name is invalid", clazz, method, parameter));
         }
         if (mappedParameter.dimensions() > 0) {
-            Assert.isEquals(mappedParameter.parameter().getType(), List.class, "a list mapped parameter must has List type");
+            Assert.isEquals(mappedParameter.parameter().getType(), List.class, exception("a list mapped parameter must has List type", clazz, method, parameter));
         } else {
-            Assert.isEquals(mappedParameter.parameter().getType(), mappedParameter.type(), "parameter type and mapped type not equal");
+            Assert.isEquals(mappedParameter.parameter().getType(), mappedParameter.type(), exception("parameter type and mapped type not equal", clazz, method, parameter));
         }
     }
 
-    public static void validate(GraphqlArgumentAnnotation annotation) {
-        Assert.isNotNull(annotation, "provided annotation is null");
-        if (Assert.isNoNullString(annotation.argumentName()))
-            Assert.isNameValid(annotation.argumentName());
-    }
-
-    public static void validateArgumentAnnotation(Parameter parameter, GraphqlArgumentAnnotation argument) {
-        Assert.isNotNull(argument, "parameter dose not contain GraphqlArgument annotation [" + parameter + "]");
-
-
-        Assert.isOneFalse("can not detect typeName for parameter [" + parameter + "] because typeName not set int GraphqlAnnotation and parameter typeName not present",
-                Assert.isNullString(argument.argumentName()), !parameter.isNamePresent());
-        String name = Assert.isNullString(argument.argumentName()) ? parameter.getName() : argument.argumentName();
-
-        Assert.isNameValid(name);
-        if (argument.nullable()) Assert.isNullable(parameter.getType());
-
-    }
-
-
-    public static void validateArgumentAnnotation(Parameter parameter) {
-        GraphqlArgument argument = parameter.getAnnotation(GraphqlArgument.class);
-        Assert.isNotNull(argument, "parameter dose not contain GraphqlArgument annotation [" + parameter + "]");
-
-
-        Assert.isOneFalse("can not detect typeName for parameter [" + parameter + "] because typeName not set int GraphqlAnnotation and parameter typeName not present",
-                Assert.isNullString(argument.argumentName()), !parameter.isNamePresent());
-        String name = Assert.isNullString(argument.argumentName()) ? parameter.getName() : argument.argumentName();
-
-        Assert.isNameValid(name);
-        if (argument.nullable()) Assert.isNullable(parameter.getType());
-
+    public static void validate(GraphqlArgumentAnnotation annotation, Class clazz, Method method, Parameter parameter) {
+        Assert.isNotNull(annotation, exception("no annotation detected for parameter", clazz, method, parameter));
+        Assert.isTrue(NameValidator.isNameValid(annotation.argumentName()), exception("argument name is invalid", clazz, method, parameter));
+        Assert.isOneFalse(exception("Java primitive type argument can not be nullable", clazz, method, parameter),
+                annotation.nullable(), parameter.getType().isPrimitive());
     }
 
 }

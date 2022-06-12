@@ -2,7 +2,6 @@ package grphaqladapter.adaptedschemabuilder.scalar.impl;
 
 
 import graphql.schema.Coercing;
-import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 
 class ScalaEntryImpl implements ScalarEntry {
@@ -17,14 +16,6 @@ class ScalaEntryImpl implements ScalarEntry {
         this.name = name;
         this.description = description;
         this.coercing = coercing;
-        validate();
-    }
-
-
-    private final void validate() {
-        Assert.isNotNull(type, "provided type is null");
-        Assert.isOneFalse("null name", Assert.isNullString(name));
-        Assert.isNotNull(coercing, "provided coercing is null");
     }
 
     @Override

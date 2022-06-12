@@ -6,7 +6,4 @@ public interface GraphqlFieldAnnotation {
 
     boolean nullable();
 
-    boolean inputField();
-
-    String setter();
 }

@@ -1,8 +1,8 @@
 package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field;
 
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapper.strategy.FieldAnnotations;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.MethodAnnotationDetector;
+import grphaqladapter.adaptedschemabuilder.utils.Utils;
 import grphaqladapter.annotations.*;
 import grphaqladapter.annotations.impl.GraphqlDescriptionAnnotationImpl;
 import grphaqladapter.annotations.impl.field.GraphqlFieldAnnotationBuilder;
@@ -12,206 +12,58 @@ import java.lang.reflect.Method;
 
 public class MethodRealAnnotationDetector implements MethodAnnotationDetector {
 
-    private final FieldAnnotationsBuilder builder;
     private final GraphqlFieldAnnotationBuilder fieldAnnotationBuilder;
     private final GraphqlInputFieldAnnotationBuilder inputFieldAnnotationBuilder;
-    private final boolean validateAnnotations;
 
-    public MethodRealAnnotationDetector(boolean validateAnnotations) {
-        this.validateAnnotations = validateAnnotations;
-        builder = FieldAnnotationsBuilder.newBuilder();
+    public MethodRealAnnotationDetector() {
         fieldAnnotationBuilder = GraphqlFieldAnnotationBuilder.newBuilder();
         inputFieldAnnotationBuilder = GraphqlInputFieldAnnotationBuilder.newBuilder();
     }
 
-    public MethodRealAnnotationDetector() {
-        this(true);
-    }
+    @Override
+    public GraphqlFieldAnnotation detectFieldAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
+        GraphqlField fieldAnnotation = MethodAnnotationLookup.findFirstAppears(method, GraphqlField.class);
 
+        if (fieldAnnotation == null) {
+            return null;
+        }
+
+        String name = Utils.stringNullifyOrGetDefault(fieldAnnotation.fieldName(), method.getName());
+
+        return fieldAnnotationBuilder
+                .refresh()
+                .setFieldName(name)
+                .setNullable(fieldAnnotation.nullable())
+                .build();
+    }
 
     @Override
-    public synchronized FieldAnnotations detectAnnotationFor(Method method, Class clazz, MappedClass.MappedType mappedType) {
-        if (validateAnnotations)
-            return buildAndValidate(method, clazz, mappedType);
+    public GraphqlInputFieldAnnotation detectInputFieldAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
+        GraphqlInputField inputFieldAnnotation = MethodAnnotationLookup.findFirstAppears(method, GraphqlInputField.class);
 
+        if (inputFieldAnnotation == null) {
+            return null;
+        }
 
-        return build(method, clazz, mappedType);
+        String name = Utils.stringNullifyOrGetDefault(inputFieldAnnotation.inputFieldName(), method.getName());
 
+        return inputFieldAnnotationBuilder
+                .refresh()
+                .setInputFieldName(name)
+                .setNullable(inputFieldAnnotation.nullable())
+                .setSetter(inputFieldAnnotation.setter())
+                .build();
     }
 
-
-    private FieldAnnotations buildAndValidate(Method method, Class cls, MappedClass.MappedType mappedType) {
-        GraphqlField field = MethodAnnotationLookup.findFirstAppears(method, GraphqlField.class);
-        GraphqlInputField inputField = MethodAnnotationLookup.findFirstAppears(method, GraphqlInputField.class);
+    @Override
+    public GraphqlDescriptionAnnotation detectDescriptionAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
         GraphqlDescription description = MethodAnnotationLookup.findFirstAppears(method, GraphqlDescription.class);
 
-        if (field == null && inputField == null)
+        if (description == null) {
             return null;
-
-        if (field != null) {
-            builder.setFieldAnnotation(
-                    fieldAnnotationBuilder
-                            .setFieldName(field.fieldName())
-                            .setInputField(field.inputField())
-                            .setSetter(field.setter())
-                            .setNullable(field.nullable())
-                            .build()
-            );
         }
 
-        if (inputField != null) {
-            builder.setInputFieldAnnotation(
-                    inputFieldAnnotationBuilder
-                            .setInputFieldName(inputField.inputFieldName())
-                            .setNullable(inputField.nullable())
-                            .setSetter(inputField.setter())
-                            .build()
-            );
-        }
-
-        if (description != null) {
-            builder.setDescriptionAnnotation(
-                    new GraphqlDescriptionAnnotationImpl(description.value())
-            );
-        }
-
-        FieldAnnotations annotations = builder.build();
-        builder.refresh();
-        inputFieldAnnotationBuilder.refresh();
-        fieldAnnotationBuilder.refresh();
-        return annotations;
+        return new GraphqlDescriptionAnnotationImpl(description.value());
     }
 
-    private FieldAnnotations build(Method method, Class cls, MappedClass.MappedType mappedType) {
-        GraphqlField field = MethodAnnotationLookup.findFirstAppears(method, GraphqlField.class);
-        GraphqlInputField inputField = MethodAnnotationLookup.findFirstAppears(method, GraphqlInputField.class);
-        GraphqlDescription description = MethodAnnotationLookup.findFirstAppears(method, GraphqlDescription.class);
-
-        if (field == null && inputField == null)
-            return null;
-
-        GraphqlFieldAnnotation fieldAnnotation = null;
-        GraphqlInputFieldAnnotation inputFieldAnnotation = null;
-        GraphqlDescriptionAnnotation descriptionAnnotation = null;
-
-        if (field != null) {
-
-            fieldAnnotation = new UnValidatedFiledAnnotation(
-                    field.fieldName(),
-                    field.nullable(),
-                    field.inputField(),
-                    field.setter()
-            );
-        }
-
-        if (inputField != null) {
-            inputFieldAnnotation = new UnValidatedInputFieldAnnotation(
-                    inputField.inputFieldName(),
-                    inputField.nullable(),
-                    inputField.setter()
-            );
-        }
-
-        if (description != null) {
-            descriptionAnnotation = new GraphqlDescriptionAnnotationImpl(description.value());
-        }
-
-        return new UnValidatedFieldAnnotations(fieldAnnotation, inputFieldAnnotation, descriptionAnnotation);
-    }
-
-
-    private static class UnValidatedInputFieldAnnotation implements GraphqlInputFieldAnnotation {
-
-        private final String inputFieldName;
-        private final boolean nullable;
-        private final String setter;
-
-        private UnValidatedInputFieldAnnotation(String inputFieldName, boolean nullable, String setter) {
-            this.inputFieldName = inputFieldName;
-            this.nullable = nullable;
-            this.setter = setter;
-        }
-
-
-        @Override
-        public String inputFieldName() {
-            return inputFieldName;
-        }
-
-        @Override
-        public boolean nullable() {
-            return nullable;
-        }
-
-        @Override
-        public String setter() {
-            return setter;
-        }
-    }
-
-    private static class UnValidatedFiledAnnotation implements GraphqlFieldAnnotation {
-
-        private final String fieldName;
-        private final boolean nullable;
-        private final boolean inputFiled;
-        private final String setter;
-
-        private UnValidatedFiledAnnotation(String fieldName, boolean nullable, boolean inputFiled, String setter) {
-            this.fieldName = fieldName;
-            this.nullable = nullable;
-            this.inputFiled = inputFiled;
-            this.setter = setter;
-        }
-
-
-        @Override
-        public String fieldName() {
-            return fieldName;
-        }
-
-        @Override
-        public boolean nullable() {
-            return nullable;
-        }
-
-        @Override
-        public boolean inputField() {
-            return inputFiled;
-        }
-
-        @Override
-        public String setter() {
-            return setter;
-        }
-    }
-
-    private static class UnValidatedFieldAnnotations implements FieldAnnotations {
-
-        private final GraphqlFieldAnnotation fieldAnnotation;
-        private final GraphqlInputFieldAnnotation inputFieldAnnotation;
-        private final GraphqlDescriptionAnnotation descriptionAnnotation;
-
-        private UnValidatedFieldAnnotations(GraphqlFieldAnnotation fieldAnnotation,
-                                            GraphqlInputFieldAnnotation inputFieldAnnotation,
-                                            GraphqlDescriptionAnnotation descriptionAnnotation) {
-            this.fieldAnnotation = fieldAnnotation;
-            this.inputFieldAnnotation = inputFieldAnnotation;
-            this.descriptionAnnotation = descriptionAnnotation;
-        }
-
-        @Override
-        public GraphqlFieldAnnotation fieldAnnotation() {
-            return fieldAnnotation;
-        }
-
-        @Override
-        public GraphqlInputFieldAnnotation inputFiledAnnotation() {
-            return inputFieldAnnotation;
-        }
-
-        @Override
-        public GraphqlDescriptionAnnotation descriptionAnnotation() {
-            return descriptionAnnotation;
-        }
-    }
 }

@@ -1,9 +1,6 @@
 package grphaqladapter.adaptedschemabuilder.mapper;
 
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
-import grphaqladapter.annotations.GraphqlFieldAnnotation;
-import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
-import grphaqladapter.annotations.impl.field.GraphqlInputFieldAnnotationBuilder;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -25,10 +22,10 @@ public class MappingStatics {
                 Type inner = paraType.getActualTypeArguments()[0];
                 TypeDetails details = findTypeDetails(inner);
 
-                return new TypeDetails(details.type, details.dimension, true);
+                return new TypeDetails(details.type, details.dimension);
 
             } else {
-                return new TypeDetails(Object.class, 0, true);
+                return new TypeDetails(Object.class, 0);
             }
         }
 
@@ -47,15 +44,15 @@ public class MappingStatics {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             if (parameterizedType.getRawType() != List.class)
-                return new TypeDetails((Class) parameterizedType.getRawType(), 0, false);
+                return new TypeDetails((Class) parameterizedType.getRawType(), 0);
 
             Type innerType = parameterizedType.getActualTypeArguments()[0];
             return detectDimsDetails(innerType, 1);
         } else {
             if (type == List.class)
-                return new TypeDetails(Object.class, 1, false);
+                return new TypeDetails(Object.class, 1);
             else
-                return new TypeDetails((Class) type, 0, false);
+                return new TypeDetails((Class) type, 0);
         }
 
     }
@@ -66,24 +63,14 @@ public class MappingStatics {
             if (parameterizedType.getRawType() == List.class) {
                 return detectDimsDetails(parameterizedType.getActualTypeArguments()[0], dims + 1);
             } else {
-                return new TypeDetails((Class) parameterizedType.getRawType(), dims, false);
+                return new TypeDetails((Class) parameterizedType.getRawType(), dims);
             }
         } else {
             if (type == List.class)
-                return new TypeDetails(Object.class, dims + 1, false);
+                return new TypeDetails(Object.class, dims + 1);
             else
-                return new TypeDetails((Class) type, dims, false);
+                return new TypeDetails((Class) type, dims);
         }
-    }
-
-    public static GraphqlInputFieldAnnotation convertFieldAnnotationToInputFieldAnnotation(GraphqlFieldAnnotation annotation) {
-        Assert.isNotNull(annotation, "provided annotation is null");
-        return GraphqlInputFieldAnnotationBuilder
-                .newBuilder()
-                .setNullable(annotation.nullable())
-                .setSetter(annotation.setter())
-                .setInputFieldName(annotation.fieldName())
-                .build();
     }
 
     public final static List<Method> getAllMethods(Class cls) {
@@ -112,12 +99,10 @@ public class MappingStatics {
 
         private final Class type;
         private final int dimension;
-        private final boolean isQueryHandler;
 
-        private TypeDetails(Class type, int dimension, boolean isQueryHandler) {
-            this.isQueryHandler = isQueryHandler;
-            Assert.isNotNegative(dimension, "an array dimension can not be <0");
-            Assert.isNotNull(type, "provided type is null");
+        private TypeDetails(Class type, int dimension) {
+            Assert.isNotNegative(dimension, new IllegalStateException("an array dimension can not be <0"));
+            Assert.isNotNull(type, new NullPointerException("provided type is null"));
             this.type = type;
             this.dimension = dimension;
         }
@@ -131,13 +116,12 @@ public class MappingStatics {
             return dimension;
         }
 
-        public boolean isQueryHandler() {
-            return isQueryHandler;
-        }
-
         @Override
         public String toString() {
-            return "[type:" + type + " , dims:" + dimension + " , query-handler:" + isQueryHandler + "]";
+            return "TypeDetails{" +
+                    "type=" + type +
+                    ", dimension=" + dimension +
+                    '}';
         }
     }
 

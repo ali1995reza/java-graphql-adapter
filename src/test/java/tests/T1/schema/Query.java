@@ -5,7 +5,9 @@ import grphaqladapter.annotations.GraphqlField;
 import grphaqladapter.annotations.GraphqlQuery;
 import tests.Randomer;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @GraphqlQuery
@@ -65,5 +67,15 @@ public class Query {
             bus.setProduceYear(Randomer.random(1998, 2001, 2012, 2021));
             return bus;
         }
+    }
+
+
+    @GraphqlField
+    public BankAccount getBankAccount(String username) {
+        return new BankAccount(
+                Base64.getEncoder().encodeToString(username.getBytes(StandardCharsets.UTF_8)),
+                username,
+                Randomer.random(10.567, 200000.23, 0.0)
+        );
     }
 }
