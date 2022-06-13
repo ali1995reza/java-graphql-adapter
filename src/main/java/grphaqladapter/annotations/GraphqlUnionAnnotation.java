@@ -1,6 +1,5 @@
 package grphaqladapter.annotations;
 
-public interface GraphqlUnionAnnotation {
+public interface GraphqlUnionAnnotation extends GraphqlTypeNameAnnotation {
 
-    String typeName();
 }

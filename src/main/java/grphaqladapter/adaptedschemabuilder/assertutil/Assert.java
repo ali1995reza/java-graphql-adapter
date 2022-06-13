@@ -18,37 +18,63 @@ public class Assert {
         }
     }
 
-    public static <T extends Throwable> void isOneFalse(T exception, boolean... conditions) throws T {
-        if (conditions == null)
-            return;
+    public static <T extends Throwable> void isOneOrMoreFalse(T exception, boolean... conditions) throws T {
+        Assert.isNotNull(exception, new NullPointerException("conditions is null"));
         for (boolean bool : conditions) {
             if (!bool) return;
         }
         throw exception;
     }
 
-    public static void isAllFalse(String msg, boolean... conditions) {
-        if (conditions == null)
-            return;
+    public static <T extends Throwable> void isExactlyOneFalse(T exception, boolean... conditions) throws T {
+        Assert.isNotNull(exception, new NullPointerException("conditions is null"));
+        boolean flag = false;
+        for (boolean bool : conditions) {
+            if (!bool && flag) {
+                throw exception;
+            } else if (!bool) {
+                flag = true;
+            }
+        }
+        if (!flag) {
+            throw exception;
+        }
+    }
+
+    public static <T extends Throwable> void isAllFalse(T exception, boolean... conditions) throws T {
+        Assert.isNotNull(exception, new NullPointerException("conditions is null"));
         for (boolean bool : conditions) {
             if (bool) {
-                throw new IllegalStateException(msg);
+                throw exception;
             }
         }
     }
 
-    public static void isOneTrue(String msg, boolean... conditions) {
-        if (conditions == null)
-            return;
+    public static <T extends Throwable> void isOneOrMoreTrue(T exception, boolean... conditions) throws T {
+        Assert.isNotNull(exception, new NullPointerException("conditions is null"));
         for (boolean bool : conditions) {
             if (bool) return;
         }
-        throw new IllegalStateException(msg);
+        throw exception;
+    }
+
+    public static <T extends Throwable> void isExactlyOneTrue(T exception, boolean... conditions) throws T {
+        Assert.isNotNull(exception, new NullPointerException("conditions is null"));
+        boolean flag = false;
+        for (boolean bool : conditions) {
+            if (bool && flag) {
+                throw exception;
+            } else if (bool) {
+                flag = true;
+            }
+        }
+        if (!flag) {
+            throw exception;
+        }
     }
 
     public static <T extends Throwable> void isAllTrue(T exception, boolean... conditions) throws T {
-        if (conditions == null)
-            return;
+        Assert.isNotNull(exception, new NullPointerException("conditions is null"));
         for (boolean bool : conditions) {
             if (!bool) {
                 throw exception;
@@ -86,25 +112,6 @@ public class Assert {
         isNull(o, new IllegalStateException("object must be null"));
     }
 
-    public static void isMethodMemberOfClass(Method m, Class cls, String msg) {
-        try {
-            Method realMethod = cls.getMethod(m.getName(), m.getParameterTypes());
-            if (m.equals(realMethod)) {
-                return;
-            }
-        } catch (NoSuchMethodException e) {
-
-        }
-
-        throw new IllegalStateException(msg);
-    }
-
-
-    public static void isMethodMemberOfClass(Method m, Class cls) {
-        isMethodMemberOfClass(m, cls, "method [" + m + "] not a member of class [" + cls + "]");
-    }
-
-
     public static void isParameterRelatedToMethod(Parameter parameter, Method method, String msg) {
         for (Parameter p : method.getParameters()) {
             if (parameter == p)
@@ -128,13 +135,13 @@ public class Assert {
         isEquals(o1, o2, new IllegalStateException("objects not equal [object1:" + o1 + " , object2:" + o2 + "]"));
     }
 
-    public static void isNotEquals(Object o1, Object o2, String msg) {
+    public static <T extends Throwable> void isNotEquals(Object o1, Object o2, T exception) throws T {
         if (Objects.equals(o1, o2))
-            throw new IllegalStateException(msg);
+            throw exception;
     }
 
     public static void isNotEquals(Object o1, Object o2) {
-        isNotEquals(o1, o2, "objects are equal [object1:" + o1 + " , object2:" + o2 + "]");
+        isNotEquals(o1, o2, new IllegalStateException("objects are equal [object1:" + o1 + " , object2:" + o2 + "]"));
     }
 
 
@@ -215,26 +222,5 @@ public class Assert {
 
     public static void isNotNegative(int i) {
         isNotNegative(i, new IllegalStateException("number can not be negative"));
-    }
-
-
-    public static void isModifierValidForATypeClass(Class cls, String msg) {
-        if (!Modifier.isPublic(cls.getModifiers()))
-            throw new IllegalStateException(msg);
-        if (cls.isArray())
-            throw new IllegalStateException(msg);
-
-    }
-
-    public static void isModifierValidForATypeClass(Class cls) {
-        isModifierValidForATypeClass(cls, "just public modifier classes can map to types [" + cls + "]");
-    }
-
-    public static void isModifierValidForAnInputTypeClass(Class cls, String msg) {
-        isModifierValidForATypeClass(cls, msg);
-    }
-
-    public static void isModifierValidForAnInputTypeClass(Class cls) {
-        isModifierValidForAnInputTypeClass(cls, "class can not map to input type [" + cls + "]");
     }
 }

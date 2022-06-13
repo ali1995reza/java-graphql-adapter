@@ -1,19 +1,76 @@
 package grphaqladapter.adaptedschemabuilder;
 
 import graphql.Scalars;
+import graphql.language.FloatValue;
+import graphql.language.IntValue;
+import graphql.language.StringValue;
+import graphql.language.Value;
 import graphql.scalars.java.JavaPrimitives;
-import graphql.schema.GraphQLNamedType;
-import graphql.schema.GraphQLScalarType;
-import graphql.schema.GraphQLSchema;
-import graphql.schema.GraphQLTypeReference;
+import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredScalarType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.MappedClassBuilder;
+import grphaqladapter.adaptedschemabuilder.validator.TypeValidator;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 final class BuildingContextImpl implements BuildingContext {
+
+    private final static GraphQLScalarType GraphQLDouble = GraphQLScalarType.newScalar().name("Double").description("java.lang.Double").coercing(new Coercing<Object, Double>() {
+        private Double convert(Object input) {
+            if (input instanceof Number || input instanceof String) {
+                try {
+                    return Double.parseDouble(input.toString());
+                } catch (NumberFormatException var3) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public Double serialize(Object input) {
+            Double result = this.convert(input);
+            if (result == null) {
+                throw new CoercingSerializeException("Expected type Number or String but was '" + input.getClass() + "'.");
+            } else {
+                return result;
+            }
+        }
+
+        @Override
+        public Double parseValue(Object input) {
+            Double result = this.convert(input);
+            if (result == null) {
+                throw new CoercingParseValueException("Expected type 'BigDecimal' but was '" + input.getClass() + "'.");
+            } else {
+                return result;
+            }
+        }
+
+        @Override
+        public Double parseLiteral(Object input) {
+            if (input instanceof StringValue) {
+                return Double.parseDouble(((StringValue) input).getValue());
+            } else if (input instanceof IntValue) {
+                return Double.parseDouble(((IntValue) input).getValue().toString());
+            } else if (input instanceof FloatValue) {
+                return Double.parseDouble(((FloatValue) input).getValue().toString());
+            } else {
+                throw new CoercingParseLiteralException("Expected AST type 'IntValue', 'StringValue' or 'FloatValue' but was '" + input.getClass() + "'.");
+            }
+        }
+
+        @Override
+        public Value<?> valueToLiteral(Object input) {
+            Double result = Objects.requireNonNull(this.convert(input));
+            return FloatValue.newFloatValue(new BigDecimal(result)).build();
+        }
+    }).build();
 
 
     private final Map<Class, Map<MappedClass.MappedType, MappedClass>> mappedClasses;
@@ -160,7 +217,7 @@ final class BuildingContextImpl implements BuildingContext {
 
     public void setGraphQLTypeFor(MappedClass cls, GraphQLNamedType type) {
 
-        Assert.isOneFalse(new IllegalStateException("class [" + cls + "] discovered multiple times"),
+        Assert.isOneOrMoreFalse(new IllegalStateException("class [" + cls + "] discovered multiple times"),
                 rawTypes.containsKey(cls));
 
         rawTypes.put(cls, type);
@@ -182,8 +239,8 @@ final class BuildingContextImpl implements BuildingContext {
             scalars.put(int.class, Scalars.GraphQLInt);
             scalars.put(Long.class, JavaPrimitives.GraphQLLong);
             scalars.put(long.class, JavaPrimitives.GraphQLLong);
-            scalars.put(Double.class, JavaPrimitives.GraphQLBigDecimal);
-            scalars.put(double.class, JavaPrimitives.GraphQLBigDecimal);
+            scalars.put(Double.class, GraphQLDouble);
+            scalars.put(double.class, GraphQLDouble);
             scalars.put(Float.class, Scalars.GraphQLFloat);
             scalars.put(float.class, Scalars.GraphQLFloat);
             scalars.put(Boolean.class, Scalars.GraphQLBoolean);
@@ -194,6 +251,7 @@ final class BuildingContextImpl implements BuildingContext {
             scalars.put(byte.class, JavaPrimitives.GraphQLByte);
             scalars.put(Short.class, JavaPrimitives.GraphQLShort);
             scalars.put(short.class, JavaPrimitives.GraphQLShort);
+            scalars.put(BigDecimal.class, JavaPrimitives.GraphQLBigDecimal);
             scalars.put(ID.class, ID.ScalarType);
 
             BuiltInScalars = Collections.unmodifiableMap(scalars);
@@ -226,16 +284,27 @@ final class BuildingContextImpl implements BuildingContext {
 
         }
 
-        private GraphQLScalarType findScalarTypeFor(Class c) {
+        private GraphQLScalarType findScalarTypeFor(Class clazz) {
 
-            GraphQLScalarType scalarType = scalars.get(c);
+            GraphQLScalarType scalarType = scalars.get(clazz);
 
             if (scalarType != null && !addedScalars.contains(scalarType)) {
                 schema.additionalType(scalarType);
                 addedScalars.add(scalarType);
+
+                MappedClass mappedClass = MappedClassBuilder
+                        .newBuilder()
+                        .setTypeName(scalarType.getName())
+                        .setBaseClass(clazz)
+                        .setDescription(scalarType.getDescription())
+                        .setMappedType(MappedClass.MappedType.SCALAR)
+                        .build();
+
+                TypeValidator.validate(mappedClass, clazz);
+
                 discoveredScalarTypes.add(
                         new DiscoveredScalarTypeImpl(
-                                c,
+                                mappedClass,
                                 scalarType.getName(),
                                 scalarType
                         )

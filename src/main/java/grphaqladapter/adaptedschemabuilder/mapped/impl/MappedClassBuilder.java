@@ -46,7 +46,7 @@ public final class MappedClassBuilder {
     }
 
     public synchronized MappedClassBuilder addMappedMethod(MappedMethod method) {
-        Assert.isOneFalse(new IllegalStateException("already a method with field typeName [" + method.fieldName() +
+        Assert.isOneOrMoreFalse(new IllegalStateException("already a method with field typeName [" + method.fieldName() +
                         "] exist - [exist:" + mappedMethods.get(method.fieldName()) + "]"),
                 mappedMethods.containsKey(method.fieldName()));
 

@@ -1,6 +1,7 @@
 package tests.T1.schema;
 
 
+import grphaqladapter.annotations.GraphqlDescription;
 import grphaqladapter.annotations.GraphqlType;
 
 @GraphqlType
@@ -24,6 +25,7 @@ public class BankAccount {
         return username;
     }
 
+    @GraphqlDescription("Balance as dollar")
     public Double getBalance() {
         return balance;
     }

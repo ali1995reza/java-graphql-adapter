@@ -87,7 +87,7 @@ public final class MappedMethodBuilder {
     }
 
     public synchronized MappedMethodBuilder addMappedParameter(MappedParameter mappedParameter) {
-        Assert.isOneFalse(new IllegalStateException("a parameter with argument typeName [" + mappedParameter.argumentName() + "] already exist"),
+        Assert.isOneOrMoreFalse(new IllegalStateException("a parameter with argument typeName [" + mappedParameter.argumentName() + "] already exist"),
                 mappedParameters.stream().anyMatch(ParameterNamePredict.of(mappedParameter)));
         this.mappedParameters.add(mappedParameter);
         return this;

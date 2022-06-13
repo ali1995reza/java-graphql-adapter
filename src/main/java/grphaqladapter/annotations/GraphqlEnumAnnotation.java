@@ -1,6 +1,5 @@
 package grphaqladapter.annotations;
 
-public interface GraphqlEnumAnnotation {
+public interface GraphqlEnumAnnotation extends GraphqlTypeNameAnnotation {
 
-    String typeName();
 }

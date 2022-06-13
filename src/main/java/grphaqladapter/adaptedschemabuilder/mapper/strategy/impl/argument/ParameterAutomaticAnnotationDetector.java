@@ -34,7 +34,7 @@ public class ParameterAutomaticAnnotationDetector implements ParameterAnnotation
     }
 
     private String getName(Parameter parameter, int index) {
-        Assert.isOneTrue("can not find the type-name of parameter because parameter typeName not present",
+        Assert.isOneOrMoreTrue(new IllegalStateException("can not find the type-name of parameter because parameter typeName not present"),
                 !parameter.isNamePresent(), argNameIfNotPresent == null);
         if (parameter.isNamePresent()) {
             return parameter.getName();

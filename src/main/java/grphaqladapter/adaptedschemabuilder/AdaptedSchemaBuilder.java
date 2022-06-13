@@ -365,31 +365,31 @@ public final class AdaptedSchemaBuilder {
 
     public DiscoveredType buildDiscoveredType(MappedClass cls, GraphQLNamedType type) {
         if (cls.mappedType().is(MappedClass.MappedType.OBJECT_TYPE) || cls.mappedType().isTopLevelType()) {
-            Assert.isOneFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
+            Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
                             " , GraphQLType:" + type + "]", cls.baseClass()),
                     !(type instanceof GraphQLObjectType));
 
             return new DiscoveredObjectTypeImpl(cls, type.getName(), (GraphQLObjectType) type);
         } else if (cls.mappedType().is(MappedClass.MappedType.INTERFACE)) {
-            Assert.isOneFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
+            Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
                             " , GraphQLType:" + type + "]", cls.baseClass()),
                     !(type instanceof GraphQLInterfaceType));
 
             return new DiscoveredInterfaceTypeImpl(cls, type.getName(), (GraphQLInterfaceType) type);
         } else if (cls.mappedType().is(MappedClass.MappedType.INPUT_TYPE)) {
-            Assert.isOneFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
+            Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
                             " , GraphQLType:" + type + "]", cls.baseClass()),
                     !(type instanceof GraphQLInputObjectType));
 
             return new DiscoveredInputTypeImpl(cls, type.getName(), (GraphQLInputObjectType) type);
         } else if (cls.mappedType().is(MappedClass.MappedType.UNION)) {
-            Assert.isOneFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
+            Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
                             " , GraphQLType:" + type + "]", cls.baseClass()),
                     !(type instanceof GraphQLUnionType));
 
             return new DiscoveredUnionTypeImpl(cls, type.getName(), (GraphQLUnionType) type);
         } else if (cls.mappedType().is(MappedClass.MappedType.ENUM)) {
-            Assert.isOneFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
+            Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "conflict - class mapped to bad type - [MappedClass:" + cls +
                             " , GraphQLType:" + type + "]", cls.baseClass()),
                     !(type instanceof GraphQLEnumType));
 

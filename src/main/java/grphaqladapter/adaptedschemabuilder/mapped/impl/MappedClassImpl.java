@@ -3,7 +3,6 @@ package grphaqladapter.adaptedschemabuilder.mapped.impl;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
-import grphaqladapter.adaptedschemabuilder.validator.TypeValidator;
 
 import java.util.Collections;
 import java.util.Map;
@@ -22,7 +21,6 @@ final class MappedClassImpl implements MappedClass {
         this.description = description;
         this.mappedType = mappedType;
         this.mappedMethods = Utils.nullifyOrGetDefault(mappedMethods, Collections.EMPTY_MAP);
-        TypeValidator.validate(this);
     }
 
     final static MappedClass clone(MappedClass mappedClass) {

@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlArgumentException;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlFieldException;
+import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlTypeException;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
@@ -178,20 +179,19 @@ public final class ClassMapper {
         HashMap<Class, Map<MappedClass.MappedType, MappedClass>> allMappedClasses = new HashMap<>();
         //so handle it please !
 
-        for (Class cls : classes) {
+        for (Class clazz : classes) {
 
-            TypeAnnotations annotations = detect(cls);
-            Assert.isOneFalse(new IllegalStateException("no annotation found for class [" + cls + "]"),
-                    annotations == null);
+            TypeAnnotations annotations = detect(clazz);
 
-            TypeValidator.validate(cls, annotations);
+            TypeValidator.validate(annotations, clazz);
 
             Map<MappedClass.MappedType, MappedClass> allMappedClass =
-                    allMappedClassFor(cls, annotations);
+                    allMappedClassFor(clazz, annotations);
 
-            Assert.isOneFalse(new IllegalStateException("no annotation found for class [" + cls + "]"),
+            Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "no mapped class", clazz),
                     allMappedClass.size() == 0);
-            allMappedClasses.put(cls, allMappedClass);
+
+            allMappedClasses.put(clazz, allMappedClass);
         }
 
         return allMappedClasses;
@@ -242,20 +242,20 @@ public final class ClassMapper {
         return mapClass(cls, name, MappedClass.MappedType.INPUT_TYPE, descriptionAnnotation == null ? null : descriptionAnnotation.value());
     }
 
-    private MappedClass mapClass(Class cls, String name, MappedClass.MappedType type, String description) {
+    private MappedClass mapClass(Class clazz, String name, MappedClass.MappedType type, String description) {
         classBuilder.refresh();
 
         if (type.isTopLevelType() || type.is(MappedClass.MappedType.OBJECT_TYPE) || type.is(MappedClass.MappedType.INTERFACE)) {
-            for (Method method : MappingStatics.getAllMethods(cls)) {
-                MappedMethod mappedMethod = mapFieldMethod(cls, method, type);
+            for (Method method : MappingStatics.getAllMethods(clazz)) {
+                MappedMethod mappedMethod = mapFieldMethod(clazz, method, type);
 
                 if (mappedMethod == null) continue;
 
                 classBuilder.addMappedMethod(mappedMethod);
             }
         } else if (type.is(MappedClass.MappedType.INPUT_TYPE)) {
-            for (Method method : MappingStatics.getAllMethods(cls)) {
-                MappedMethod mappedMethod = mapInputFieldMethod(cls, method);
+            for (Method method : MappingStatics.getAllMethods(clazz)) {
+                MappedMethod mappedMethod = mapInputFieldMethod(clazz, method);
 
                 if (mappedMethod == null) continue;
 
@@ -263,12 +263,16 @@ public final class ClassMapper {
             }
         }
 
-        return classBuilder
-                .setBaseClass(cls)
+        MappedClass mappedClass = classBuilder
+                .setBaseClass(clazz)
                 .setTypeName(name)
                 .setMappedType(type)
                 .setDescription(description)
                 .build();
+
+        TypeValidator.validate(mappedClass, clazz);
+
+        return mappedClass;
     }
 
 

@@ -1,6 +1,5 @@
 package grphaqladapter.annotations;
 
-public interface GraphqlSubscriptionAnnotation {
+public interface GraphqlSubscriptionAnnotation extends GraphqlTypeNameAnnotation {
 
-    String typeName();
 }

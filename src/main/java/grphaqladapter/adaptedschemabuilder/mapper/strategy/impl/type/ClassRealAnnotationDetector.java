@@ -2,6 +2,7 @@ package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.type;
 
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.ClassAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.TypeAnnotations;
+import grphaqladapter.adaptedschemabuilder.utils.Utils;
 import grphaqladapter.annotations.*;
 import grphaqladapter.annotations.impl.GraphqlDescriptionAnnotationImpl;
 import grphaqladapter.annotations.impl.type.TypesAnnotationBuilder;
@@ -16,6 +17,10 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
         typeBuilder = TypesAnnotationBuilder.newBuilder();
     }
 
+
+    private static String typeName(String name, Class clazz) {
+        return Utils.stringNullifyOrGetDefault(name, clazz.getSimpleName());
+    }
 
     @Override
     public synchronized TypeAnnotations detectAnnotationFor(Class cls) {
@@ -34,28 +39,28 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
         if (interfaceAnnotation != null) {
             builder.setInterfaceAnnotation(
-                    typeBuilder.setTypeName(interfaceAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(interfaceAnnotation.typeName(), cls))
                             .buildInterfaceAnnotation()
             );
         }
 
         if (inputTypeAnnotation != null) {
             builder.setInputTypeAnnotation(
-                    typeBuilder.setTypeName(inputTypeAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(inputTypeAnnotation.typeName(), cls))
                             .buildInputTypeAnnotation()
             );
         }
 
         if (typeAnnotation != null) {
             builder.setTypeAnnotation(
-                    typeBuilder.setTypeName(typeAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(typeAnnotation.typeName(), cls))
                             .buildTypeAnnotation()
             );
         }
 
         if (unionAnnotation != null) {
             builder.setUnionAnnotation(
-                    typeBuilder.setTypeName(unionAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(unionAnnotation.typeName(), cls))
                             .buildUnionAnnotation()
             );
         }
@@ -63,28 +68,28 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
         if (enumAnnotation != null) {
             builder.setEnumAnnotation(
-                    typeBuilder.setTypeName(enumAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(enumAnnotation.typeName(), cls))
                             .buildEnumAnnotation()
             );
         }
 
         if (queryAnnotation != null) {
             builder.setQueryAnnotation(
-                    typeBuilder.setTypeName(queryAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(queryAnnotation.typeName(), cls))
                             .buildQueryAnnotation()
             );
         }
 
         if (mutationAnnotation != null) {
             builder.setMutationAnnotation(
-                    typeBuilder.setTypeName(mutationAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(mutationAnnotation.typeName(), cls))
                             .buildMutationAnnotation()
             );
         }
 
         if (subscriptionAnnotation != null) {
             builder.setSubscriptionAnnotation(
-                    typeBuilder.setTypeName(subscriptionAnnotation.typeName())
+                    typeBuilder.setTypeName(typeName(subscriptionAnnotation.typeName(), cls))
                             .buildSubscriptionAnnotation()
             );
         }
@@ -99,5 +104,4 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
         return typeAnnotations;
     }
-
 }
