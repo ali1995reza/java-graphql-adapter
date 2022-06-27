@@ -10,7 +10,7 @@ public class Car implements Vehicle {
     private String model;
     private Integer produceYear;
 
-    @GraphqlField(fieldName = "model")
+    @GraphqlField(name = "model")
     public String getModel() {
         return model;
     }
@@ -20,7 +20,7 @@ public class Car implements Vehicle {
     }
 
     @ToString
-    @GraphqlField(fieldName = "produceYear")
+    @GraphqlField(name = "produceYear")
     public Integer getProduceYear() {
         return produceYear;
     }

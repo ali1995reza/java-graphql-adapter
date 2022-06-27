@@ -83,16 +83,16 @@ public class PojoMethodAnnotationDetector implements MethodAnnotationDetector {
             return null;
         }
         return GraphqlInputFieldAnnotationBuilder.newBuilder()
-                .setInputFieldName(getName(method))
-                .setNullable(isNullable(method))
-                .setSetter(setter)
+                .name(getName(method))
+                .nullable(isNullable(method))
+                .setter(setter)
                 .build();
     }
 
     private GraphqlFieldAnnotation outputField(Method method, Class clazz) {
         return GraphqlFieldAnnotationBuilder.newBuilder()
-                .setFieldName(getName(method))
-                .setNullable(isNullable(method))
+                .name(getName(method))
+                .nullable(isNullable(method))
                 .build();
     }
 

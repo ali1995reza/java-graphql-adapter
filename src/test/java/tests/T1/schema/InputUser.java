@@ -10,7 +10,7 @@ public class InputUser {
     private UserType type;
 
 
-    @GraphqlInputField(inputFieldName = "name", nullable = false, setter = "setName")
+    @GraphqlInputField(name = "name", nullable = false, setter = "setName")
     public String getName() {
         return name;
     }
@@ -19,7 +19,7 @@ public class InputUser {
         this.name = name;
     }
 
-    @GraphqlInputField(inputFieldName = "type", nullable = false, setter = "setType")
+    @GraphqlInputField(name = "type", nullable = false, setter = "setType")
     public UserType getType() {
         return type;
     }

@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface GraphqlEnum {
 
-    String typeName() default "";
+    String name() default "";
 }

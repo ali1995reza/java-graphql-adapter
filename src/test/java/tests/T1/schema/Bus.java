@@ -17,7 +17,7 @@ public class Bus implements Vehicle {
     @Delay(0)
     @UpperCase
     @MD5(salt = "some_salt")
-    @GraphqlField(fieldName = "model")
+    @GraphqlField(name = "model")
     public String getModel() {
         return model;
     }
@@ -27,7 +27,7 @@ public class Bus implements Vehicle {
     }
 
     @ToString
-    @GraphqlField(fieldName = "produceYear")
+    @GraphqlField(name = "produceYear")
     public Integer getProduceYear() {
         return produceYear;
     }
@@ -36,7 +36,7 @@ public class Bus implements Vehicle {
         this.produceYear = produceYear;
     }
 
-    @GraphqlField(fieldName = "size")
+    @GraphqlField(name = "size")
     public Integer getSize() {
         return size;
     }

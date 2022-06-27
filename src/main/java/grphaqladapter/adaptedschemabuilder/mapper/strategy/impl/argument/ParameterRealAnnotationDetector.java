@@ -35,11 +35,11 @@ public class ParameterRealAnnotationDetector implements ParameterAnnotationDetec
         if (argument == null)
             return null;
 
-        String name = StringUtils.isNullString(argument.argumentName()) ? parameter.getName() : argument.argumentName();
+        String name = StringUtils.isNullString(argument.name()) ? parameter.getName() : argument.name();
 
         return GraphqlArgumentAnnotationBuilder.newBuilder()
-                .setArgumentName(name)
-                .setNullable(argument.nullable())
+                .name(name)
+                .nullable(argument.nullable())
                 .build();
     }
 }

@@ -1,37 +1,18 @@
 package grphaqladapter.annotations.impl.field;
 
 import grphaqladapter.annotations.GraphqlFieldAnnotation;
+import grphaqladapter.annotations.impl.NullableContainerBuilder;
 
-public class GraphqlFieldAnnotationBuilder {
-
-    private String fieldName;
-    private boolean nullable;
-
-    private GraphqlFieldAnnotationBuilder() {
-    }
+public class GraphqlFieldAnnotationBuilder extends NullableContainerBuilder<GraphqlFieldAnnotationBuilder, GraphqlFieldAnnotation> {
 
     public static GraphqlFieldAnnotationBuilder newBuilder() {
         return new GraphqlFieldAnnotationBuilder();
     }
 
-    public synchronized GraphqlFieldAnnotationBuilder setNullable(boolean nullable) {
-        this.nullable = nullable;
-        return this;
-    }
-
-    public synchronized GraphqlFieldAnnotationBuilder setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-        return this;
-    }
-
-    public synchronized GraphqlFieldAnnotationBuilder refresh() {
-        fieldName = null;
-        nullable = false;
-
-        return this;
+    private GraphqlFieldAnnotationBuilder() {
     }
 
     public synchronized GraphqlFieldAnnotation build() {
-        return new GraphqlFieldAnnotationImpl(fieldName, nullable);
+        return new GraphqlFieldAnnotationImpl(name(), isNullable());
     }
 }

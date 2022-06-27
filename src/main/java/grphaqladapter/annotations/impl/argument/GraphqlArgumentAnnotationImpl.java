@@ -6,20 +6,20 @@ import grphaqladapter.annotations.GraphqlArgumentAnnotation;
 final class GraphqlArgumentAnnotationImpl implements GraphqlArgumentAnnotation {
 
 
-    private final String argumentName;
+    private final String name;
     private final boolean nullable;
 
-    GraphqlArgumentAnnotationImpl(String argumentName, boolean nullable) {
+    GraphqlArgumentAnnotationImpl(String name, boolean nullable) {
 
-        this.argumentName = argumentName;
+        this.name = name;
         this.nullable = nullable;
 
     }
 
 
     @Override
-    public String argumentName() {
-        return argumentName;
+    public String name() {
+        return name;
     }
 
     @Override

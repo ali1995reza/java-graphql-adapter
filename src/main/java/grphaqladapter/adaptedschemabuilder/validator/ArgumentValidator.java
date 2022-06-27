@@ -41,7 +41,7 @@ public final class ArgumentValidator {
 
     public static void validate(GraphqlArgumentAnnotation annotation, Class clazz, Method method, Parameter parameter) {
         Assert.isNotNull(annotation, exception("no annotation detected for parameter", clazz, method, parameter));
-        Assert.isTrue(NameValidator.isNameValid(annotation.argumentName()), exception("argument name is invalid", clazz, method, parameter));
+        Assert.isTrue(NameValidator.isNameValid(annotation.name()), exception("argument name is invalid", clazz, method, parameter));
         Assert.isOneOrMoreFalse(exception("Java primitive type argument can not be nullable", clazz, method, parameter),
                 annotation.nullable(), parameter.getType().isPrimitive());
     }

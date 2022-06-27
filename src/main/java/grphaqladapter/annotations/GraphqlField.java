@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface GraphqlField {
 
-    String fieldName() default "";
+    String name() default "";
 
     boolean nullable() default true;
 

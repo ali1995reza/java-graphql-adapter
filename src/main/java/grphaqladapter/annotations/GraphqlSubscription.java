@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface GraphqlSubscription {
 
-    String typeName() default "";
+    String name() default "";
 }

@@ -1,33 +1,15 @@
 package grphaqladapter.annotations.impl.argument;
 
 import grphaqladapter.annotations.GraphqlArgumentAnnotation;
+import grphaqladapter.annotations.impl.NullableContainerBuilder;
 
-public class GraphqlArgumentAnnotationBuilder {
-
-
-    private String argumentName;
-    private boolean nullable;
-
-    private GraphqlArgumentAnnotationBuilder() {
-    }
+public class GraphqlArgumentAnnotationBuilder extends NullableContainerBuilder<GraphqlArgumentAnnotationBuilder, GraphqlArgumentAnnotation> {
 
     public static GraphqlArgumentAnnotationBuilder newBuilder() {
         return new GraphqlArgumentAnnotationBuilder();
     }
 
-    public synchronized GraphqlArgumentAnnotationBuilder setArgumentName(String argumentName) {
-        this.argumentName = argumentName;
-        return this;
-    }
-
-
-    public synchronized GraphqlArgumentAnnotationBuilder setNullable(boolean nullable) {
-        this.nullable = nullable;
-        return this;
-    }
-
-
     public synchronized GraphqlArgumentAnnotation build() {
-        return new GraphqlArgumentAnnotationImpl(argumentName, nullable);
+        return new GraphqlArgumentAnnotationImpl(name(), isNullable());
     }
 }

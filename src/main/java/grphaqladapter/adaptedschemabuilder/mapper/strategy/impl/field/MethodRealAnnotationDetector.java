@@ -41,11 +41,11 @@ public class MethodRealAnnotationDetector implements MethodAnnotationDetector {
             return null;
         }
 
-        String name = Utils.stringNullifyOrGetDefault(fieldAnnotation.fieldName(), method.getName());
+        String name = Utils.stringNullifyOrGetDefault(fieldAnnotation.name(), method.getName());
 
         return GraphqlFieldAnnotationBuilder.newBuilder()
-                .setFieldName(name)
-                .setNullable(fieldAnnotation.nullable())
+                .name(name)
+                .nullable(fieldAnnotation.nullable())
                 .build();
     }
 
@@ -57,12 +57,12 @@ public class MethodRealAnnotationDetector implements MethodAnnotationDetector {
             return null;
         }
 
-        String name = Utils.stringNullifyOrGetDefault(inputFieldAnnotation.inputFieldName(), method.getName());
+        String name = Utils.stringNullifyOrGetDefault(inputFieldAnnotation.name(), method.getName());
 
         return GraphqlInputFieldAnnotationBuilder.newBuilder()
-                .setInputFieldName(name)
-                .setNullable(inputFieldAnnotation.nullable())
-                .setSetter(inputFieldAnnotation.setter())
+                .name(name)
+                .nullable(inputFieldAnnotation.nullable())
+                .setter(inputFieldAnnotation.setter())
                 .build();
     }
 

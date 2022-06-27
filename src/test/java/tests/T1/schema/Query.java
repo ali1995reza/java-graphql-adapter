@@ -15,7 +15,7 @@ import java.util.List;
 public class Query {
 
     @GraphqlField
-    public IntList getList(@GraphqlArgument(argumentName = "period") IntPeriodScalar periodScalar) {
+    public IntList getList(@GraphqlArgument(name = "period") IntPeriodScalar periodScalar) {
 
         List<Integer> list = new ArrayList<>();
         periodScalar.forEach(list::add);
@@ -25,8 +25,8 @@ public class Query {
     }
 
     @GraphqlField
-    public List<List<Integer>> multiplyMatrix(@GraphqlArgument(argumentName = "m1", nullable = false) List<List<Integer>> first,
-                                              @GraphqlArgument(argumentName = "m2", nullable = false) List<List<Integer>> second) {
+    public List<List<Integer>> multiplyMatrix(@GraphqlArgument(name = "m1", nullable = false) List<List<Integer>> first,
+                                              @GraphqlArgument(name = "m2", nullable = false) List<List<Integer>> second) {
         List<List<Integer>> result = new ArrayList<>();
 
         for (int i = 0; i < first.size(); i++) {
@@ -44,7 +44,7 @@ public class Query {
 
 
     @GraphqlField
-    public UserInterface getUser(@GraphqlArgument(argumentName = "user", nullable = false) InputUser user) {
+    public UserInterface getUser(@GraphqlArgument(name = "user", nullable = false) InputUser user) {
         if (user.getType() == UserType.NORMAL) {
             return NormalUser.create(user.getName());
         }
@@ -52,7 +52,7 @@ public class Query {
     }
 
     @GraphqlField
-    public Vehicle getVehicle(@GraphqlArgument(argumentName = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
+    public Vehicle getVehicle(@GraphqlArgument(name = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
         if (isCar == null) {
             isCar = false;
         }

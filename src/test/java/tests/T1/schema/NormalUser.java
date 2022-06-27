@@ -2,7 +2,7 @@ package tests.T1.schema;
 
 import grphaqladapter.annotations.GraphqlType;
 
-@GraphqlType(typeName = "User")
+@GraphqlType(name = "User")
 public class NormalUser implements UserInterface {
 
     private String name;

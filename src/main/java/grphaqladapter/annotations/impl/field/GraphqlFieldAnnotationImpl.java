@@ -6,18 +6,18 @@ import grphaqladapter.annotations.GraphqlFieldAnnotation;
 class GraphqlFieldAnnotationImpl implements GraphqlFieldAnnotation {
 
 
-    private final String fieldName;
+    private final String name;
     private final boolean nullable;
 
-    public GraphqlFieldAnnotationImpl(String fieldName, boolean nullable) {
-        this.fieldName = fieldName;
+    public GraphqlFieldAnnotationImpl(String name, boolean nullable) {
+        this.name = name;
         this.nullable = nullable;
     }
 
 
     @Override
-    public String fieldName() {
-        return fieldName;
+    public String name() {
+        return name;
     }
 
     @Override

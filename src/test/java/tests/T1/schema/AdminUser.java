@@ -6,7 +6,7 @@ import grphaqladapter.annotations.GraphqlType;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@GraphqlType(typeName = "Admin")
+@GraphqlType(name = "Admin")
 public class AdminUser implements UserInterface {
 
 

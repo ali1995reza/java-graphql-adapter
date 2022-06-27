@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface GraphqlUnion {
 
-    String typeName() default "";
+    String name() default "";
 }

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 public @interface GraphqlArgument {
 
-    String argumentName() default "";
+    String name() default "";
 
     boolean nullable() default true;
 }

@@ -17,7 +17,7 @@ class GraphqlInputFieldAnnotationImpl implements GraphqlInputFieldAnnotation {
 
 
     @Override
-    public String inputFieldName() {
+    public String name() {
         return inputFieldName;
     }
 

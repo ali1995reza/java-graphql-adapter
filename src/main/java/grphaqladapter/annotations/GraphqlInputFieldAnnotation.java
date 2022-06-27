@@ -1,8 +1,6 @@
 package grphaqladapter.annotations;
 
-public interface GraphqlInputFieldAnnotation {
-
-    String inputFieldName();
+public interface GraphqlInputFieldAnnotation extends GraphqlElementAnnotation {
 
     boolean nullable();
 

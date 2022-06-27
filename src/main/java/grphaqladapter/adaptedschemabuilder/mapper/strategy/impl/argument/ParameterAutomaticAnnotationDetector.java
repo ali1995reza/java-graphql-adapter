@@ -28,8 +28,8 @@ public class ParameterAutomaticAnnotationDetector implements ParameterAnnotation
 
     @Override
     public synchronized GraphqlArgumentAnnotation detectArgumentAnnotation(Method method, Parameter parameter, int parameterIndex) {
-        return builder.setArgumentName(getName(parameter, parameterIndex))
-                .setNullable(isNullable(parameter))
+        return builder.name(getName(parameter, parameterIndex))
+                .nullable(isNullable(parameter))
                 .build();
     }
 

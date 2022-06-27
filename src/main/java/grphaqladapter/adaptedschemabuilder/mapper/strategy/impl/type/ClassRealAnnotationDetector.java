@@ -42,28 +42,28 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
         if (interfaceAnnotation != null) {
             builder.interfaceAnnotation(
-                    typeBuilder.setTypeName(typeName(interfaceAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(interfaceAnnotation.name(), clazz))
                             .buildInterfaceAnnotation()
             );
         }
 
         if (inputTypeAnnotation != null) {
             builder.inputTypeAnnotation(
-                    typeBuilder.setTypeName(typeName(inputTypeAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(inputTypeAnnotation.name(), clazz))
                             .buildInputTypeAnnotation()
             );
         }
 
         if (typeAnnotation != null) {
             builder.typeAnnotation(
-                    typeBuilder.setTypeName(typeName(typeAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(typeAnnotation.name(), clazz))
                             .buildTypeAnnotation()
             );
         }
 
         if (unionAnnotation != null) {
             builder.unionAnnotation(
-                    typeBuilder.setTypeName(typeName(unionAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(unionAnnotation.name(), clazz))
                             .buildUnionAnnotation()
             );
         }
@@ -71,28 +71,28 @@ public class ClassRealAnnotationDetector implements ClassAnnotationDetector {
 
         if (enumAnnotation != null) {
             builder.enumAnnotation(
-                    typeBuilder.setTypeName(typeName(enumAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(enumAnnotation.name(), clazz))
                             .buildEnumAnnotation()
             );
         }
 
         if (queryAnnotation != null) {
             builder.queryAnnotation(
-                    typeBuilder.setTypeName(typeName(queryAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(queryAnnotation.name(), clazz))
                             .buildQueryAnnotation()
             );
         }
 
         if (mutationAnnotation != null) {
             builder.mutationAnnotation(
-                    typeBuilder.setTypeName(typeName(mutationAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(mutationAnnotation.name(), clazz))
                             .buildMutationAnnotation()
             );
         }
 
         if (subscriptionAnnotation != null) {
             builder.subscriptionAnnotation(
-                    typeBuilder.setTypeName(typeName(subscriptionAnnotation.typeName(), clazz))
+                    typeBuilder.name(typeName(subscriptionAnnotation.name(), clazz))
                             .buildSubscriptionAnnotation()
             );
         }

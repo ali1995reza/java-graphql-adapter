@@ -70,14 +70,14 @@ public final class FieldValidator {
 
     public static void validate(GraphqlFieldAnnotation annotation, Class clazz, Method method) {
         Assert.isNotNull(annotation, exception("no annotation detected for method", clazz, method));
-        Assert.isTrue(NameValidator.isNameValid(annotation.fieldName()), exception("field name is invalid", clazz, method));
+        Assert.isTrue(NameValidator.isNameValid(annotation.name()), exception("field name is invalid", clazz, method));
         Assert.isOneOrMoreFalse(exception("Java primitive type field can not be nullable", clazz, method),
                 annotation.nullable(), method.getReturnType().isPrimitive());
     }
 
     public static void validate(GraphqlInputFieldAnnotation annotation, Class clazz, Method method) {
         Assert.isNotNull(annotation, exception("no annotation detected for method", clazz, method));
-        Assert.isTrue(NameValidator.isNameValid(annotation.inputFieldName()), exception("input field name is invalid", clazz, method));
+        Assert.isTrue(NameValidator.isNameValid(annotation.name()), exception("input field name is invalid", clazz, method));
         Assert.isOneOrMoreFalse(exception("Java primitive type input field can not be nullable", clazz, method),
                 annotation.nullable(), method.getReturnType().isPrimitive());
         Assert.isTrue(StringUtils.isNoNullString(annotation.setter()), exception("input field setter method name is null", clazz, method));

@@ -487,7 +487,7 @@ public final class ClassMapper {
 
         MappedFieldMethod mappedMethod = methodBuilder.method(method)
                 .description(getDescription(descriptionAnnotation))
-                .name(annotation.fieldName())
+                .name(annotation.name())
                 .type(TypeDescriptor.of(method, annotation.nullable()))
                 .build();
 
@@ -514,7 +514,7 @@ public final class ClassMapper {
 
         MappedInputFieldMethod mappedMethod = methodBuilder.method(method)
                 .description(getDescription(descriptionAnnotation))
-                .name(annotation.inputFieldName())
+                .name(annotation.name())
                 .type(TypeDescriptor.of(method, annotation.nullable()))
                 .setter(setterMethod)
                 .build();
@@ -592,7 +592,7 @@ public final class ClassMapper {
 
         MappedParameter mappedParameter = MappedParameterBuilder
                 .newBuilder()
-                .name(argumentAnnotation.argumentName())
+                .name(argumentAnnotation.name())
                 .parameter(parameter)
                 .type(TypeDescriptor.of(parameter, argumentAnnotation.nullable()))
                 .build();

@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface GraphqlQuery {
 
-    String typeName() default "";
+    String name() default "";
 }

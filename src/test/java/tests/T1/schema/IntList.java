@@ -42,7 +42,7 @@ public class IntList {
     }
 
     @GraphqlField
-    public Integer get(@GraphqlArgument(argumentName = "index", nullable = false) int index) {
+    public Integer get(@GraphqlArgument(name = "index", nullable = false) int index) {
         return data.get(index);
     }
 }
