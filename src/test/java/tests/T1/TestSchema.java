@@ -45,7 +45,7 @@ public class TestSchema {
                 )
                 .build();
         graphQL = GraphQL.newGraphQL(adaptedSchema.getSchema()).build();
-        System.out.println(adaptedSchema.asSchemaDefinitionLanguage());
+
         LOGGER.info(adaptedSchema.asSchemaDefinitionLanguage());
     }
 

@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.concurrent.CompletableFuture;
 
 public class MD5DirectiveFunction extends GraphqlDirectiveFunction {
 
@@ -26,7 +27,21 @@ public class MD5DirectiveFunction extends GraphqlDirectiveFunction {
     }
 
     private Object hash(Object object) {
-        if (object == null || !(object instanceof String)) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof CompletableFuture) {
+            return hasAsync((CompletableFuture) object);
+        }
+        return hashSync(object);
+    }
+
+    private Object hasAsync(CompletableFuture future) {
+        return future.thenApply(this::hashSync);
+    }
+
+    private Object hashSync(Object object) {
+        if (!(object instanceof String)) {
             return object;
         }
         String input = (String) object;

@@ -53,7 +53,6 @@ public class Query {
 
     @GraphqlField
     public Vehicle getVehicle(@GraphqlArgument(argumentName = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
-        System.out.println((Object) environment.getGraphQlContext().get("auth"));
         if (isCar == null) {
             isCar = false;
         }

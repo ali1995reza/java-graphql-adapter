@@ -2,6 +2,7 @@ package tests.T1.schema;
 
 import grphaqladapter.annotations.GraphqlField;
 import grphaqladapter.annotations.GraphqlType;
+import tests.T1.schema.directives.ToString;
 
 @GraphqlType
 public class Car implements Vehicle {
@@ -18,6 +19,7 @@ public class Car implements Vehicle {
         this.model = model;
     }
 
+    @ToString
     @GraphqlField(fieldName = "produceYear")
     public Integer getProduceYear() {
         return produceYear;

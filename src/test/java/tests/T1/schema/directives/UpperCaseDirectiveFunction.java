@@ -9,6 +9,8 @@ import grphaqladapter.adaptedschemabuilder.utils.DataFetcherAdapter;
 import grphaqladapter.annotations.interfaces.GraphqlDirectiveFunction;
 import grphaqladapter.annotations.interfaces.SchemaDirectiveHandlingContext;
 
+import java.util.concurrent.CompletableFuture;
+
 public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object> {
 
     @Override
@@ -28,12 +30,16 @@ public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object>
 
     @Override
     public GraphQLFieldDefinition onField(GraphQLFieldDefinition fieldDefinition, MappedTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
-        context.changeDataFetcherBehavior(typeClass.name(), field.name(),dataFetcher-> DataFetcherAdapter.of(dataFetcher, this::upperCase));
+        context.changeDataFetcherBehavior(typeClass.name(), field.name(), dataFetcher -> DataFetcherAdapter.of(dataFetcher, this::upperCase));
         return fieldDefinition;
     }
 
-    private Object upperCase(Object object) {
-        if(object == null || !(object instanceof String)) {
+    private CompletableFuture upperAsync(CompletableFuture future) {
+        return future.thenApply(this::upperSync);
+    }
+
+    private Object upperSync(Object object) {
+        if (!(object instanceof String)) {
             return object;
         }
         String str = (String) object;
@@ -45,5 +51,17 @@ public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object>
             data[i] = Character.toUpperCase(data[i]);
         }
         return new String(data);
+    }
+
+    private Object upperCase(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof CompletableFuture) {
+            return upperAsync((CompletableFuture) object);
+        } else {
+            return upperSync(object);
+        }
+
     }
 }

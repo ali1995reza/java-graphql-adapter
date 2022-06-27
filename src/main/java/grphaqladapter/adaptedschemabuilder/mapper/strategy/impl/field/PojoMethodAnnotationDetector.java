@@ -100,29 +100,33 @@ public class PojoMethodAnnotationDetector implements MethodAnnotationDetector {
         String name = method.getName();
         if (name.startsWith(GET_PREFIX)) {
             name = name.replaceFirst(GET_PREFIX, EMPTY);
-            name = firstCharLowerCase(name);
         } else if (name.startsWith(IS_PREFIX)) {
             name = name.replaceFirst(IS_PREFIX, EMPTY);
-            name = firstCharLowerCase(name);
         }
         return name;
     }
 
     private String getName(Method method) {
-        String name = removePrefix ? removePrefix(method) : method.getName();
+        String name = removePrefix ? firstCharLowerCase(removePrefix(method)) : method.getName();
         return name;
     }
 
     private String getSetterName(Method method, Class clazz) {
         String name = removePrefix(method);
+        Method setter = getMethod(clazz, SET_PREFIX + name, method.getReturnType());
+        if (setter == null) {
+            return null;
+        }
+        return setter.getName();
+    }
+
+    private Method getMethod(Class clazz, String name, Class... params) {
         try {
-            clazz.getMethod(SET_PREFIX + name, method.getReturnType());
-            return SET_PREFIX + name;
+            return clazz.getMethod(name, params);
         } catch (NoSuchMethodException ignored) {
         }
         try {
-            clazz.getDeclaredMethod(SET_PREFIX + name, method.getReturnType());
-            return SET_PREFIX + name;
+            return clazz.getDeclaredMethod(name, params);
         } catch (NoSuchMethodException e) {
             return null;
         }

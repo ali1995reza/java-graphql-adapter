@@ -1,6 +1,6 @@
 fragment fr on Bus {
     model
-    produceYear(pageParameters: {page:10 , size:20}) @MD5(salt: "salt")
+    produceYear @MD5(salt: "salt")
     size
 }
 
