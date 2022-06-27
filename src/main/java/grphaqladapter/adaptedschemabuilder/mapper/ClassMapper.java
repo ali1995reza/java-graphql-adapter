@@ -1,35 +1,44 @@
 package grphaqladapter.adaptedschemabuilder.mapper;
 
 
+import graphql.introspection.Introspection;
 import graphql.schema.DataFetchingEnvironment;
+import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlArgumentException;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlFieldException;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlTypeException;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
-import grphaqladapter.adaptedschemabuilder.mapped.impl.MappedClassBuilder;
-import grphaqladapter.adaptedschemabuilder.mapped.impl.MappedMethodBuilder;
-import grphaqladapter.adaptedschemabuilder.mapped.impl.MappedParameterBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.*;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.annotation.MappedAnnotationBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.classes.MappedInputTypeClassBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.classes.MappedTypeClassBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.enums.MappedEnumBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.enums.MappedEnumConstantsBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.interfaces.MappedInterfaceBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.interfaces.MappedUnionInterfaceBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.method.MappedFieldMethodBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.method.MappedInputFieldMethodBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.parameter.MappedAnnotationMethodBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.parameter.MappedParameterBuilder;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.*;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument.ParameterAutomaticAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.argument.ParameterRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.chain.ChainBuilder;
+import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.directive.RealDirectiveAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field.MethodRealAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field.PojoMethodAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.type.ClassRealAnnotationDetector;
-import grphaqladapter.adaptedschemabuilder.utils.Utils;
 import grphaqladapter.adaptedschemabuilder.validator.ArgumentValidator;
 import grphaqladapter.adaptedschemabuilder.validator.FieldValidator;
 import grphaqladapter.adaptedschemabuilder.validator.TypeValidator;
 import grphaqladapter.annotations.*;
+import grphaqladapter.annotations.interfaces.GraphqlDirectiveFunction;
+import grphaqladapter.annotations.interfaces.GraphqlDirectivesHolder;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder.exception;
@@ -49,95 +58,88 @@ public final class ClassMapper {
                             .withNotNullAnnotation(NotNull.class)
                             .build())
                     .build();
-
     public final static Chain<ClassAnnotationDetector> DEFAULT_CLASS_ANNOTATION_DETECTOR =
             ChainBuilder.newBuilder()
                     .addToLast(new ClassRealAnnotationDetector())
                     .build();
+    public final static Chain<AppliedDirectiveDetector> DEFAULT_APPLIED_DIRECTIVE_DETECTOR =
+            ChainBuilder.newBuilder()
+                    .addToLast(new RealDirectiveAnnotationDetector())
+                    .build();
 
 
-    private final static Function<Class, Map<MappedClass.MappedType, MappedClass>> creator = new Function<Class, Map<MappedClass.MappedType, MappedClass>>() {
+    private final static Function<Class, Map<MappedElementType, MappedClass>> creator = new Function<Class, Map<MappedElementType, MappedClass>>() {
         @Override
-        public Map<MappedClass.MappedType, MappedClass> apply(Class aClass) {
+        public Map<MappedElementType, MappedClass> apply(Class aClass) {
             return new HashMap<>();
         }
     };
 
 
-    private final MappedParameterBuilder parameterBuilder = MappedParameterBuilder.newBuilder();
-    private final MappedMethodBuilder methodBuilder = MappedMethodBuilder.newBuilder();
-    private final MappedClassBuilder classBuilder = MappedClassBuilder.newBuilder();
-
-
     private Chain<ClassAnnotationDetector> classAnnotationDetectorChain;
     private Chain<MethodAnnotationDetector> methodAnnotationDetectorChain;
     private Chain<ParameterAnnotationDetector> parameterAnnotationDetectorChain;
+    private Chain<AppliedDirectiveDetector> appliedDirectiveDetectorChain;
 
     public ClassMapper() {
         classAnnotationDetectorChain = DEFAULT_CLASS_ANNOTATION_DETECTOR;
         methodAnnotationDetectorChain = DEFAULT_METHOD_ANNOTATION_DETECTOR;
         parameterAnnotationDetectorChain = DEFAULT_PARAMETER_ANNOTATION_DETECTOR;
+        appliedDirectiveDetectorChain = DEFAULT_APPLIED_DIRECTIVE_DETECTOR;
     }
 
-    public ClassMapper setClassAnnotationDetectorChain(Chain<ClassAnnotationDetector> classAnnotationDetectorChain) {
-        Assert.isNotNull(methodAnnotationDetectorChain, new IllegalStateException("provided chain is null"));
+    public ClassMapper annotationDetectorChain(Chain<ClassAnnotationDetector> classAnnotationDetectorChain) {
+        Assert.isNotNull(classAnnotationDetectorChain, new IllegalStateException("provided chain is null"));
         this.classAnnotationDetectorChain = classAnnotationDetectorChain;
         return this;
     }
 
 
-    public ClassMapper setMethodAnnotationDetectorChain(Chain<MethodAnnotationDetector> methodAnnotationDetectorChain) {
+    public ClassMapper methodAnnotationDetectorChain(Chain<MethodAnnotationDetector> methodAnnotationDetectorChain) {
         Assert.isNotNull(methodAnnotationDetectorChain, new IllegalStateException("provided chain is null"));
         this.methodAnnotationDetectorChain = methodAnnotationDetectorChain;
         return this;
     }
 
-    public ClassMapper setParameterAnnotationDetectorChain(Chain<ParameterAnnotationDetector> parameterAnnotationDetectorChain) {
-        Assert.isNotNull(methodAnnotationDetectorChain, new IllegalStateException("provided chain is null"));
+    public ClassMapper parameterAnnotationDetectorChain(Chain<ParameterAnnotationDetector> parameterAnnotationDetectorChain) {
+        Assert.isNotNull(parameterAnnotationDetectorChain, new IllegalStateException("provided chain is null"));
         this.parameterAnnotationDetectorChain = parameterAnnotationDetectorChain;
         return this;
     }
 
+    public void appliedDirectiveDetectorChain(Chain<AppliedDirectiveDetector> appliedDirectiveDetectorChain) {
+        Assert.isNotNull(appliedDirectiveDetectorChain, new IllegalStateException("provided chain is null"));
+        this.appliedDirectiveDetectorChain = appliedDirectiveDetectorChain;
+    }
+
     public ClassMapper reset() {
-        classAnnotationDetectorChain = DEFAULT_CLASS_ANNOTATION_DETECTOR;
-        methodAnnotationDetectorChain = DEFAULT_METHOD_ANNOTATION_DETECTOR;
-        parameterAnnotationDetectorChain = DEFAULT_PARAMETER_ANNOTATION_DETECTOR;
+        this.classAnnotationDetectorChain = DEFAULT_CLASS_ANNOTATION_DETECTOR;
+        this.methodAnnotationDetectorChain = DEFAULT_METHOD_ANNOTATION_DETECTOR;
+        this.parameterAnnotationDetectorChain = DEFAULT_PARAMETER_ANNOTATION_DETECTOR;
+        this.appliedDirectiveDetectorChain = DEFAULT_APPLIED_DIRECTIVE_DETECTOR;
         return this;
     }
 
-    private TypeAnnotations detect(Class cls) {
-        TypeAnnotations annotations = null;
+    private TypeAnnotations detectTypeAnnotations(Class clazz) {
         for (ClassAnnotationDetector detector : classAnnotationDetectorChain) {
-            annotations = detector.detectAnnotationFor(cls);
-            if (annotations != null)
-                break;
-        }
-
-        return annotations;
-    }
-
-    private GraphqlFieldAnnotation detectFieldAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
-
-        for (MethodAnnotationDetector detector : methodAnnotationDetectorChain) {
-            if (detector.skipField(method, clazz, mappedType)) {
+            if (detector.skipType(clazz)) {
                 return null;
             }
-            GraphqlFieldAnnotation annotation = detector.detectFieldAnnotation(method, clazz, mappedType);
-            if (annotation != null) {
-                return annotation;
+            TypeAnnotations annotations = detector.detectAnnotationFor(clazz);
+            if (annotations != null) {
+                return annotations;
             }
         }
-
         return null;
     }
 
-    private GraphqlInputFieldAnnotation detectInputFieldAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
+    private GraphqlFieldAnnotation detectFieldAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
 
         for (MethodAnnotationDetector detector : methodAnnotationDetectorChain) {
-            if (detector.skipField(method, clazz, mappedType)) {
+            if (detector.skipField(method, clazz, mappedElementType)) {
                 return null;
             }
-            GraphqlInputFieldAnnotation annotation = detector.detectInputFieldAnnotation(method, clazz, mappedType);
+            GraphqlFieldAnnotation annotation = detector.detectFieldAnnotation(method, clazz, mappedElementType);
             if (annotation != null) {
                 return annotation;
             }
@@ -146,10 +148,13 @@ public final class ClassMapper {
         return null;
     }
 
-    private GraphqlDescriptionAnnotation detectFieldDescription(Method method, Class clazz, MappedClass.MappedType mappedType) {
+    private GraphqlInputFieldAnnotation detectInputFieldAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
 
         for (MethodAnnotationDetector detector : methodAnnotationDetectorChain) {
-            GraphqlDescriptionAnnotation annotation = detector.detectDescriptionAnnotation(method, clazz, mappedType);
+            if (detector.skipInputField(method, clazz, mappedElementType)) {
+                return null;
+            }
+            GraphqlInputFieldAnnotation annotation = detector.detectInputFieldAnnotation(method, clazz, mappedElementType);
             if (annotation != null) {
                 return annotation;
             }
@@ -158,35 +163,87 @@ public final class ClassMapper {
         return null;
     }
 
-    private GraphqlArgumentAnnotation detectArgument(Method method, Parameter parameter, int index) {
+    private GraphqlDirectiveArgumentAnnotation detectDirectiveArgumentAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
 
-        if (parameter.getType() == DataFetchingEnvironment.class) {
-            return null;
+        for (MethodAnnotationDetector detector : methodAnnotationDetectorChain) {
+            if (detector.skipDirectiveArgument(method, clazz, mappedElementType)) {
+                return null;
+            }
+            GraphqlDirectiveArgumentAnnotation annotation = detector.detectDirectiveArgumentAnnotation(method, clazz, mappedElementType);
+            if (annotation != null) {
+                return annotation;
+            }
         }
 
-        GraphqlArgumentAnnotation annotations = null;
+        return null;
+    }
 
+    public List<DirectiveArgumentsValue> detectDirective(MappedElement element, Map<Class, MappedAnnotation> annotationMap) {
+        for (AppliedDirectiveDetector detector : appliedDirectiveDetectorChain) {
+            List<DirectiveArgumentsValue> value = detector.detectDirectives(element, annotationMap);
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
+    private GraphqlDescriptionAnnotation detectFieldDescription(Method method, Class clazz, MappedElementType mappedElementType) {
+
+        for (MethodAnnotationDetector detector : methodAnnotationDetectorChain) {
+            GraphqlDescriptionAnnotation annotation = detector.detectDescriptionAnnotation(method, clazz, mappedElementType);
+            if (annotation != null) {
+                return annotation;
+            }
+        }
+
+        return null;
+    }
+
+    private Object detectArgument(Class clazz, Method method, Parameter parameter, int index) {
         for (ParameterAnnotationDetector detector : parameterAnnotationDetectorChain) {
-            annotations = detector.detectArgumentAnnotation(method, parameter, index);
-            if (annotations != null)
-                break;
+            if (detector.skip(method, parameter, index)) {
+                return MappedParameter.Model.SKIPPED;
+            }
+            GraphqlArgumentAnnotation annotation = detector.detectArgumentAnnotation(method, parameter, index);
+            if (annotation != null) {
+                return annotation;
+            }
+            if ((parameter.getType() == DataFetchingEnvironment.class ||
+                    parameter.getType() == GraphqlDirectivesHolder.class ||
+                    parameter.getType() == AdaptedGraphQLSchema.class) &&
+                    detector.isSystemParameter(method, parameter, index)) {
+
+                if (parameter.getType() == AdaptedGraphQLSchema.class) {
+                    return MappedParameter.Model.ADAPTED_SCHEMA;
+                } else if (parameter.getType() == DataFetchingEnvironment.class) {
+                    return MappedParameter.Model.DATA_FETCHING_ENVIRONMENT;
+                } else if (parameter.getType() == GraphqlDirectivesHolder.class) {
+                    return MappedParameter.Model.DIRECTIVES;
+                }
+
+                throw exception(MappingGraphqlArgumentException.class, "can not map parameter to system-parameter type. A system-parameter type must be AdaptedGraphQLSchema, DataFetchingEnvironment or GraphqlDirectivesHolder", clazz, method, parameter);
+            }
         }
 
-        return annotations;
+        throw exception(MappingGraphqlArgumentException.class, "can not map parameter", clazz, method, parameter);
     }
 
-    public Map<Class, Map<MappedClass.MappedType, MappedClass>> map(Collection<Class> classes) {
-        HashMap<Class, Map<MappedClass.MappedType, MappedClass>> allMappedClasses = new HashMap<>();
-        //so handle it please !
+    public Map<Class, Map<MappedElementType, MappedElement>> map(Collection<Class> classes) {
+        HashMap<Class, Map<MappedElementType, MappedElement>> allMappedClasses = new HashMap<>();
 
         for (Class clazz : classes) {
 
-            TypeAnnotations annotations = detect(clazz);
+            TypeAnnotations annotations = detectTypeAnnotations(clazz);
+
+            if (annotations == null) {
+                continue;
+            }
 
             TypeValidator.validate(annotations, clazz);
 
-            Map<MappedClass.MappedType, MappedClass> allMappedClass =
-                    allMappedClassFor(clazz, annotations);
+            Map<MappedElementType, MappedElement> allMappedClass =
+                    allMappedElementFor(clazz, annotations);
 
             Assert.isOneOrMoreFalse(exception(MappingGraphqlTypeException.class, "no mapped class", clazz),
                     allMappedClass.size() == 0);
@@ -198,144 +255,219 @@ public final class ClassMapper {
 
     }
 
+    private Map<MappedElementType, MappedElement> allMappedElementFor(Class cls, TypeAnnotations annotations) {
+        Map<MappedElementType, MappedElement> map = new HashMap<>();
 
-    private Map<MappedClass.MappedType, MappedClass> allMappedClassFor(Class cls, TypeAnnotations annotations) {
-        Map<MappedClass.MappedType, MappedClass> map = new HashMap<>();
+        final String description = annotations.descriptionAnnotation() == null ? null :
+                annotations.descriptionAnnotation().value();
 
-        String description = annotations.descriptionAnnotation() == null ? null : annotations.descriptionAnnotation().value();
-
-        MappedClass mappedClass = mapClassIfNotNull(cls, annotations.typeAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.interfaceAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.inputTypeAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.unionAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.enumAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.queryAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.mutationAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
-        mappedClass = mapClassIfNotNull(cls, annotations.subscriptionAnnotation(), description);
-        if (mappedClass != null) map.put(mappedClass.mappedType(), mappedClass);
-
+        Arrays.asList(annotations.typeAnnotation(),
+                        annotations.interfaceAnnotation(),
+                        annotations.inputTypeAnnotation(),
+                        annotations.unionAnnotation(),
+                        annotations.enumAnnotation(),
+                        annotations.queryAnnotation(),
+                        annotations.mutationAnnotation(),
+                        annotations.subscriptionAnnotation(),
+                        annotations.directiveAnnotation())
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(element -> {
+                    MappedElement mappedClass = mapClassIfNotNull(cls, element, description);
+                    map.put(mappedClass.mappedType(), mappedClass);
+                });
 
         return map;
     }
 
+    private MappedTypeClass mapTypeClass(Class clazz, String name, MappedElementType elementType, String description) {
 
-    private MappedClass mapClassIfNotNull(Class cls, GraphqlInputTypeAnnotation annotation, GraphqlDescriptionAnnotation descriptionAnnotation) {
+        MappedTypeClassBuilder builder = MappedTypeClassBuilder.newBuilder(elementType)
+                .name(name)
+                .baseClass(clazz)
+                .description(description);
+
+        for (Method method : MappingStatics.getAllMethods(clazz)) {
+            MappedFieldMethod mappedMethod = mapFieldMethod(clazz, method);
+
+            if (mappedMethod == null) continue;
+
+            builder.addFieldMethod(mappedMethod);
+        }
+
+        MappedTypeClass mappedTypeClass = builder.build();
+
+        TypeValidator.validate(mappedTypeClass, clazz);
+
+        return mappedTypeClass;
+    }
+
+    private MappedInterface mapInterfaceClass(Class clazz, String name, String description) {
+
+        MappedInterfaceBuilder builder = MappedInterfaceBuilder.newBuilder()
+                .name(name)
+                .baseClass(clazz)
+                .description(description);
+
+        for (Method method : MappingStatics.getAllMethods(clazz)) {
+            MappedFieldMethod mappedMethod = mapFieldMethod(clazz, method);
+
+            if (mappedMethod == null) continue;
+
+            builder.addFieldMethod(mappedMethod);
+        }
+
+        MappedInterface mappedInterface = builder.build();
+
+        TypeValidator.validate(mappedInterface, clazz);
+
+        return mappedInterface;
+    }
+
+
+    private MappedInputTypeClass mapInputTypeClass(Class clazz, String name, String description) {
+        MappedInputTypeClassBuilder builder = MappedInputTypeClassBuilder.newBuilder()
+                .name(name)
+                .baseClass(clazz)
+                .description(description);
+
+        for (Method method : MappingStatics.getAllMethods(clazz)) {
+            MappedInputFieldMethod mappedMethod = mapInputFieldMethod(clazz, method);
+
+            if (mappedMethod == null) continue;
+
+            builder.addInputFieldMethod(mappedMethod);
+        }
+
+        MappedInputTypeClass mappedTypeClass = builder.build();
+
+        TypeValidator.validate(mappedTypeClass, clazz);
+
+        return mappedTypeClass;
+    }
+
+    private MappedEnum mapEnumClass(Class clazz, String name, String description) {
+
+        MappedEnumBuilder builder = MappedEnumBuilder.newBuilder()
+                .name(name)
+                .baseClass(clazz)
+                .description(description);
+
+        for (Object c : clazz.getEnumConstants()) {
+            Enum constant = (Enum) c;
+
+            MappedEnumConstant mappedEnumConstant = mapEnumConstant(clazz, constant);
+
+            if (mappedEnumConstant == null) {
+                continue;
+            }
+
+            builder.addEnumConstant(mappedEnumConstant);
+        }
+
+        MappedEnum mappedEnum = builder.build();
+
+        TypeValidator.validate(mappedEnum, clazz);
+
+        return mappedEnum;
+
+    }
+
+    private MappedUnionInterface mapUnionInterface(Class clazz, String name, String description) {
+
+        MappedUnionInterfaceBuilder builder = MappedUnionInterfaceBuilder.newBuilder()
+                .name(name)
+                .baseClass(clazz)
+                .description(description);
+
+        MappedUnionInterface unionInterface = builder.build();
+
+        TypeValidator.validate(unionInterface, clazz);
+
+        return unionInterface;
+    }
+
+    private MappedClass mapClass(Class clazz, String name, MappedElementType type, String description) {
+
+        if (type.isTopLevelType() || type.is(MappedElementType.OBJECT_TYPE)) {
+            return mapTypeClass(clazz, name, type, description);
+        } else if (type.is(MappedElementType.INPUT_TYPE)) {
+            return mapInputTypeClass(clazz, name, description);
+        } else if (type.is(MappedElementType.ENUM)) {
+            return mapEnumClass(clazz, name, description);
+        } else if (type.is(MappedElementType.INTERFACE)) {
+            return mapInterfaceClass(clazz, name, description);
+        } else if (type.is(MappedElementType.UNION)) {
+            return mapUnionInterface(clazz, name, description);
+        }
+
+        throw new IllegalStateException("bad element type [" + type + "] for mapping a class");
+    }
+
+    private MappedAnnotation mapAnnotation(Class<? extends Annotation> clazz, String name, Class<? extends GraphqlDirectiveFunction> functionality, Introspection.DirectiveLocation[] locations, String description) {
+
+        MappedAnnotationBuilder builder = MappedAnnotationBuilder.newBuilder();
+        builder.name(name).description(description)
+                .baseClass(clazz)
+                .functionality(functionality)
+                .addLocations(locations);
+
+        for (Method method : MappingStatics.getAllMethods(clazz)) {
+            MappedAnnotationMethod mappedMethod = mapAnnotationMethod(clazz, method);
+
+            if (mappedMethod == null) {
+                continue;
+            }
+
+            builder.addMethod(mappedMethod);
+
+        }
+
+        return builder.build();
+    }
+
+    private static MappedElementType getTypeFromAnnotation(GraphqlElementAnnotation annotation) {
+        if (annotation instanceof GraphqlTypeAnnotation) {
+            return MappedElementType.OBJECT_TYPE;
+        }
+        if (annotation instanceof GraphqlInterfaceAnnotation) {
+            return MappedElementType.INTERFACE;
+        }
+        if (annotation instanceof GraphqlInputTypeAnnotation) {
+            return MappedElementType.INPUT_TYPE;
+        }
+        if (annotation instanceof GraphqlUnionAnnotation) {
+            return MappedElementType.UNION;
+        }
+        if (annotation instanceof GraphqlEnumAnnotation) {
+            return MappedElementType.ENUM;
+        }
+        if (annotation instanceof GraphqlMutationAnnotation) {
+            return MappedElementType.MUTATION;
+        }
+        if (annotation instanceof GraphqlQueryAnnotation) {
+            return MappedElementType.QUERY;
+        }
+        if (annotation instanceof GraphqlSubscriptionAnnotation) {
+            return MappedElementType.SUBSCRIPTION;
+        }
+        throw new IllegalStateException("bad annotation [" + annotation + "] for a class");
+    }
+
+    private MappedElement mapClassIfNotNull(Class cls, GraphqlElementAnnotation annotation, String description) {
         if (annotation == null)
             return null;
 
-        String name = Utils.stringNullifyOrGetDefault(annotation.typeName(), cls.getSimpleName());
-
-        return mapClass(cls, name, MappedClass.MappedType.INPUT_TYPE, descriptionAnnotation == null ? null : descriptionAnnotation.value());
-    }
-
-    private MappedClass mapClass(Class clazz, String name, MappedClass.MappedType type, String description) {
-        classBuilder.refresh();
-
-        if (type.isTopLevelType() || type.is(MappedClass.MappedType.OBJECT_TYPE) || type.is(MappedClass.MappedType.INTERFACE)) {
-            for (Method method : MappingStatics.getAllMethods(clazz)) {
-                MappedMethod mappedMethod = mapFieldMethod(clazz, method, type);
-
-                if (mappedMethod == null) continue;
-
-                classBuilder.addMappedMethod(mappedMethod);
-            }
-        } else if (type.is(MappedClass.MappedType.INPUT_TYPE)) {
-            for (Method method : MappingStatics.getAllMethods(clazz)) {
-                MappedMethod mappedMethod = mapInputFieldMethod(clazz, method);
-
-                if (mappedMethod == null) continue;
-
-                classBuilder.addMappedMethod(mappedMethod);
-            }
+        if (annotation instanceof GraphqlDirectiveAnnotation) {
+            GraphqlDirectiveAnnotation directiveAnnotation = (GraphqlDirectiveAnnotation) annotation;
+            return mapAnnotation(cls, directiveAnnotation.name(), directiveAnnotation.functionality(), directiveAnnotation.locations(), description);
         }
-
-        MappedClass mappedClass = classBuilder
-                .setBaseClass(clazz)
-                .setTypeName(name)
-                .setMappedType(type)
-                .setDescription(description)
-                .build();
-
-        TypeValidator.validate(mappedClass, clazz);
-
-        return mappedClass;
+        return mapClass(cls, annotation.name(), getTypeFromAnnotation(annotation), description);
     }
 
+    private MappedFieldMethod mapFieldMethod(Class clazz, Method method) {
 
-    private MappedClass mapClassIfNotNull(Class cls, Object a, String description) {
-        if (a == null)
-            return null;
-
-        if (a instanceof GraphqlTypeAnnotation) {
-            GraphqlTypeAnnotation annotation = (GraphqlTypeAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.OBJECT_TYPE, description);
-        } else if (a instanceof GraphqlInterfaceAnnotation) {
-            GraphqlInterfaceAnnotation annotation = (GraphqlInterfaceAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.INTERFACE, description);
-        } else if (a instanceof GraphqlInputTypeAnnotation) {
-            GraphqlInputTypeAnnotation annotation = (GraphqlInputTypeAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.INPUT_TYPE, description);
-        } else if (a instanceof GraphqlEnumAnnotation) {
-            GraphqlEnumAnnotation annotation = (GraphqlEnumAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.ENUM, description);
-        } else if (a instanceof GraphqlUnionAnnotation) {
-            GraphqlUnionAnnotation annotation = (GraphqlUnionAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.UNION, description);
-        } else if (a instanceof GraphqlQueryAnnotation) {
-            GraphqlQueryAnnotation annotation = (GraphqlQueryAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.QUERY, description);
-        } else if (a instanceof GraphqlMutationAnnotation) {
-            GraphqlMutationAnnotation annotation = (GraphqlMutationAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.MUTATION, description);
-        } else if (a instanceof GraphqlSubscriptionAnnotation) {
-            GraphqlSubscriptionAnnotation annotation = (GraphqlSubscriptionAnnotation) a;
-            String name = Utils.stringNullifyOrGetDefault(annotation.typeName(),
-                    cls.getSimpleName());
-
-            return mapClass(cls, name, MappedClass.MappedType.SUBSCRIPTION, description);
-        } else {
-            throw new IllegalStateException("object not an annotation - [type:" + a.getClass() + "]");
-        }
-    }
-
-    private MappedMethod mapFieldMethod(Class clazz, Method method, MappedClass.MappedType mappedType) {
-
-        GraphqlFieldAnnotation annotation = detectFieldAnnotation(method, clazz, mappedType);
+        GraphqlFieldAnnotation annotation = detectFieldAnnotation(method, clazz, MappedElementType.FIELD);
 
         if (annotation == null) {
             return null;
@@ -343,25 +475,20 @@ public final class ClassMapper {
 
         FieldValidator.validate(annotation, clazz, method);
 
-        GraphqlDescriptionAnnotation descriptionAnnotation = detectFieldDescription(method, clazz, mappedType);
+        GraphqlDescriptionAnnotation descriptionAnnotation = detectFieldDescription(method, clazz, MappedElementType.FIELD);
 
-        MappingStatics.TypeDetails typeDetails =
-                MappingStatics.findTypeDetails(method);
+        MappedFieldMethodBuilder methodBuilder = MappedFieldMethodBuilder.newBuilder();
 
-        methodBuilder.refresh();
         for (int index = 0; index < method.getParameters().length; index++) {
-            methodBuilder.addMappedParameter(
+            methodBuilder.addParameter(
                     mapParameter(clazz, method, method.getParameters()[index], index)
             );
         }
 
-        MappedMethod mappedMethod = methodBuilder
-                .setDimensions(typeDetails.dimension())
-                .setType(typeDetails.type())
-                .setFieldName(annotation.fieldName())
-                .setNullable(annotation.nullable())
-                .setMethod(method)
-                .setDescriptionFrom(descriptionAnnotation)
+        MappedFieldMethod mappedMethod = methodBuilder.method(method)
+                .description(getDescription(descriptionAnnotation))
+                .name(annotation.fieldName())
+                .type(TypeDescriptor.of(method, annotation.nullable()))
                 .build();
 
         FieldValidator.validate(mappedMethod, clazz, method);
@@ -369,9 +496,9 @@ public final class ClassMapper {
         return mappedMethod;
     }
 
-    private MappedMethod mapInputFieldMethod(Class clazz, Method method) {
+    private MappedInputFieldMethod mapInputFieldMethod(Class clazz, Method method) {
 
-        GraphqlInputFieldAnnotation annotation = detectInputFieldAnnotation(method, clazz, MappedClass.MappedType.INPUT_TYPE);
+        GraphqlInputFieldAnnotation annotation = detectInputFieldAnnotation(method, clazz, MappedElementType.INPUT_TYPE);
 
         if (annotation == null) {
             return null;
@@ -379,23 +506,17 @@ public final class ClassMapper {
 
         FieldValidator.validate(annotation, clazz, method);
 
-        GraphqlDescriptionAnnotation descriptionAnnotation = detectFieldDescription(method, clazz, MappedClass.MappedType.INPUT_TYPE);
-
-        MappingStatics.TypeDetails typeDetails = MappingStatics
-                .findTypeDetails(method.getGenericReturnType());
+        GraphqlDescriptionAnnotation descriptionAnnotation = detectFieldDescription(method, clazz, MappedElementType.INPUT_TYPE);
 
         Method setterMethod = detectSetter(annotation.setter(), clazz, method);
 
-        methodBuilder.refresh();
+        MappedInputFieldMethodBuilder methodBuilder = MappedInputFieldMethodBuilder.newBuilder();
 
-        MappedMethod mappedMethod = methodBuilder
-                .setMethod(method)
-                .setSetter(setterMethod)
-                .setNullable(annotation.nullable())
-                .setFieldName(annotation.inputFieldName())
-                .setDimensions(typeDetails.dimension())
-                .setType(typeDetails.type())
-                .setDescriptionFrom(descriptionAnnotation)
+        MappedInputFieldMethod mappedMethod = methodBuilder.method(method)
+                .description(getDescription(descriptionAnnotation))
+                .name(annotation.inputFieldName())
+                .type(TypeDescriptor.of(method, annotation.nullable()))
+                .setter(setterMethod)
                 .build();
 
         FieldValidator.validate(mappedMethod, clazz, method);
@@ -403,6 +524,37 @@ public final class ClassMapper {
         return mappedMethod;
     }
 
+    private MappedEnumConstant mapEnumConstant(Class clazz, Enum e) {
+        MappedEnumConstant constant = MappedEnumConstantsBuilder.newBuilder()
+                .name(e.name())
+                .constant(e)
+                .build();
+
+        //todo validate
+
+        return constant;
+    }
+
+    private MappedAnnotationMethod mapAnnotationMethod(Class clazz, Method method) {
+        GraphqlDirectiveArgumentAnnotation annotation = detectDirectiveArgumentAnnotation(method, clazz, MappedElementType.DIRECTIVE);
+        if (annotation == null) {
+            return null;
+        }
+        //ArgumentValidator.validate(); //todo
+
+
+        return MappedAnnotationMethodBuilder.newBuilder()
+                .name(annotation.name())
+                .method(method)
+                .type(new TypeDescriptor(
+                        annotation.type(),
+                        annotation.nullable(),
+                        annotation.dimensions(),
+                        annotation.dimensions() > 0 ? TypeDescriptor.DimensionModel.LIST : null
+                ))
+                .valueParser(annotation.valueParser())
+                .build();
+    }
 
     private Method detectSetter(String setter, Class clazz, Method method) {
         try {
@@ -418,56 +570,40 @@ public final class ClassMapper {
 
 
     private MappedParameter mapParameter(Class clazz, Method method, Parameter parameter, int index) {
-        if (parameter.getType() == DataFetchingEnvironment.class) {
-            return mapEnvParameter(clazz, method, parameter, index);
-        } else {
-            return mapSchemaParameter(clazz, method, parameter, index);
+        Object o = detectArgument(clazz, method, parameter, index);
+
+        if (o == MappedParameter.Model.ADAPTED_SCHEMA) {
+            return MappedParameterBuilder.newAdaptedSchemaParameter(parameter);
         }
 
-    }
+        if (o == MappedParameter.Model.DATA_FETCHING_ENVIRONMENT) {
+            return MappedParameterBuilder.newEnvironmentParameter(parameter);
+        }
 
-    private MappedParameter mapEnvParameter(Class clazz, Method method, Parameter parameter, int index) {
+        if (o == MappedParameter.Model.DIRECTIVES) {
+            return MappedParameterBuilder.newDirectiveParameter(parameter);
+        }
 
-        GraphqlArgumentAnnotation argumentAnnotation = detectArgument(method, parameter, index);
+        if (o == MappedParameter.Model.SKIPPED) {
+            return MappedParameterBuilder.newSkippedParameter(parameter);
+        }
 
-        Assert.isNull(argumentAnnotation, exception(MappingGraphqlArgumentException.class, "env parameter must not contains argument annotation", clazz, method, parameter));
+        GraphqlArgumentAnnotation argumentAnnotation = (GraphqlArgumentAnnotation) o;
 
-
-        MappingStatics.TypeDetails typeDetails =
-                MappingStatics.findTypeDetails(parameter.getParameterizedType());
-
-        return parameterBuilder
-                .setDimensions(typeDetails.dimension())
-                .setType(typeDetails.type())
-                .setParameter(parameter)
-                .setArgumentName("ENV_PARAMETER")
-                .setNullable(false)
-                .setEnv(true)
-                .build();
-    }
-
-    private MappedParameter mapSchemaParameter(Class clazz, Method method, Parameter parameter, int index) {
-        GraphqlArgumentAnnotation argumentAnnotation = detectArgument(method, parameter, index);
-
-        ArgumentValidator.validate(argumentAnnotation, clazz, method, parameter);
-
-        MappingStatics.TypeDetails typeDetails =
-                MappingStatics.findTypeDetails(parameter.getParameterizedType());
-
-        String name = Utils.stringNullifyOrGetDefault(argumentAnnotation.argumentName(), parameter.getName());
-
-        MappedParameter mappedParameter = parameterBuilder
-                .setDimensions(typeDetails.dimension())
-                .setType(typeDetails.type())
-                .setParameter(parameter)
-                .setArgumentName(name)
-                .setNullable(argumentAnnotation.nullable())
-                .setEnv(false)
+        MappedParameter mappedParameter = MappedParameterBuilder
+                .newBuilder()
+                .name(argumentAnnotation.argumentName())
+                .parameter(parameter)
+                .type(TypeDescriptor.of(parameter, argumentAnnotation.nullable()))
                 .build();
 
         ArgumentValidator.validate(mappedParameter, clazz, method, parameter);
 
         return mappedParameter;
+    }
+
+    private static String getDescription(GraphqlDescriptionAnnotation annotation) {
+        return annotation == null ? null : annotation.value();
     }
 
 }

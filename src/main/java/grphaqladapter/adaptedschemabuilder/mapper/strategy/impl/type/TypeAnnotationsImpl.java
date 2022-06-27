@@ -13,9 +13,10 @@ class TypeAnnotationsImpl implements TypeAnnotations {
     private final GraphqlQueryAnnotation queryAnnotation;
     private final GraphqlMutationAnnotation mutationAnnotation;
     private final GraphqlSubscriptionAnnotation subscriptionAnnotation;
+    private final GraphqlDirectiveAnnotation directiveAnnotation;
     private final GraphqlDescriptionAnnotation descriptionAnnotation;
 
-    TypeAnnotationsImpl(GraphqlTypeAnnotation typeAnnotation, GraphqlInputTypeAnnotation inputTypeAnnotation, GraphqlInterfaceAnnotation interfaceAnnotation, GraphqlUnionAnnotation unionAnnotation, GraphqlEnumAnnotation enumAnnotation, GraphqlQueryAnnotation queryAnnotation, GraphqlMutationAnnotation mutationAnnotation, GraphqlSubscriptionAnnotation subscriptionAnnotation, GraphqlDescriptionAnnotation descriptionAnnotation) {
+    TypeAnnotationsImpl(GraphqlTypeAnnotation typeAnnotation, GraphqlInputTypeAnnotation inputTypeAnnotation, GraphqlInterfaceAnnotation interfaceAnnotation, GraphqlUnionAnnotation unionAnnotation, GraphqlEnumAnnotation enumAnnotation, GraphqlQueryAnnotation queryAnnotation, GraphqlMutationAnnotation mutationAnnotation, GraphqlSubscriptionAnnotation subscriptionAnnotation, GraphqlDirectiveAnnotation directiveAnnotation, GraphqlDescriptionAnnotation descriptionAnnotation) {
         this.typeAnnotation = typeAnnotation;
         this.inputTypeAnnotation = inputTypeAnnotation;
         this.interfaceAnnotation = interfaceAnnotation;
@@ -24,6 +25,7 @@ class TypeAnnotationsImpl implements TypeAnnotations {
         this.queryAnnotation = queryAnnotation;
         this.mutationAnnotation = mutationAnnotation;
         this.subscriptionAnnotation = subscriptionAnnotation;
+        this.directiveAnnotation = directiveAnnotation;
         this.descriptionAnnotation = descriptionAnnotation;
 
      /*   Assert.isOneFalse("at least one type annotation needed",
@@ -80,6 +82,11 @@ class TypeAnnotationsImpl implements TypeAnnotations {
     @Override
     public GraphqlSubscriptionAnnotation subscriptionAnnotation() {
         return subscriptionAnnotation;
+    }
+
+    @Override
+    public GraphqlDirectiveAnnotation directiveAnnotation() {
+        return directiveAnnotation;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package tests.T1.schema;
 
+import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.annotations.GraphqlArgument;
 import grphaqladapter.annotations.GraphqlField;
 import grphaqladapter.annotations.GraphqlQuery;
@@ -51,7 +52,8 @@ public class Query {
     }
 
     @GraphqlField
-    public Vehicle getVehicle(@GraphqlArgument(argumentName = "isCar") Boolean isCar) {
+    public Vehicle getVehicle(@GraphqlArgument(argumentName = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
+        System.out.println((Object) environment.getGraphQlContext().get("auth"));
         if (isCar == null) {
             isCar = false;
         }

@@ -20,5 +20,7 @@ public interface TypeAnnotations {
 
     GraphqlSubscriptionAnnotation subscriptionAnnotation();
 
+    GraphqlDirectiveAnnotation directiveAnnotation();
+
     GraphqlDescriptionAnnotation descriptionAnnotation();
 }

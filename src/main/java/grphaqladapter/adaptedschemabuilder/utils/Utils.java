@@ -9,13 +9,7 @@ public final class Utils {
 
 
     public static <T> List copy(List<T> l) {
-        ArrayList<T> list = new ArrayList<>();
-
-        for (T o : l) {
-            list.add(o);
-        }
-
-        return list;
+        return new ArrayList<>(l);
     }
 
 
@@ -23,14 +17,14 @@ public final class Utils {
         return new HashMap<>(m);
     }
 
-    public final static <T> T nullifyOrGetDefault(T t, T d) {
+    public static <T> T nullifyOrGetDefault(T t, T d) {
         if (t == null)
             return d;
 
         return t;
     }
 
-    public final static String stringNullifyOrGetDefault(String s, String d) {
+    public static String stringNullifyOrGetDefault(String s, String d) {
         if (s == null || s.isEmpty())
             return d;
 

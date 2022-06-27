@@ -4,6 +4,8 @@ import graphql.schema.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SDLStatic {
 
@@ -252,15 +254,70 @@ public class SDLStatic {
     public static String from(GraphQLSchema schema) {
         StringBuffer buffer = new StringBuffer();
 
-        buffer.append(NEW_LINE).append(NEW_LINE);
+        List<GraphQLNamedType> allTypes = schema.getAllTypesAsList();
 
-        for (GraphQLNamedType type : schema.getAllTypesAsList()) {
-            if (BuiltInTypes.contains(type.getName()))
-                continue;
-            buffer.append(from(type)).append(NEW_LINE).append(NEW_LINE);
-        }
+        separate(allTypes, GraphQLScalarType.class)
+                .forEach(type -> append(buffer, type));
+
+        separate(allTypes, GraphQLEnumType.class)
+                .forEach(type -> append(buffer, type));
+
+        separate(allTypes, GraphQLInputObjectType.class)
+                .forEach(type -> append(buffer, type));
+
+        separate(allTypes, GraphQLInterfaceType.class)
+                .forEach(type -> append(buffer, type));
+
+        separateJustObjects(schema)
+                .forEach(type -> append(buffer, type));
+
+        separate(allTypes, GraphQLUnionType.class)
+                .forEach(type -> append(buffer, type));
+
+        separateTopLevelObjects(schema)
+                .forEach(type -> append(buffer, type));
 
         return buffer.toString();
+    }
+
+    private static void append(StringBuffer buffer, GraphQLNamedType type) {
+        if (BuiltInTypes.contains(type.getName()))
+            return;
+        buffer.append(from(type)).append(NEW_LINE).append(NEW_LINE);
+    }
+
+    private static <T> Stream<T> stream(List<?> list, Class<T> clazz) {
+        return list.stream().filter(x -> clazz.isAssignableFrom(x.getClass()))
+                .map(x -> (T) x);
+    }
+
+    private static <T> List<T> separate(List<?> list, Class<T> clazz) {
+        return stream(list, clazz).collect(Collectors.toList());
+    }
+
+    private static boolean hasSameName(GraphQLObjectType t1, GraphQLObjectType t2) {
+        if (t1 == null || t2 == null) {
+            return false;
+        }
+        return t1.getName().equals(t2.getName());
+    }
+
+    private static boolean isTopLevel(GraphQLObjectType type, GraphQLSchema schema) {
+        return hasSameName(schema.getQueryType(), type)
+                || hasSameName(schema.getMutationType(), type)
+                || hasSameName(schema.getSubscriptionType(), type);
+    }
+
+    private static List<GraphQLObjectType> separateJustObjects(GraphQLSchema schema) {
+        return stream(schema.getAllTypesAsList(), GraphQLObjectType.class)
+                .filter(type -> !isTopLevel(type, schema))
+                .collect(Collectors.toList());
+    }
+
+    private static List<GraphQLObjectType> separateTopLevelObjects(GraphQLSchema schema) {
+        return stream(schema.getAllTypesAsList(), GraphQLObjectType.class)
+                .filter(type -> isTopLevel(type, schema))
+                .collect(Collectors.toList());
     }
 
     private static String spaces(int size) {

@@ -6,31 +6,31 @@ import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
 
 
-abstract class DiscoveredTypeImpl<T extends GraphQLType> implements DiscoveredType<T> {
+abstract class DiscoveredTypeImpl<T extends GraphQLType, E extends MappedClass> implements DiscoveredType<T, E> {
 
-    private final MappedClass mappedClass;
+    private final E mappedElement;
     private final String name;
     private final T graphQLType;
 
-    public DiscoveredTypeImpl(MappedClass mappedClass, String name, T graphQLType) {
-        this.mappedClass = mappedClass;
+    public DiscoveredTypeImpl(E mappedElement, String name, T graphQLType) {
+        this.mappedElement = mappedElement;
         this.name = name;
         this.graphQLType = graphQLType;
     }
 
     @Override
-    public String typeName() {
+    public String name() {
         return name;
     }
 
     @Override
-    public T asGraphQLType() {
+    public T asGraphqlElement() {
         return graphQLType;
     }
 
     @Override
-    public MappedClass asMappedClass() {
-        return mappedClass;
+    public E asMappedElement() {
+        return mappedElement;
     }
 
     abstract void setUnmodifiable();

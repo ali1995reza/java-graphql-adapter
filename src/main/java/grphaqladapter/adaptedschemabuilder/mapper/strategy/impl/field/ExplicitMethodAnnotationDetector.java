@@ -1,9 +1,10 @@
 package grphaqladapter.adaptedschemabuilder.mapper.strategy.impl.field;
 
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedElementType;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.MethodAnnotationDetector;
 import grphaqladapter.adaptedschemabuilder.utils.Utils;
 import grphaqladapter.annotations.GraphqlDescriptionAnnotation;
+import grphaqladapter.annotations.GraphqlDirectiveArgumentAnnotation;
 import grphaqladapter.annotations.GraphqlFieldAnnotation;
 import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
 
@@ -22,17 +23,23 @@ class ExplicitMethodAnnotationDetector implements MethodAnnotationDetector {
     }
 
     @Override
-    public GraphqlFieldAnnotation detectFieldAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
+    public GraphqlFieldAnnotation detectFieldAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
         return this.explicitFieldAnnotations.get(method);
     }
 
     @Override
-    public GraphqlInputFieldAnnotation detectInputFieldAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
+    public GraphqlInputFieldAnnotation detectInputFieldAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
         return this.explicitInputFieldAnnotations.get(method);
     }
 
     @Override
-    public GraphqlDescriptionAnnotation detectDescriptionAnnotation(Method method, Class clazz, MappedClass.MappedType mappedType) {
+    public GraphqlDirectiveArgumentAnnotation detectDirectiveArgumentAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
         return null;
     }
+
+    @Override
+    public GraphqlDescriptionAnnotation detectDescriptionAnnotation(Method method, Class clazz, MappedElementType mappedElementType) {
+        return null;
+    }
+
 }

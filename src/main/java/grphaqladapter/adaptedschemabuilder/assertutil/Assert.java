@@ -99,6 +99,21 @@ public class Assert {
             throw exception;
     }
 
+    public static <T extends Throwable> void allNotNull(T exception, Object... objects) throws T {
+        if (objects == null) {
+            return;
+        }
+        for (Object o : objects) {
+            if (o == null) {
+                throw exception;
+            }
+        }
+    }
+
+    public static <T extends Throwable> void allNotNull(Object... objects) throws T {
+        allNotNull(new NullPointerException("on of provided objects is null"), objects);
+    }
+
     public static void isNotNull(Object o) {
         isNotNull(o, new NullPointerException("object is null"));
     }
@@ -196,13 +211,8 @@ public class Assert {
         isModifierValidForAFieldMethod(method, "just public and none-static methods with return value can be mapped to fields - [method:" + method + "]");
     }
 
-    public static void isPositive(int i, String msg) {
-        if (i < 1)
-            throw new IllegalStateException(msg);
-    }
-
-    public static void isPositive(int i) {
-        isPositive(i, "number must be positive");
+    public static <T extends Throwable> void isPositive(int i, T exception) throws T {
+        isTrue(i > 0, exception);
     }
 
     public static void isNotPositive(int i, String msg) {

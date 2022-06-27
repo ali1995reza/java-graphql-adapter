@@ -1,38 +1,19 @@
 package grphaqladapter.adaptedschemabuilder.mapped.impl;
 
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
-import grphaqladapter.adaptedschemabuilder.utils.Utils;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedElementType;
 
-import java.util.Collections;
-import java.util.Map;
+public abstract class MappedClassImpl extends MappedElementImpl implements MappedClass {
 
-final class MappedClassImpl implements MappedClass {
-
+    private final String name;
     private final Class baseClass;
-    private final String typeName;
     private final String description;
-    private final MappedType mappedType;
-    private final Map<String, MappedMethod> mappedMethods;
 
-    MappedClassImpl(Class baseClass, String typeName, String description, MappedType mappedType, Map<String, MappedMethod> mappedMethods) {
+    protected MappedClassImpl(String name, MappedElementType mappedType, String description, Class baseClass) {
+        super(name, mappedType, description);
+        this.name = name;
         this.baseClass = baseClass;
-        this.typeName = typeName;
         this.description = description;
-        this.mappedType = mappedType;
-        this.mappedMethods = Utils.nullifyOrGetDefault(mappedMethods, Collections.EMPTY_MAP);
-    }
-
-    final static MappedClass clone(MappedClass mappedClass) {
-        return new MappedClassImpl(
-                mappedClass.baseClass(),
-                mappedClass.typeName(),
-                mappedClass.description(),
-                mappedClass.mappedType(),
-                mappedClass.mappedMethods() == null ? null :
-                        Collections.unmodifiableMap(Utils.copy(mappedClass.mappedMethods()))
-
-        );
     }
 
     @Override
@@ -41,27 +22,12 @@ final class MappedClassImpl implements MappedClass {
     }
 
     @Override
-    public MappedType mappedType() {
-        return mappedType;
-    }
-
-    @Override
-    public String typeName() {
-        return typeName;
-    }
-
-    @Override
     public String description() {
         return description;
     }
 
     @Override
-    public Map<String, MappedMethod> mappedMethods() {
-        return mappedMethods;
-    }
-
-    @Override
-    public String toString() {
-        return "[class:" + baseClass + " , mappedType-argumentName:" + typeName + " , mappedType:" + mappedType + " , mapped-methods:" + mappedMethods + "]";
+    public String name() {
+        return name;
     }
 }

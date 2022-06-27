@@ -13,6 +13,7 @@ import tests.T1.schema.Bus;
 import tests.T1.schema.CustomObjectConstructor;
 import tests.T1.schema.IntPeriodScalar;
 import tests.T1.schema.UserType;
+import tests.T1.schema.directives.*;
 
 import java.util.List;
 
@@ -28,6 +29,12 @@ public class TestSchema {
         AdaptedGraphQLSchema adaptedSchema = AdaptedSchemaBuilder
                 .newBuilder()
                 .addPackage("tests.T1.schema")
+                .add(Delay.class)
+                .add(UpperCase.class)
+                .add(Authentication.class)
+                .add(ToString.class)
+                .add(MD5.class)
+                .add(AddPageParameters.class)
                 .objectConstructor(new CustomObjectConstructor())
                 .addScalar(
                         ScalarEntryBuilder.newBuilder()
@@ -38,7 +45,7 @@ public class TestSchema {
                 )
                 .build();
         graphQL = GraphQL.newGraphQL(adaptedSchema.getSchema()).build();
-
+        System.out.println(adaptedSchema.asSchemaDefinitionLanguage());
         LOGGER.info(adaptedSchema.asSchemaDefinitionLanguage());
     }
 
@@ -104,6 +111,7 @@ public class TestSchema {
     @Test
     public void testGetVehicle() {
         ExecutionResultParser parser = execute("Query-6");
+        System.out.println(parser);
         assertEquals(parser.getData("getVehicle.__typename"), Bus.class.getSimpleName());
         assertNotNull(parser.getData("getVehicle.model"));
         assertNotNull(parser.getData("getVehicle.produceYear"));

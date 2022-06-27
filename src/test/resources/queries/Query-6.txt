@@ -1,14 +1,16 @@
-query {
+fragment fr on Bus {
+    model
+    produceYear(pageParameters: {page:10 , size:20}) @MD5(salt: "salt")
+    size
+}
+
+query @Authentication(token:"some_token") {
     getVehicle(isCar: false) {
         __typename
-        ... on Car{
+        ... on Car {
             model
             produceYear
         }
-        ... on Bus {
-            model
-            produceYear
-            size
-        }
+        ... fr
     }
 }

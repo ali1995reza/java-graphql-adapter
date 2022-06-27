@@ -46,8 +46,8 @@ public class SimpleTypeResolverGenerator implements TypeResolverGenerator {
 
             Class objectClass = typeResolutionEnvironment.getObject().getClass();
             for (DiscoveredObjectType objectType : possibleTypes) {
-                if (objectType.asMappedClass().baseClass().isAssignableFrom(objectClass))
-                    return objectType.asGraphQLType();
+                if (objectType.asMappedElement().baseClass().isAssignableFrom(objectClass))
+                    return objectType.asGraphqlElement();
             }
 
             return null;

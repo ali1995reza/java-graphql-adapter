@@ -1,27 +1,11 @@
 package grphaqladapter.adaptedschemabuilder.mapped;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
-public interface MappedMethod {
+public interface MappedMethod extends MappedElement {
 
     Method method();
 
-    String fieldName();
+    TypeDescriptor type();
 
-    String description();
-
-    boolean isInputField();
-
-    Method setter();
-
-    boolean isNullable();
-
-    boolean isList();
-
-    int dimensions();
-
-    Class type();
-
-    List<MappedParameter> parameters();
 }

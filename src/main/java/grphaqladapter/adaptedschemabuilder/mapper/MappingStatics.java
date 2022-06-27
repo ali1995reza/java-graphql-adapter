@@ -22,14 +22,12 @@ public class MappingStatics {
                 Type inner = paraType.getActualTypeArguments()[0];
                 TypeDetails details = findTypeDetails(inner);
 
-                return new TypeDetails(details.type, details.dimension);
+                return new TypeDetails(details.type, details.dimension, false);
 
             } else {
-                return new TypeDetails(Object.class, 0);
+                return new TypeDetails(Object.class, 0, false);
             }
         }
-
-
         return findTypeDetails(type);
     }
 
@@ -44,36 +42,54 @@ public class MappingStatics {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             if (parameterizedType.getRawType() != List.class)
-                return new TypeDetails((Class) parameterizedType.getRawType(), 0);
+                return new TypeDetails((Class) parameterizedType.getRawType(), 0, false);
 
             Type innerType = parameterizedType.getActualTypeArguments()[0];
             return detectDimsDetails(innerType, 1);
-        } else {
-            if (type == List.class)
-                return new TypeDetails(Object.class, 1);
+        } else if (type instanceof Class) {
+            Class clazz = (Class) type;
+            if (clazz == List.class)
+                return new TypeDetails(Object.class, 1, false);
+            else if(clazz.isArray())
+                return forArray(clazz);
             else
-                return new TypeDetails((Class) type, 0);
+                return new TypeDetails(clazz, 0, false);
         }
+
+        throw new IllegalStateException("unknown type class");
 
     }
 
-    private static final TypeDetails detectDimsDetails(Type type, int dims) {
+    private static TypeDetails detectDimsDetails(Type type, int dims) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             if (parameterizedType.getRawType() == List.class) {
                 return detectDimsDetails(parameterizedType.getActualTypeArguments()[0], dims + 1);
             } else {
-                return new TypeDetails((Class) parameterizedType.getRawType(), dims);
+                return new TypeDetails((Class) parameterizedType.getRawType(), dims, false);
             }
-        } else {
-            if (type == List.class)
-                return new TypeDetails(Object.class, dims + 1);
+        } else if (type instanceof Class) {
+            Class clazz = (Class) type;
+            if (clazz == List.class)
+                return new TypeDetails(Object.class, dims + 1, false);
             else
-                return new TypeDetails((Class) type, dims);
+                return new TypeDetails(clazz, dims, false);
         }
+
+        throw new IllegalStateException("unknown type class");
+
     }
 
-    public final static List<Method> getAllMethods(Class cls) {
+    private static TypeDetails forArray(Class clazz) {
+        int dims = 0;
+        while (clazz.isArray()) {
+            ++dims;
+            clazz = clazz.getComponentType();
+        }
+        return new TypeDetails(clazz, dims, true);
+    }
+
+    public static List<Method> getAllMethods(Class cls) {
         Method[] methods = cls.getMethods();
         Method[] declaredMethods = cls.getDeclaredMethods();
         List<Method> list = new ArrayList<>();
@@ -99,8 +115,10 @@ public class MappingStatics {
 
         private final Class type;
         private final int dimension;
+        private final boolean isArray;
 
-        private TypeDetails(Class type, int dimension) {
+        private TypeDetails(Class type, int dimension, boolean isArray) {
+            this.isArray = isArray;
             Assert.isNotNegative(dimension, new IllegalStateException("an array dimension can not be <0"));
             Assert.isNotNull(type, new NullPointerException("provided type is null"));
             this.type = type;
@@ -116,11 +134,16 @@ public class MappingStatics {
             return dimension;
         }
 
+        public boolean isArray() {
+            return isArray;
+        }
+
         @Override
         public String toString() {
             return "TypeDetails{" +
                     "type=" + type +
                     ", dimension=" + dimension +
+                    ", isArray=" + isArray +
                     '}';
         }
     }

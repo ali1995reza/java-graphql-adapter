@@ -27,4 +27,12 @@ public class InputUser {
     public void setType(UserType type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "InputUser{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

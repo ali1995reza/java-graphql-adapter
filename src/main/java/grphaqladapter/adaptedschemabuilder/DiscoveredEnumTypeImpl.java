@@ -2,11 +2,11 @@ package grphaqladapter.adaptedschemabuilder;
 
 import graphql.schema.GraphQLEnumType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredEnumType;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedEnum;
 
-final class DiscoveredEnumTypeImpl extends DiscoveredTypeImpl<GraphQLEnumType> implements DiscoveredEnumType {
+final class DiscoveredEnumTypeImpl extends DiscoveredTypeImpl<GraphQLEnumType, MappedEnum> implements DiscoveredEnumType {
 
-    public DiscoveredEnumTypeImpl(MappedClass mappedClass, String name, GraphQLEnumType graphQLType) {
+    public DiscoveredEnumTypeImpl(MappedEnum mappedClass, String name, GraphQLEnumType graphQLType) {
         super(mappedClass, name, graphQLType);
     }
 

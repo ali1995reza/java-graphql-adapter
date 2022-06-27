@@ -6,7 +6,7 @@ import grphaqladapter.adaptedschemabuilder.assertutil.NameValidator;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlTypeException;
 import grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedElementType;
 import grphaqladapter.adaptedschemabuilder.mapper.strategy.TypeAnnotations;
 import grphaqladapter.adaptedschemabuilder.scalar.ScalarEntry;
 import grphaqladapter.annotations.*;
@@ -23,27 +23,27 @@ public final class TypeValidator {
     }
 
     public static void validate(MappedClass mappedClass, Class clazz) {
-        Assert.isNotNull(mappedClass.baseClass(), exception("base class is null", clazz));
+        /*Assert.isNotNull(mappedClass.baseClass(), exception("base class is null", clazz));
         Assert.isEquals(mappedClass.baseClass(), clazz, exception("target class and mapped class not same", clazz));
         isModifierValidForATypeClass(mappedClass.baseClass());
-        Assert.isTrue(NameValidator.isNameValid(mappedClass.typeName()), exception("mapped name is not valid", clazz));
+        Assert.isTrue(NameValidator.isNameValid(mappedClass.name()), exception("mapped name is not valid", clazz));
         validateModifiers(mappedClass);
         for (MappedMethod method : mappedClass.mappedMethods().values()) {
             FieldValidator.validate(method, mappedClass.baseClass(), method.method());
             isMethodMemberOfClass(method.method(), mappedClass.baseClass());
-        }
+        }*/
 
     }
 
     private static void validateModifiers(MappedClass mappedClass) {
-        if (mappedClass.mappedType().isOneOf(MappedClass.MappedType.INPUT_TYPE, MappedClass.MappedType.OBJECT_TYPE) ||
+        if (mappedClass.mappedType().isOneOf(MappedElementType.INPUT_TYPE, MappedElementType.OBJECT_TYPE) ||
                 mappedClass.mappedType().isTopLevelType()) {
 
             Assert.isAllTrue(exception("just a public normal class can map to " + mappedClass.mappedType(), mappedClass.baseClass()),
                     !mappedClass.baseClass().isInterface(),
                     !mappedClass.baseClass().isEnum(),
                     Modifier.isPublic(mappedClass.baseClass().getModifiers()));
-        } else if (mappedClass.mappedType().is(MappedClass.MappedType.ENUM)) {
+        } else if (mappedClass.mappedType().is(MappedElementType.ENUM)) {
             Assert.isAllTrue(exception("just enum class can map to " + mappedClass.mappedType(), mappedClass.baseClass()),
                     Modifier.isPublic(mappedClass.baseClass().getModifiers()),
                     mappedClass.baseClass().isEnum());
@@ -72,7 +72,7 @@ public final class TypeValidator {
     }
 
     private static void validateInterfaceClass(TypeAnnotations annotations, Class clazz) {
-        if (!clazz.isInterface()) {
+        if (!clazz.isInterface() || clazz.isAnnotation()) {
             return;
         }
         Assert.isNull(annotations.typeAnnotation(), exception("an interface can not map to GraphqlType", clazz));
@@ -81,6 +81,8 @@ public final class TypeValidator {
         Assert.isNull(annotations.queryAnnotation(), exception("an interface can not map to GraphqlQuery", clazz));
         Assert.isNull(annotations.mutationAnnotation(), exception("an interface can not map to GraphqlMutation", clazz));
         Assert.isNull(annotations.subscriptionAnnotation(), exception("an interface can not map to GraphqlSubscription", clazz));
+        Assert.isNull(annotations.directiveAnnotation(), exception("an interface class can not map to GraphqlDirective", clazz));
+
 
         Assert.isOneOrMoreFalse(exception("an interface can not map to both GraphqlUnion and GraphqlInterface", clazz),
                 annotations.unionAnnotation() != null, annotations.interfaceAnnotation() != null);
@@ -104,6 +106,7 @@ public final class TypeValidator {
         Assert.isNull(annotations.queryAnnotation(), exception("an abstract class can not map to GraphqlQuery", clazz));
         Assert.isNull(annotations.mutationAnnotation(), exception("an abstract class can not map to GraphqlMutation", clazz));
         Assert.isNull(annotations.subscriptionAnnotation(), exception("an abstract class can not map to GraphqlSubscription", clazz));
+        Assert.isNull(annotations.directiveAnnotation(), exception("an abstract class can not map to GraphqlDirective", clazz));
 
         Assert.isNotNull(annotations.typeAnnotation(), exception("GraphqlType annotation is needed", clazz));
 
@@ -123,6 +126,7 @@ public final class TypeValidator {
         Assert.isNull(annotations.queryAnnotation(), exception("an enum class can not map to GraphqlQuery", clazz));
         Assert.isNull(annotations.mutationAnnotation(), exception("an enum class can not map to GraphqlMutation", clazz));
         Assert.isNull(annotations.subscriptionAnnotation(), exception("an enum class can not map to GraphqlSubscription", clazz));
+        Assert.isNull(annotations.directiveAnnotation(), exception("an enum class can not map to GraphqlDirective", clazz));
 
 
         Assert.isNotNull(annotations.enumAnnotation(), exception("GraphqlEnum annotation is needed", clazz));
@@ -130,9 +134,26 @@ public final class TypeValidator {
         validate(annotations.enumAnnotation(), clazz, false);
     }
 
+    private static void validateAnnotationClass(TypeAnnotations annotations, Class clazz) {
+        if(!clazz.isAnnotation()) {
+            return;
+        }
+
+        Assert.isNull(annotations.typeAnnotation(), exception("an annotation class can not map to GraphqlType", clazz));
+        Assert.isNull(annotations.inputTypeAnnotation(), exception("an annotation class can not map to GraphqlInputType", clazz));
+        Assert.isNull(annotations.interfaceAnnotation(), exception("an annotation class can not map to GraphqlInterface", clazz));
+        Assert.isNull(annotations.unionAnnotation(), exception("an annotation class can not map to GraphqlUnion", clazz));
+        Assert.isNull(annotations.queryAnnotation(), exception("an annotation class can not map to GraphqlQuery", clazz));
+        Assert.isNull(annotations.mutationAnnotation(), exception("an annotation class can not map to GraphqlMutation", clazz));
+        Assert.isNull(annotations.subscriptionAnnotation(), exception("an annotation class can not map to GraphqlSubscription", clazz));
+
+        validate(annotations.directiveAnnotation(), clazz);
+
+    }
+
     private static void validateNormalClass(TypeAnnotations annotations, Class clazz) {
 
-        if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isEnum() || clazz.isInterface()) {
+        if (clazz.isAnnotation() || Modifier.isAbstract(clazz.getModifiers()) || clazz.isEnum() || clazz.isInterface()) {
             return;
         }
 
@@ -157,7 +178,7 @@ public final class TypeValidator {
         if (topLevelType) {
 
             Assert.isAllTrue(exception("GraphqlQuery, GraphqlMutation and GraphqlSubscription can not combine by GraphqlType or GraphqlInputType", clazz),
-                    annotations.inputTypeAnnotation() == null, annotations.typeAnnotation() == null);
+                    annotations.inputTypeAnnotation() == null, annotations.typeAnnotation() == null, annotations.directiveAnnotation() == null);
 
             Assert.isExactlyOneTrue(exception("just one of GraphqlQuery, GraphqlMutation and GraphqlSubscription can present", clazz),
                     queryAnnotation != null,
@@ -169,11 +190,12 @@ public final class TypeValidator {
             validate(subscriptionAnnotation, clazz, true);
 
         } else {
-            Assert.isOneOrMoreTrue(exception("at least one of GraphqlType or GraphqlInputType is needed", clazz),
+
+            Assert.isOneOrMoreTrue(exception("at least one of GraphqlType or GraphqlInputType annotations is needed", clazz),
                     annotations.inputTypeAnnotation() != null, annotations.typeAnnotation() != null);
 
             if (typeAnnotation != null && inputTypeAnnotation != null) {
-                Assert.isNotEquals(typeAnnotation.typeName(), inputTypeAnnotation.typeName(), exception("both GraphqlInputType and GraphqlType has same names", clazz));
+                Assert.isNotEquals(typeAnnotation.name(), inputTypeAnnotation.name(), exception("both GraphqlInputType and GraphqlType has same names", clazz));
             }
 
             validate(inputTypeAnnotation, clazz, true);
@@ -192,12 +214,36 @@ public final class TypeValidator {
         validateNormalClass(annotations, clazz);
     }
 
-    public static void validate(GraphqlTypeNameAnnotation annotation, Class clazz, boolean skipIfNull) {
+    public static void validate(GraphqlDirectiveAnnotation annotation, Class clazz) {
+        validate(annotation, clazz, false);
+    }
+
+    public static void validate(GraphqlDirectiveAnnotation annotation, Class clazz, boolean skipIfNull) {
+        if (skipIfNull && annotation == null) {
+            return;
+        }
+        validate((GraphqlElementAnnotation) annotation, clazz, skipIfNull);
+        Assert.isNull(annotation.locations(), exception("no directive locations set", clazz));
+        Assert.isPositive(annotation.locations().length, exception("no directive locations set", clazz));
+    }
+
+    public static void validate(GraphqlElementAnnotation annotation, Class clazz, boolean skipIfNull) {
         if (skipIfNull && annotation == null) {
             return;
         }
         Assert.isNotNull(annotation, exception("can not detect type annotation", clazz));
-        Assert.isTrue(NameValidator.isNameValid(annotation.typeName()), exception("type name is not valid for GraphqlQuery", clazz));
+        Assert.isTrue(NameValidator.isNameValid(annotation.name()), exception("type name is not valid for GraphqlQuery", clazz));
+    }
+
+    public static void validate(GraphqlElementAnnotation annotation, Class clazz) {
+        validate(annotation, clazz, false);
+    }
+
+    public static void validate(GraphqlTypeNameAnnotation annotation, Class clazz, boolean skipIfNull) {
+        if (skipIfNull && annotation == null) {
+            return;
+        }
+        validate((GraphqlElementAnnotation) annotation, clazz, skipIfNull);
     }
 
     public static void validate(GraphqlTypeNameAnnotation annotation, Class clazz) {

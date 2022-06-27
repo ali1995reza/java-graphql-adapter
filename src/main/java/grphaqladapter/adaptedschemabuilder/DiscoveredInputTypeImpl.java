@@ -2,13 +2,13 @@ package grphaqladapter.adaptedschemabuilder;
 
 import graphql.schema.GraphQLInputObjectType;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInputType;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedInputTypeClass;
 
-final class DiscoveredInputTypeImpl extends DiscoveredTypeImpl<GraphQLInputObjectType> implements DiscoveredInputType {
+final class DiscoveredInputTypeImpl extends DiscoveredTypeImpl<GraphQLInputObjectType, MappedInputTypeClass> implements DiscoveredInputType {
 
 
-    public DiscoveredInputTypeImpl(MappedClass mappedClass, String name, GraphQLInputObjectType graphQLType) {
-        super(mappedClass, name, graphQLType);
+    public DiscoveredInputTypeImpl(MappedInputTypeClass mappedInputTypeClass, String name, GraphQLInputObjectType graphQLType) {
+        super(mappedInputTypeClass, name, graphQLType);
     }
 
 

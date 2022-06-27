@@ -3,5 +3,9 @@ package grphaqladapter.adaptedschemabuilder.mapper.strategy;
 
 public interface ClassAnnotationDetector {
 
-    TypeAnnotations detectAnnotationFor(Class cls);
+    default boolean skipType(Class clazz) {
+        return false;
+    };
+
+    TypeAnnotations detectAnnotationFor(Class clazz);
 }

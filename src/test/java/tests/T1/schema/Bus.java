@@ -2,6 +2,10 @@ package tests.T1.schema;
 
 import grphaqladapter.annotations.GraphqlField;
 import grphaqladapter.annotations.GraphqlType;
+import tests.T1.schema.directives.Delay;
+import tests.T1.schema.directives.MD5;
+import tests.T1.schema.directives.ToString;
+import tests.T1.schema.directives.UpperCase;
 
 @GraphqlType
 public class Bus implements Vehicle {
@@ -10,6 +14,9 @@ public class Bus implements Vehicle {
     private Integer produceYear;
     private Integer size;
 
+    @UpperCase
+    @Delay(0)
+    @MD5(salt = "some_salt")
     @GraphqlField(fieldName = "model")
     public String getModel() {
         return model;
@@ -28,6 +35,7 @@ public class Bus implements Vehicle {
         this.produceYear = produceYear;
     }
 
+    @ToString
     @GraphqlField(fieldName = "size")
     public Integer getSize() {
         return size;

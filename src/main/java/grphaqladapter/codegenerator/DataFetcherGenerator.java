@@ -1,16 +1,15 @@
 package grphaqladapter.codegenerator;
 
-import graphql.schema.DataFetcher;
-import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredType;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
+import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredElement;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedFieldMethod;
+import grphaqladapter.adaptedschemabuilder.mapped.MappedTypeClass;
 
 import java.util.List;
 
 public interface DataFetcherGenerator {
 
 
-    DataFetcher generate(MappedClass cls, MappedMethod method, ObjectConstructor objectConstructor);
+    AdaptedDataFetcher generate(MappedTypeClass cls, MappedFieldMethod method);
 
-    void init(List<DiscoveredType> discoveredTypes);
+    void init(List<DiscoveredElement> discoveredElements);
 }

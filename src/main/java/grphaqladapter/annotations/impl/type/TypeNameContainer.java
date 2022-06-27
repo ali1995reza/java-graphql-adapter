@@ -8,7 +8,7 @@ abstract class TypeNameContainer {
         this.typeName = typeName;
     }
 
-    public String typeName() {
+    public String name() {
         return typeName;
     }
 }

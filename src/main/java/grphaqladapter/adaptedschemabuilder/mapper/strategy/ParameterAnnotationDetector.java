@@ -7,6 +7,14 @@ import java.lang.reflect.Parameter;
 
 public interface ParameterAnnotationDetector {
 
+    default boolean skip(Method method, Parameter parameter, int parameterIndex) {
+        return false;
+    }
+
+    default boolean isSystemParameter(Method method, Parameter parameter, int parameterIndex) {
+        return false;
+    }
+
     GraphqlArgumentAnnotation detectArgumentAnnotation(Method method, Parameter parameter, int parameterIndex);
 
 }

@@ -13,6 +13,7 @@ public class TypeAnnotationsBuilder {
     private GraphqlQueryAnnotation queryAnnotation;
     private GraphqlMutationAnnotation mutationAnnotation;
     private GraphqlSubscriptionAnnotation subscriptionAnnotation;
+    private GraphqlDirectiveAnnotation directiveAnnotation;
     private GraphqlDescriptionAnnotation descriptionAnnotation;
 
     private TypeAnnotationsBuilder() {
@@ -36,47 +37,52 @@ public class TypeAnnotationsBuilder {
     }
 
 
-    public TypeAnnotationsBuilder setInputTypeAnnotation(GraphqlInputTypeAnnotation inputTypeAnnotation) {
+    public TypeAnnotationsBuilder inputTypeAnnotation(GraphqlInputTypeAnnotation inputTypeAnnotation) {
         this.inputTypeAnnotation = inputTypeAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setInterfaceAnnotation(GraphqlInterfaceAnnotation interfaceAnnotation) {
+    public TypeAnnotationsBuilder interfaceAnnotation(GraphqlInterfaceAnnotation interfaceAnnotation) {
         this.interfaceAnnotation = interfaceAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setTypeAnnotation(GraphqlTypeAnnotation typeAnnotation) {
+    public TypeAnnotationsBuilder typeAnnotation(GraphqlTypeAnnotation typeAnnotation) {
         this.typeAnnotation = typeAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setUnionAnnotation(GraphqlUnionAnnotation unionAnnotation) {
+    public TypeAnnotationsBuilder unionAnnotation(GraphqlUnionAnnotation unionAnnotation) {
         this.unionAnnotation = unionAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setEnumAnnotation(GraphqlEnumAnnotation enumAnnotation) {
+    public TypeAnnotationsBuilder enumAnnotation(GraphqlEnumAnnotation enumAnnotation) {
         this.enumAnnotation = enumAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setQueryAnnotation(GraphqlQueryAnnotation queryAnnotation) {
+    public TypeAnnotationsBuilder queryAnnotation(GraphqlQueryAnnotation queryAnnotation) {
         this.queryAnnotation = queryAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setMutationAnnotation(GraphqlMutationAnnotation mutationAnnotation) {
+    public TypeAnnotationsBuilder mutationAnnotation(GraphqlMutationAnnotation mutationAnnotation) {
         this.mutationAnnotation = mutationAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setSubscriptionAnnotation(GraphqlSubscriptionAnnotation subscriptionAnnotation) {
+    public TypeAnnotationsBuilder subscriptionAnnotation(GraphqlSubscriptionAnnotation subscriptionAnnotation) {
         this.subscriptionAnnotation = subscriptionAnnotation;
         return this;
     }
 
-    public TypeAnnotationsBuilder setDescriptionAnnotation(GraphqlDescriptionAnnotation descriptionAnnotation) {
+    public TypeAnnotationsBuilder directiveAnnotation(GraphqlDirectiveAnnotation directiveAnnotation) {
+        this.directiveAnnotation = directiveAnnotation;
+        return this;
+    }
+
+    public TypeAnnotationsBuilder descriptionAnnotation(GraphqlDescriptionAnnotation descriptionAnnotation) {
         this.descriptionAnnotation = descriptionAnnotation;
         return this;
     }
@@ -90,6 +96,7 @@ public class TypeAnnotationsBuilder {
                 queryAnnotation,
                 mutationAnnotation,
                 subscriptionAnnotation,
+                directiveAnnotation,
                 descriptionAnnotation);
     }
 }

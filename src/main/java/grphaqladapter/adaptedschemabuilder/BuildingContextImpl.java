@@ -10,12 +10,16 @@ import graphql.schema.*;
 import grphaqladapter.adaptedschemabuilder.assertutil.Assert;
 import grphaqladapter.adaptedschemabuilder.builtinscalars.ID;
 import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredScalarType;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedClass;
-import grphaqladapter.adaptedschemabuilder.mapped.impl.MappedClassBuilder;
+import grphaqladapter.adaptedschemabuilder.mapped.*;
+import grphaqladapter.adaptedschemabuilder.mapped.impl.classes.MappedScalarClassBuilder;
 import grphaqladapter.adaptedschemabuilder.validator.TypeValidator;
+import grphaqladapter.annotations.interfaces.GraphqlDirectiveDetails;
+import grphaqladapter.annotations.interfaces.SchemaDirectiveHandlingContext;
+import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 
 final class BuildingContextImpl implements BuildingContext {
 
@@ -73,28 +77,45 @@ final class BuildingContextImpl implements BuildingContext {
     }).build();
 
 
-    private final Map<Class, Map<MappedClass.MappedType, MappedClass>> mappedClasses;
-    private final Map<MappedClass, GraphQLNamedType> rawTypes;
-    private final Map<MappedClass, List<MappedClass>> possibleTypes;
+    private final Map<Class, Map<MappedElementType, MappedElement>> mappedClasses;
+    private final Map<MappedClass, GraphQLNamedType> rawTypes = new HashMap<>();
+    private final Map<MappedClass, List<MappedClass>> possibleTypes = new HashMap<>();
+    private final Map<MappedAnnotation, GraphQLDirective> directives = new HashMap<>();
     private final ScalarAddController scalarAddController;
+    private final Function<MappedElement, List<GraphqlDirectiveDetails>> directiveResolver;
+    private final DirectiveHandlingContextImpl directiveHandlingContext;
+    private final ObjectConstructor objectConstructor;
 
-    BuildingContextImpl(Map<Class, Map<MappedClass.MappedType, MappedClass>> mcs,
+    BuildingContextImpl(Map<Class, Map<MappedElementType, MappedElement>> mappedClasses,
                         GraphQLSchema.Builder schemaBuilder,
-                        Map<Class, GraphQLScalarType> providedScalars) {
-        Assert.isNotNull(mcs, new IllegalStateException("mapped classes is null"));
+                        Map<Class, GraphQLScalarType> providedScalars,
+                        Function<MappedElement, List<GraphqlDirectiveDetails>> directiveResolver,
+                        ObjectConstructor objectConstructor) {
+        Assert.isNotNull(mappedClasses, new IllegalStateException("mapped classes is null"));
         Assert.isNotNull(schemaBuilder, new IllegalStateException("provided schema builder is null"));
-        mappedClasses = mcs;
-        rawTypes = new HashMap<>();
-        possibleTypes = new HashMap<>();
-        scalarAddController = new ScalarAddController(schemaBuilder, providedScalars);
+        this.mappedClasses = mappedClasses;
+        this.scalarAddController = new ScalarAddController(schemaBuilder, providedScalars);
+        this.directiveResolver = directiveResolver;
+        this.objectConstructor = objectConstructor;
+        this.directiveHandlingContext = new DirectiveHandlingContextImpl(elementsByName(mappedClasses));
+    }
+
+    private static Map<String, MappedElement> elementsByName(Map<Class, Map<MappedElementType, MappedElement>> mappedClasses) {
+        Map<String, MappedElement> elementMap = new HashMap<>();
+        mappedClasses.forEach((clazz, map) -> {
+            map.forEach((elementType, element) -> {
+                elementMap.put(element.name(), element);
+            });
+        });
+        return Collections.unmodifiableMap(elementMap);
     }
 
     @Override
     public GraphQLTypeReference getInputObjectTypeFor(Class c) {
 
         MappedClass mappedClass =
-                getMappedClassFor(c, MappedClass.MappedType.INPUT_TYPE);
-        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.typeName());
+                getMappedClassFor(c, MappedElementType.INPUT_TYPE);
+        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
     }
 
     @Override
@@ -133,8 +154,8 @@ final class BuildingContextImpl implements BuildingContext {
     @Override
     public GraphQLTypeReference getObjectTypeFor(Class c) {
         MappedClass mappedClass =
-                getMappedClassFor(c, MappedClass.MappedType.OBJECT_TYPE);
-        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.typeName());
+                getMappedClassFor(c, MappedElementType.OBJECT_TYPE);
+        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
     }
 
     public GraphQLNamedType rawTypeOf(MappedClass mappedClass) {
@@ -149,47 +170,56 @@ final class BuildingContextImpl implements BuildingContext {
         return rawTypes;
     }
 
+    public Map<MappedAnnotation, GraphQLDirective> getDirectives() {
+        return directives;
+    }
+
     @Override
     public GraphQLTypeReference getInterfaceFor(Class c) {
         MappedClass mappedClass =
-                getMappedClassFor(c, MappedClass.MappedType.INTERFACE);
+                getMappedClassFor(c, MappedElementType.INTERFACE);
 
 
-        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.typeName());
+        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
     }
 
     @Override
     public GraphQLTypeReference getEnumFor(Class c) {
         MappedClass mappedClass =
-                getMappedClassFor(c, MappedClass.MappedType.ENUM);
+                getMappedClassFor(c, MappedElementType.ENUM);
 
-        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.typeName());
+        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
     }
 
     @Override
     public GraphQLTypeReference getUnionTypeFor(Class c) {
         MappedClass mappedClass =
-                getMappedClassFor(c, MappedClass.MappedType.UNION);
-        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.typeName());
+                getMappedClassFor(c, MappedElementType.UNION);
+        return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
+    }
+
+    @Override
+    public GraphQLDirective getDirectiveFor(Class c) {
+        return null;
     }
 
     @Override
     public boolean isAnInterface(Class cls) {
         return mappedClasses.get(cls) != null &&
-                mappedClasses.get(cls).get(MappedClass.MappedType.INTERFACE) != null;
+                mappedClasses.get(cls).get(MappedElementType.INTERFACE) != null;
     }
 
     @Override
     public boolean isAnUnion(Class cls) {
         return mappedClasses.get(cls) != null &&
-                mappedClasses.get(cls).get(MappedClass.MappedType.UNION) != null;
+                mappedClasses.get(cls).get(MappedElementType.UNION) != null;
     }
 
     @Override
     public void addToPossibleTypesOf(MappedClass mappedClass, MappedClass possible) {
 
-        if (mappedClass.mappedType() != MappedClass.MappedType.INTERFACE &&
-                mappedClass.mappedType() != MappedClass.MappedType.UNION) {
+        if (mappedClass.mappedType() != MappedElementType.INTERFACE &&
+                mappedClass.mappedType() != MappedElementType.UNION) {
             throw new IllegalStateException("just interfaces or union types have possible types");
         }
         if (mappedClasses.get(mappedClass.baseClass())
@@ -208,11 +238,26 @@ final class BuildingContextImpl implements BuildingContext {
     }
 
     @Override
-    public MappedClass getMappedClassFor(Class cls, MappedClass.MappedType mappedType) {
+    public MappedClass getMappedClassFor(Class cls, MappedElementType mappedElementType) {
         if (mappedClasses.get(cls) == null)
             return null;
 
-        return mappedClasses.get(cls).get(mappedType);
+        return (MappedClass) mappedClasses.get(cls).get(mappedElementType);
+    }
+
+    @Override
+    public List<GraphqlDirectiveDetails> resolveDirective(MappedElement element) {
+        return directiveResolver.apply(element);
+    }
+
+    @Override
+    public ObjectConstructor objectConstructor() {
+        return objectConstructor;
+    }
+
+    @Override
+    public SchemaDirectiveHandlingContext directiveHandlingContext() {
+        return directiveHandlingContext;
     }
 
     public void setGraphQLTypeFor(MappedClass cls, GraphQLNamedType type) {
@@ -221,6 +266,11 @@ final class BuildingContextImpl implements BuildingContext {
                 rawTypes.containsKey(cls));
 
         rawTypes.put(cls, type);
+    }
+
+    public void setDirective(MappedAnnotation mappedAnnotation, GraphQLDirective directive) {
+        Assert.isFalse(directives.containsKey(mappedAnnotation), new IllegalStateException("class [" + mappedAnnotation + "] discovered multiple times"));
+        directives.put(mappedAnnotation, directive);
     }
 
     public List<DiscoveredScalarType> allScalars() {
@@ -292,12 +342,12 @@ final class BuildingContextImpl implements BuildingContext {
                 schema.additionalType(scalarType);
                 addedScalars.add(scalarType);
 
-                MappedClass mappedClass = MappedClassBuilder
+                MappedScalarClass mappedClass = MappedScalarClassBuilder
                         .newBuilder()
-                        .setTypeName(scalarType.getName())
-                        .setBaseClass(clazz)
-                        .setDescription(scalarType.getDescription())
-                        .setMappedType(MappedClass.MappedType.SCALAR)
+                        .name(scalarType.getName())
+                        .baseClass(clazz)
+                        .description(scalarType.getDescription())
+                        .coercing(scalarType.getCoercing())
                         .build();
 
                 TypeValidator.validate(mappedClass, clazz);
@@ -313,6 +363,5 @@ final class BuildingContextImpl implements BuildingContext {
 
             return scalarType;
         }
-
     }
 }

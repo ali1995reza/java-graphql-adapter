@@ -6,14 +6,11 @@ import grphaqladapter.adaptedschemabuilder.assertutil.StringUtils;
 import grphaqladapter.adaptedschemabuilder.exceptions.MappingGraphqlFieldException;
 import grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedMethod;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedParameter;
 import grphaqladapter.annotations.GraphqlFieldAnnotation;
 import grphaqladapter.annotations.GraphqlInputFieldAnnotation;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public final class FieldValidator {
 
@@ -26,17 +23,17 @@ public final class FieldValidator {
 
     public static void validate(MappedMethod mappedMethod, Class clazz, Method method) {
 
-        Assert.isNotNegative(mappedMethod.dimensions(), exception("can not create mapped method with dimensions <0", clazz, method));
+        /*Assert.isNotNegative(mappedMethod.type().dimensions(), exception("can not create mapped method with dimensions <0", clazz, method));
         Assert.isNotNull(mappedMethod.method(), exception("provided method is null", clazz, method));
         Assert.isModifierValidForAFieldMethod(mappedMethod.method());
         Assert.isNotNull(mappedMethod.parameters(), exception("provided parameters is null", clazz, method));
-        Assert.isTrue(NameValidator.isNameValid(mappedMethod.fieldName()), exception("type name is not valid", clazz, method));
+        Assert.isTrue(NameValidator.isNameValid(mappedMethod.name()), exception("type name is not valid", clazz, method));
         Assert.isOneOrMoreFalse(exception("Java primitive types can not be nullable", clazz, method),
-                mappedMethod.isNullable(), mappedMethod.type().isPrimitive());
+                mappedMethod.type().isNullable(), mappedMethod.type().type().isPrimitive());
 
         if (CompletableFuture.class.isAssignableFrom(mappedMethod.method().getReturnType())) {
             //todo nothing here !
-        } else if (mappedMethod.dimensions() > 0) {
+        } else if (mappedMethod.type().dimensions() > 0) {
             Assert.isEquals(mappedMethod.method().getReturnType(), List.class, exception("a list mapped method must has List return-type", clazz, method));
         } else {
             Assert.isEquals(mappedMethod.method().getReturnType(),
@@ -56,10 +53,10 @@ public final class FieldValidator {
         for (int i = 0; i < mappedMethod.parameters().size(); i++) {
             for (int j = i + 1; j < mappedMethod.parameters().size(); j++) {
                 Assert.isOneOrMoreFalse(exception("2 MappedParameter with same name exist [" + mappedMethod.parameters().get(i) + "]", clazz, mappedMethod.method()),
-                        mappedMethod.parameters().get(i).argumentName().
-                                equals(mappedMethod.parameters().get(j).argumentName()));
+                        mappedMethod.parameters().get(i).name().
+                                equals(mappedMethod.parameters().get(j).name()));
             }
-        }
+        }*/
 
     }
 
