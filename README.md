@@ -164,10 +164,9 @@ and don't map it.
 Directives in GraphQL help to create more modularity. As GraphQL is just a specification each implementation of it
 should implement this functionality by own self. In this library we have a `GraphqlDirectiveFunction` class which help
 us to create functionality of a directive. Each directive can extends this class to create a custom functionality. For
-example lets implement @UpperCase directive.
+example lets implement `@UpperCase` directive.
 
-We will create UpperCaseDirectiveFunction like this:
-
+We will create `UpperCaseDirectiveFunction` like this:
 ```java
 import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
@@ -235,7 +234,6 @@ public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object>
 ```
 
 And then you have to define directives like this:
-
 ```java
 import graphql.introspection.Introspection;
 import grphaqladapter.annotations.GraphqlDirective;
@@ -251,7 +249,6 @@ public @interface UpperCase {
 ```
 
 With this implementation you add this directive to a field like this:
-
 ```java
 import grphaqladapter.annotations.GraphqlType;
 
@@ -285,3 +282,30 @@ query {
     }
 }
 ```
+
+In some causes you need to get directives before handling field fetching. For this type of use-cause you can
+use `preHandleFieldDirective`. By overriding thi method you can add a custom functionality. Another way is to get
+directives as parameter. You can add `GraphqlDirectivesHolder` to field parameters and default strategy will map it to
+system-parameter and system will provide it in execution-time automatically.For example, we can get `@UpperCase`
+directive like this:
+
+```java
+import grphaqladapter.annotations.GraphqlType;
+
+@GraphqlType
+public class MyType {
+
+    @GraphqlField
+    public String myField(GraphqlDirectivesHolder holder) {
+        GraphqlDirectiveDetails details = holder.fieldDirectives()
+                .directives().get(UpperCase.class);
+        if (details != null) {
+            return "SOME_DETAILS";
+        }
+        return "some_details";
+    }
+}
+```
+
+
+
