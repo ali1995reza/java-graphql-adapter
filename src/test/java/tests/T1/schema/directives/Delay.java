@@ -7,7 +7,7 @@ import grphaqladapter.annotations.GraphqlDirectiveArgument;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-@GraphqlDirective(locations = {Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.FIELD}, functionality = DelayDirectiveFunction.class)
+@GraphqlDirective(locations = {Introspection.DirectiveLocation.FIELD_DEFINITION, Introspection.DirectiveLocation.FIELD, Introspection.DirectiveLocation.QUERY}, functionality = DelayDirectiveFunction.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Delay {
     @GraphqlDirectiveArgument(nullable = false, name = "seconds")

@@ -1,10 +1,10 @@
 fragment fr on Bus {
     model
-    produceYear @MD5(salt: "salt")
+    produceYear
     size
 }
 
-query @Authentication(token:"some_token") {
+query {
     getVehicle(isCar: false) {
         __typename
         ... on Car {

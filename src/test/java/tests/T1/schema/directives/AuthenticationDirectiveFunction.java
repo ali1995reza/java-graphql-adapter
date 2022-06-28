@@ -12,4 +12,10 @@ public class AuthenticationDirectiveFunction extends GraphqlDirectiveFunction {
         env.getGraphQlContext().put("auth", directive().getArgument("token"));
         super.preHandleOperationDirective(source, operation, field, env);
     }
+
+    @Override
+    public void preHandleFieldDirective(Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
+        env.getGraphQlContext().put("auth", directive().getArgument("token"));
+        super.preHandleFieldDirective(source, field, env);
+    }
 }

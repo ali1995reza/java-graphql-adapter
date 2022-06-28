@@ -40,8 +40,8 @@ public class ObjectBuilder {
         }
     }
 
-    public Object buildFromObject(Class type, Object object) {
-        return buildFromObject(type, 0, null, object);
+    public <T> T buildFromObject(Class<T> type, Object object) {
+        return (T) buildFromObject(type, 0, null, object);
     }
 
     public Object buildFromObject(TypeDescriptor descriptor, Object object) {
@@ -60,8 +60,8 @@ public class ObjectBuilder {
         }
     }
 
-    public Object buildFromValue(Class type, Value value) {
-        return buildFromValue(type, 0, null, value);
+    public <T> T buildFromValue(Class<T> type, Value value) {
+        return (T) buildFromValue(type, 0, null, value);
     }
 
     public Object buildFromValue(TypeDescriptor descriptor, Value value) {

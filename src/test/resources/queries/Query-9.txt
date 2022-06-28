@@ -1,0 +1,3 @@
+query @Authentication(token: "Peter") @Delay(seconds:0) {
+    isDirectivesHealthy @UpperCase
+}

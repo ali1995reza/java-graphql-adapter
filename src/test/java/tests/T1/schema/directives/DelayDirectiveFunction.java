@@ -1,5 +1,6 @@
 package tests.T1.schema.directives;
 
+import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
 import grphaqladapter.adaptedschemabuilder.mapped.MappedFieldMethod;
@@ -29,8 +30,12 @@ public class DelayDirectiveFunction extends GraphqlDirectiveFunction<Object> {
 
     @Override
     public Object handleFieldDirective(Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
-        final int seconds = directive().getArgument("seconds");
-        return CompletableFuture.supplyAsync(() -> value, execute(seconds, TimeUnit.SECONDS));
+        return execute(value);
+    }
+
+    @Override
+    public Object handleOperationDirective(Object value, Object source, OperationDefinition operation, MappedFieldMethod field, DataFetchingEnvironment env) {
+        return execute(value);
     }
 
     @Override

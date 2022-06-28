@@ -109,9 +109,8 @@ public class TestSchema {
     }
 
     @Test
-    public void testGetVehicle() {
+    public void testFragments() {
         ExecutionResultParser parser = execute("Query-6");
-        System.out.println(parser);
         assertEquals(parser.getData("getVehicle.__typename"), Bus.class.getSimpleName());
         assertNotNull(parser.getData("getVehicle.model"));
         assertNotNull(parser.getData("getVehicle.produceYear"));
@@ -119,8 +118,35 @@ public class TestSchema {
     }
 
     @Test
-    public void testGetBankAccount() {
+    public void testPreHandleFieldDirective() {
         ExecutionResultParser parser = execute("Query-7");
-        System.out.println(parser);
+        assertNotNull(parser.getData("getBankAccount.id"));
+        assertNotNull(parser.getData("getBankAccount.username"));
+        assertNotNull(parser.getData("getBankAccount.balance"));
+    }
+
+    @Test
+    public void testSystemParams() {
+        ExecutionResultParser parser = execute("Query-8");
+        assertTrue((boolean) parser.getData("isSystemParamsHealthy"));
+    }
+
+    @Test
+    public void testDirectivesHolder() {
+        ExecutionResultParser parser = execute("Query-9");
+        assertTrue((boolean) parser.getData("isDirectivesHealthy"));
+    }
+
+    @Test
+    public void testFieldDirective() {
+        ExecutionResultParser parser = execute("Query-10");
+        assertEquals(parser.getData("getDeveloperName"), "ALIREZA AKHOUNDI");
+    }
+
+    @Test
+    public void testChangeArgumentParams() {
+        ExecutionResultParser parser = execute("Query-11");
+        assertEquals(parser.getData("getPageDetails.page"), Integer.valueOf(10));
+        assertEquals(parser.getData("getPageDetails.size"), Integer.valueOf(20));
     }
 }
