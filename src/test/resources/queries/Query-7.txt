@@ -1,4 +1,4 @@
-query @UpperCase {
+query {
     getBankAccount(arg0: "Peter") {
         id
         username

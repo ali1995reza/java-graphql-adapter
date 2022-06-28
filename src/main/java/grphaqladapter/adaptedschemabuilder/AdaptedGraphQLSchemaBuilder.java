@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 import static grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuilder.exception;
 
-public final class AdaptedSchemaBuilder {
+public final class AdaptedGraphQLSchemaBuilder {
 
     private final List<Class> allClasses = new ArrayList<>();
     private final Map<Class, ScalarEntry> scalarEntries;
@@ -41,15 +41,15 @@ public final class AdaptedSchemaBuilder {
     private TypeResolverGenerator typeResolverGenerator;
     private ObjectConstructor objectConstructor = new ReflectionObjectConstructor();
 
-    private AdaptedSchemaBuilder() {
+    private AdaptedGraphQLSchemaBuilder() {
         dataFetcherGenerator = new ReflectionDataFetcherGenerator();
         typeResolverGenerator = new SimpleTypeResolverGenerator();
         mapper = new ClassMapper();
         scalarEntries = new HashMap<>();
     }
 
-    public static AdaptedSchemaBuilder newBuilder() {
-        return new AdaptedSchemaBuilder();
+    public static AdaptedGraphQLSchemaBuilder newBuilder() {
+        return new AdaptedGraphQLSchemaBuilder();
     }
 
     private void addIfNotExists(Class c) {
@@ -57,7 +57,7 @@ public final class AdaptedSchemaBuilder {
             allClasses.add(c);
     }
 
-    public synchronized AdaptedSchemaBuilder add(Class c, Class... cls) {
+    public synchronized AdaptedGraphQLSchemaBuilder add(Class c, Class... cls) {
         addIfNotExists(c);
         if (cls != null) {
             for (Class cl : cls) {
@@ -68,7 +68,7 @@ public final class AdaptedSchemaBuilder {
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder addAll(Collection<Class> cls) {
+    public synchronized AdaptedGraphQLSchemaBuilder addAll(Collection<Class> cls) {
         for (Class cl : cls) {
             addIfNotExists(cl);
         }
@@ -76,16 +76,16 @@ public final class AdaptedSchemaBuilder {
         return this;
     }
 
-    public AdaptedSchemaBuilder addPackage(String packageName, ClassFilter filter) {
+    public AdaptedGraphQLSchemaBuilder addPackage(String packageName, ClassFilter filter) {
         Set<Class> classes = PackageParser.getAllGraphqlAnnotatedClasses(packageName, filter);
         return addAll(classes);
     }
 
-    public AdaptedSchemaBuilder addPackage(String packageName) {
+    public AdaptedGraphQLSchemaBuilder addPackage(String packageName) {
         return addPackage(packageName, ClassFilter.ACCEPT_ALL);
     }
 
-    public synchronized AdaptedSchemaBuilder remove(Class c) {
+    public synchronized AdaptedGraphQLSchemaBuilder remove(Class c) {
         allClasses.remove(c);
         return this;
     }
@@ -94,45 +94,45 @@ public final class AdaptedSchemaBuilder {
         return mapper;
     }
 
-    public synchronized AdaptedSchemaBuilder generator(TypeResolverGenerator generator) {
+    public synchronized AdaptedGraphQLSchemaBuilder generator(TypeResolverGenerator generator) {
         Assert.isNotNull(generator, new IllegalStateException("code generators can not be null"));
         typeResolverGenerator = generator;
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder generator(DataFetcherGenerator generator) {
+    public synchronized AdaptedGraphQLSchemaBuilder generator(DataFetcherGenerator generator) {
         Assert.isNotNull(generator, new IllegalStateException("data-fetcher generators can not be null"));
         dataFetcherGenerator = generator;
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder clearClasses() {
+    public synchronized AdaptedGraphQLSchemaBuilder clearClasses() {
         allClasses.clear();
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder addScalar(ScalarEntry entry) {
+    public synchronized AdaptedGraphQLSchemaBuilder addScalar(ScalarEntry entry) {
         TypeValidator.validate(entry);
         scalarEntries.put(entry.type(), entry);
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder removeScalar(ScalarEntry entry) {
+    public synchronized AdaptedGraphQLSchemaBuilder removeScalar(ScalarEntry entry) {
         scalarEntries.remove(entry.type(), entry);
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder removeScalar(Class cls) {
+    public synchronized AdaptedGraphQLSchemaBuilder removeScalar(Class cls) {
         scalarEntries.remove(cls);
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder clearScalars() {
+    public synchronized AdaptedGraphQLSchemaBuilder clearScalars() {
         scalarEntries.clear();
         return this;
     }
 
-    public synchronized AdaptedSchemaBuilder objectConstructor(ObjectConstructor constructor) {
+    public synchronized AdaptedGraphQLSchemaBuilder objectConstructor(ObjectConstructor constructor) {
         Assert.isNotNull(constructor, new IllegalStateException("provided object constructor is null"));
         this.objectConstructor = constructor;
         return this;
@@ -265,7 +265,7 @@ public final class AdaptedSchemaBuilder {
 
     private void addDataFetchers(List<DiscoveredElement> discoveredElements, DataFetcherGenerator dataFetcherGenerator, GraphQLCodeRegistry.Builder code, Supplier<AdaptedGraphQLSchema> schemaSupplier, BuildingContext context) {
         DirectiveHandlingContextImpl directiveContext = (DirectiveHandlingContextImpl) context.directiveHandlingContext();
-        discoveredElements.stream().filter(AdaptedSchemaBuilder::isInterfaceOrType).forEach(d -> {
+        discoveredElements.stream().filter(AdaptedGraphQLSchemaBuilder::isInterfaceOrType).forEach(d -> {
             Map<String, MappedFieldMethod> methods = d instanceof DiscoveredObjectType ?
                     ((DiscoveredObjectType) d).asMappedElement().fieldMethods() :
                     ((DiscoveredInterfaceType) d).asMappedElement().fieldMethods();
@@ -334,15 +334,15 @@ public final class AdaptedSchemaBuilder {
         allElements.addAll(context.allScalars());
         allElements = Collections.unmodifiableList(allElements);
 
-        allElements.stream().filter(AdaptedSchemaBuilder::isScalar)
+        allElements.stream().filter(AdaptedGraphQLSchemaBuilder::isScalar)
                 .forEach(type -> {
                     schema.additionalType((GraphQLScalarType) type.asGraphqlElement());
                 });
 
-        allElements.stream().filter(AdaptedSchemaBuilder::isInputType)
+        allElements.stream().filter(AdaptedGraphQLSchemaBuilder::isInputType)
                 .forEach(type -> schema.additionalType((GraphQLInputObjectType) type.asGraphqlElement()));
 
-        allElements.stream().filter(AdaptedSchemaBuilder::isDirective)
+        allElements.stream().filter(AdaptedGraphQLSchemaBuilder::isDirective)
                 .forEach(
                         element -> schema.additionalDirective((GraphQLDirective) element.asGraphqlElement())
                 );

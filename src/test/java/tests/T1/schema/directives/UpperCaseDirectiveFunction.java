@@ -24,12 +24,10 @@ public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object>
     }
 
     @Override
-    public Object handleFragmentDirective(Object value, Object source, MappedTypeClass type, MappedFieldMethod field, DataFetchingEnvironment env) {
-        return super.handleFragmentDirective(value, source, type, field, env);
-    }
-
-    @Override
     public GraphQLFieldDefinition onField(GraphQLFieldDefinition fieldDefinition, MappedTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
+        if (field.type().type() != String.class || field.type().dimensions() > 0) {
+            throw new IllegalStateException("UpperCase directive can just apply on String type fields");
+        }
         context.changeDataFetcherBehavior(typeClass.name(), field.name(), dataFetcher -> DataFetcherAdapter.of(dataFetcher, this::upperCase));
         return fieldDefinition;
     }

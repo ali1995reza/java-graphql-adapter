@@ -45,6 +45,10 @@ import static grphaqladapter.adaptedschemabuilder.exceptions.SchemaExceptionBuil
 
 public final class ClassMapper {
 
+    public final static Chain<ClassAnnotationDetector> DEFAULT_CLASS_ANNOTATION_DETECTOR =
+            ChainBuilder.newBuilder()
+                    .addToLast(new ClassRealAnnotationDetector())
+                    .build();
     public final static Chain<MethodAnnotationDetector> DEFAULT_METHOD_ANNOTATION_DETECTOR =
             ChainBuilder.newBuilder()
                     .addToLast(new MethodRealAnnotationDetector())
@@ -57,10 +61,6 @@ public final class ClassMapper {
                             .argNameIfNotPresent("arg")
                             .withNotNullAnnotation(NotNull.class)
                             .build())
-                    .build();
-    public final static Chain<ClassAnnotationDetector> DEFAULT_CLASS_ANNOTATION_DETECTOR =
-            ChainBuilder.newBuilder()
-                    .addToLast(new ClassRealAnnotationDetector())
                     .build();
     public final static Chain<AppliedDirectiveDetector> DEFAULT_APPLIED_DIRECTIVE_DETECTOR =
             ChainBuilder.newBuilder()
@@ -88,7 +88,7 @@ public final class ClassMapper {
         appliedDirectiveDetectorChain = DEFAULT_APPLIED_DIRECTIVE_DETECTOR;
     }
 
-    public ClassMapper annotationDetectorChain(Chain<ClassAnnotationDetector> classAnnotationDetectorChain) {
+    public ClassMapper classAnnotationDetectorChain(Chain<ClassAnnotationDetector> classAnnotationDetectorChain) {
         Assert.isNotNull(classAnnotationDetectorChain, new IllegalStateException("provided chain is null"));
         this.classAnnotationDetectorChain = classAnnotationDetectorChain;
         return this;

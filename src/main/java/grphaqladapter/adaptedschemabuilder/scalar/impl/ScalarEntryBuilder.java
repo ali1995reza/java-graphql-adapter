@@ -17,27 +17,47 @@ public final class ScalarEntryBuilder {
         return new ScalarEntryBuilder();
     }
 
-    public ScalarEntryBuilder setType(Class type) {
+    public ScalarEntryBuilder type(Class type) {
         this.type = type;
         return this;
     }
 
-    public ScalarEntryBuilder setCoercing(Coercing coercing) {
+    public Class type() {
+        return type;
+    }
+
+    public ScalarEntryBuilder coercing(Coercing coercing) {
         this.coercing = coercing;
         return this;
     }
 
-    public ScalarEntryBuilder setName(String name) {
+    public Coercing coercing() {
+        return coercing;
+    }
+
+    public ScalarEntryBuilder name(String name) {
         this.name = name;
         return this;
     }
 
-    public ScalarEntryBuilder setDescription(String description) {
+    public String name() {
+        return name;
+    }
+
+    public ScalarEntryBuilder description(String description) {
         this.description = description;
         return this;
     }
 
+    public String description() {
+        return description;
+    }
+
     public ScalarEntry build() {
-        return new ScalaEntryImpl(type, name, description, coercing);
+        return new ScalaEntryImpl(type(),
+                name(),
+                description(),
+                coercing()
+        );
     }
 }

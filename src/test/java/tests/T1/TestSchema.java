@@ -2,7 +2,7 @@ package tests.T1;
 
 import graphql.GraphQL;
 import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschemabuilder.AdaptedSchemaBuilder;
+import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchemaBuilder;
 import grphaqladapter.adaptedschemabuilder.scalar.impl.ScalarEntryBuilder;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class TestSchema {
     private final GraphQL graphQL;
 
     public TestSchema() {
-        AdaptedGraphQLSchema adaptedSchema = AdaptedSchemaBuilder
+        AdaptedGraphQLSchema adaptedSchema = AdaptedGraphQLSchemaBuilder
                 .newBuilder()
                 .addPackage("tests.T1.schema")
                 .add(Delay.class)
@@ -38,9 +38,9 @@ public class TestSchema {
                 .objectConstructor(new CustomObjectConstructor())
                 .addScalar(
                         ScalarEntryBuilder.newBuilder()
-                                .setName("Period")
-                                .setCoercing(IntPeriodScalar.Coercing)
-                                .setType(IntPeriodScalar.class)
+                                .name("Period")
+                                .coercing(IntPeriodScalar.Coercing)
+                                .type(IntPeriodScalar.class)
                                 .build()
                 )
                 .build();
