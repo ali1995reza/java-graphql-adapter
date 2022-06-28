@@ -86,18 +86,18 @@ public class TypeFinder {
 
     public DiscoveredScalarType findScalarTypeByClass(Class clazz) {
         DiscoveredScalarType scalarType = scalarsByClass.get(clazz);
-        if(scalarType != null) {
+        if (scalarType != null) {
             return scalarType;
         }
-        throw new IllegalStateException("can not find any scalar-type for class ["+clazz+"]");
+        throw new IllegalStateException("can not find any scalar-type for class [" + clazz + "]");
     }
 
     public DiscoveredEnumType findEnumTypeByClass(Class clazz) {
         DiscoveredEnumType enumType = enumsByClass.get(clazz);
-        if(enumType != null) {
+        if (enumType != null) {
             return enumType;
         }
-        throw new IllegalStateException("can not find any enum-type for class ["+clazz+"]");
+        throw new IllegalStateException("can not find any enum-type for class [" + clazz + "]");
     }
 
     public DiscoveredObjectType findObjectTypeByName(String name) {
@@ -137,13 +137,17 @@ public class TypeFinder {
         return isScalar(clazz) || isEnum(clazz);
     }
 
-    public DiscoveredObjectType findObjectTypeByObject(Object o) {
-        DiscoveredObjectType type = objectTypeByClass.computeIfAbsent(o.getClass(), this::findFromClass);
+    public DiscoveredObjectType findObjectTypeByClass(Class clazz) {
+        DiscoveredObjectType type = objectTypeByClass.computeIfAbsent(clazz, this::findFromClass);
         if (type != null) {
             return type;
         }
 
-        throw new IllegalStateException("can not find any object type for object - class [" + o.getClass() + "]");
+        throw new IllegalStateException("can not find any object type for object - class [" + clazz + "]");
+    }
+
+    public DiscoveredObjectType findObjectTypeByObject(Object o) {
+        return findObjectTypeByClass(o.getClass());
     }
 
     public Object getSkippedValue(Parameter parameter) {
