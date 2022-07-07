@@ -1,6 +1,3 @@
 query {
-    getPageDetails(pageParameters:{page:10, size:20}) {
-        page
-        size
-    }
+    getDeveloperName @UpperCase @Reverse
 }

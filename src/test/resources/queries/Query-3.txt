@@ -1,6 +1,6 @@
 query {
-    getList(period: "[1:10]") {
-        data
+    getList(period: "[1:5]") {
+        data @Reverse
         size
     }
 }

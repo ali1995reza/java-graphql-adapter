@@ -1,0 +1,3 @@
+query {
+    serializeToString(input:{name:"mn", value:"mv", priority:99})
+}

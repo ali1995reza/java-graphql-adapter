@@ -1,0 +1,7 @@
+query {
+    getBankAccount(username: "Peter") @Authentication(token: "Peter") {
+        id
+        username
+        balance
+    }
+}

@@ -1,28 +1,29 @@
 # [GraphQL](https://graphql.org/) Java Adapter
 
 Purpose of this library is to create `GraphQLSchema` by consuming your java classes.
+This library developed on top of [GraphQL-Java](https://www.graphql-java.com/) library.
 
 To create a Schema you have to use `AdaptedGraphQLSchemaBuilder` class. This class help you to create your schema using
-your classes.
+your classes. To create new builder you should call `AdaptedGraphQLSchema.newBuilder()`.
 
 To add a class you can use :
 
 ```java
-AdaptedGraphQLSchemaBuilder.newBuilder()
+AdaptedGraphQLSchema.newBuilder()
         .add(MyFirstClass.class,MySecondClass.class);
 ```
 
 Or you can add all classes in a package using below code:
 
 ```java
-AdaptedGraphQLSchemaBuilder.newBuilder()
+AdaptedGraphQLSchema.newBuilder()
         .addPackage("my.awesome.package");
 ```
 
 And to creat the `AdaptedGraphQLSchema` you have to call `build()`.
 
 ```java
-AdaptedGraphQLSchema adaptedSchema=AdaptedGraphQLSchemaBuilder.newBuilder()
+AdaptedGraphQLSchema adaptedSchema=AdaptedGraphQLSchema.newBuilder()
         .add(MyFirstClass.class,MySecondClass.class)
         .addPackage("my.awesome.package")
         .build();
@@ -52,26 +53,26 @@ ClassMapper classMapper=AdaptedGraphQLSchemaBuilder.newBuilder()
         .mapper();
 ```
 
-The strategy of how to map your classes is here. `ClassMapper` will use **detectors**
-to detect the class descriptions.You can change it by your own way. The default mapping strategy will use **
-annotations** and
-**POJO** model.
+The strategy of how to map your classes is here. `ClassMapper` will use **Descriptors**
+to describe elements.You can change it by your own way. The default mapping strategy will use
+**_annotations_** and **POJO** model.
 
-There is 4 types of detectors :
+There is 5 types of Descriptors :
 
-- `ClassAnnotationDetector`, which detect annotations of a class
-- `MethodAnnotationDetector`, which detect annotations of a method
-- `ParameterAnnotationDetector`, which detect annotations of a parameter
-- `AppliedDirectiveDetector`, which detect applied directives on elements
+- `ClassDescriptor`, which describe type based on a class
+- `MethodDescriptor`, which describe field, input-field or directive-argument based on a method
+- `ParameterDescriptor`, which describe argument base on a parameter
+- `EnumConstatntDescriptor`, which describe enum-value base on an enum constant
+- `AppliedDirectiveDescriptor`, which describe applied-directive base on an annotation
 
-`ClassMapper` hold user a chain of detectors. To change the behavior of mapper you can set your detectors. For example
-if you want to apply a custom `ClassAnnotationDetector`
+`ClassMapper` hold user a chain of descriptors. To change the behavior of mapper you can set your own descriptors. For
+example if you want to apply a custom `ClassDescriptor`
 you have to do it like this:
 
 ```java
-classMapper.classAnnotationDetectorChain(ChainBuilder.newBuilder()
-        .addToLast(new MyCustomClassAnnotationDetector())
-        .addToLast(new ClassRealAnnotationDetector())
+classMapper.classDescriptorChain(ChainBuilder.newBuilder()
+        .addToLast(new MyCustomClassDescriptor())
+        .addToLast(new AnnotationBaseClassDescriptor())
         //and more detectors ...
         .build());
 ```
@@ -139,6 +140,11 @@ This annotation will use to set a method as GraphQL input-field. You can specify
 use the method name. Also, it is possible to set input-field nullable. Each input-field is nullable by default. You have
 to set the setter-method name of the input-field too.
 
+#### @GraphqlEnumValue(`name() default ""`)
+
+This annotation will use to set an enum-constant as GraphQL enum-value. You can specify the name or the default strategy
+will use the enum-constant name. Also, default strategy will map enum-constants automatically.
+
 #### @GraphqlArgument(`name() default "";` `nullable() default true;`)
 
 This annotation will use to set a parameter of a method as GraphQL field. You can specify the name or the default
@@ -153,6 +159,13 @@ This annotation will use to set an annotation-method as a GraphQL directive argu
 method is limited you can set custom type details for the method. If you set custom type you have to set a
 custom `ValueParser` just for building-schema time. In execution time type resolving and building object will be
 automatic even if you set custom type.
+
+#### @DefaultValue(`value();` `valueParser() default AutomaticDefaultValuerParser.class;`)
+
+This annotation will use to set a default value for an argument or input-field. You should set a String value. There is
+an argument which help you a custom value parser which convert the `String` value to the argument or input-field type.
+By default, system will use scalar-types coercing and enum-value names and for custom input-types you can use json
+string values without key double-quotation and single-quotation wrapped String values.
 
 #### @SkipElement
 
@@ -172,37 +185,50 @@ We will create `UpperCaseDirectiveFunction` like this:
 import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedFieldMethod;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedTypeClass;
-import grphaqladapter.adaptedschemabuilder.utils.DataFetcherAdapter;
-import grphaqladapter.annotations.interfaces.GraphqlDirectiveFunction;
-import grphaqladapter.annotations.interfaces.SchemaDirectiveHandlingContext;
+import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
+import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
+import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
+import grphaqladapter.adaptedschema.utils.DataFetcherAdapter;
 
 import java.util.concurrent.CompletableFuture;
 
-public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object> {
+public class UpperCaseDirectiveFunction implements GraphqlDirectiveFunction<Object> {
 
     @Override
-    public Object handleFieldDirective(Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
+    public Object handleFieldDirective(GraphqlDirectiveDetails directive, Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
         return upperCase(value);
     }
 
     @Override
-    public Object handleOperationDirective(Object value, Object source, OperationDefinition operation, MappedFieldMethod field, DataFetchingEnvironment env) {
+    public Object handleOperationDirective(GraphqlDirectiveDetails directive, Object value, Object source, OperationDefinition operation, MappedFieldMethod field, DataFetchingEnvironment env) {
         return upperCase(value);
     }
 
     @Override
-    public GraphQLFieldDefinition onField(GraphQLFieldDefinition fieldDefinition, MappedTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
+    public GraphQLFieldDefinition onField(GraphqlDirectiveDetails directive, GraphQLFieldDefinition fieldDefinition, MappedObjectTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
         if (field.type().type() != String.class || field.type().dimensions() > 0) {
             throw new IllegalStateException("UpperCase directive can just apply on String type fields");
         }
         context.changeDataFetcherBehavior(typeClass.name(), field.name(), dataFetcher -> DataFetcherAdapter.of(dataFetcher, this::upperCase));
-        return fieldDefinition;
+        return GraphqlDirectiveFunction.super.onField(directive, fieldDefinition, typeClass, field, context);
     }
 
     private CompletableFuture upperAsync(CompletableFuture future) {
         return future.thenApply(this::upperSync);
+    }
+
+    private Object upperCase(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof CompletableFuture) {
+            return upperAsync((CompletableFuture) object);
+        } else {
+            return upperSync(object);
+        }
+
     }
 
     private Object upperSync(Object object) {
@@ -219,18 +245,6 @@ public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object>
         }
         return new String(data);
     }
-
-    private Object upperCase(Object object) {
-        if (object == null) {
-            return null;
-        }
-        if (object instanceof CompletableFuture) {
-            return upperAsync((CompletableFuture) object);
-        } else {
-            return upperSync(object);
-        }
-
-    }
 }
 ```
 
@@ -239,7 +253,6 @@ And then you have to define directives like this:
 ```java
 import graphql.introspection.Introspection;
 import grphaqladapter.annotations.GraphqlDirective;
-import grphaqladapter.annotations.GraphqlDirectiveArgument;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -253,11 +266,12 @@ public @interface UpperCase {
 With this implementation you add this directive to a field like this:
 
 ```java
+import grphaqladapter.annotations.GraphqlObjectType;
 import grphaqladapter.annotations.GraphqlType;
 
 import java.util.concurrent.CompletableFuture;
 
-@GraphqlType
+@GraphqlObjectType
 public class DeveloperInfo {
 
     @UpperCase
@@ -287,21 +301,21 @@ query {
 ```
 
 In some cases you need to get directives before handling field fetching. For this type of use-case you can
-use `preHandleFieldDirective`. By overriding thi method you can add a custom functionality. Another way is to get
+use `preHandleFieldDirective`. By overriding this method you can add a custom functionality. Another way is to get
 directives as parameter. You can add `GraphqlDirectivesHolder` to field parameters and default strategy will map it to
 system-parameter and system will provide it in execution-time automatically.For example, we can get `@UpperCase`
 directive like this:
 
 ```java
-import grphaqladapter.annotations.GraphqlType;
+import grphaqladapter.annotations.GraphqlObjectType;
 
-@GraphqlType
+@GraphqlObjectType
 public class MyType {
 
     @GraphqlField
     public String myField(GraphqlDirectivesHolder holder) {
         GraphqlDirectiveDetails details = holder.fieldDirectives()
-                .directives().get(UpperCase.class);
+                .directivesByClass().get(UpperCase.class);
         if (details != null) {
             return "SOME_DETAILS";
         }
@@ -364,9 +378,10 @@ DiscoveredObjectType discoveredObjectType=adaptedSchema
 This tool will help you create object instances. For example, you can read an argument from DataFetching like this:
 
 ```java
+import grphaqladapter.annotations.GraphqlObjectType;
 import grphaqladapter.annotations.GraphqlType;
 
-@GraphqlType
+@GraphqlObjectType
 public class MyType {
 
     @GraphqlField
@@ -430,37 +445,50 @@ In next step we declare our `UpperCase` directive. We have to define the functio
 import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedFieldMethod;
-import grphaqladapter.adaptedschemabuilder.mapped.MappedTypeClass;
-import grphaqladapter.adaptedschemabuilder.utils.DataFetcherAdapter;
-import grphaqladapter.annotations.interfaces.GraphqlDirectiveFunction;
-import grphaqladapter.annotations.interfaces.SchemaDirectiveHandlingContext;
+import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
+import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
+import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
+import grphaqladapter.adaptedschema.utils.DataFetcherAdapter;
 
 import java.util.concurrent.CompletableFuture;
 
-public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object> {
+public class UpperCaseDirectiveFunction implements GraphqlDirectiveFunction<Object> {
 
     @Override
-    public Object handleFieldDirective(Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
+    public Object handleFieldDirective(GraphqlDirectiveDetails directive, Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
         return upperCase(value);
     }
 
     @Override
-    public Object handleOperationDirective(Object value, Object source, OperationDefinition operation, MappedFieldMethod field, DataFetchingEnvironment env) {
+    public Object handleOperationDirective(GraphqlDirectiveDetails directive, Object value, Object source, OperationDefinition operation, MappedFieldMethod field, DataFetchingEnvironment env) {
         return upperCase(value);
     }
 
     @Override
-    public GraphQLFieldDefinition onField(GraphQLFieldDefinition fieldDefinition, MappedTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
+    public GraphQLFieldDefinition onField(GraphqlDirectiveDetails directive, GraphQLFieldDefinition fieldDefinition, MappedObjectTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
         if (field.type().type() != String.class || field.type().dimensions() > 0) {
             throw new IllegalStateException("UpperCase directive can just apply on String type fields");
         }
         context.changeDataFetcherBehavior(typeClass.name(), field.name(), dataFetcher -> DataFetcherAdapter.of(dataFetcher, this::upperCase));
-        return fieldDefinition;
+        return GraphqlDirectiveFunction.super.onField(directive, fieldDefinition, typeClass, field, context);
     }
 
     private CompletableFuture upperAsync(CompletableFuture future) {
         return future.thenApply(this::upperSync);
+    }
+
+    private Object upperCase(Object object) {
+        if (object == null) {
+            return null;
+        }
+        if (object instanceof CompletableFuture) {
+            return upperAsync((CompletableFuture) object);
+        } else {
+            return upperSync(object);
+        }
+
     }
 
     private Object upperSync(Object object) {
@@ -476,18 +504,6 @@ public class UpperCaseDirectiveFunction extends GraphqlDirectiveFunction<Object>
             data[i] = Character.toUpperCase(data[i]);
         }
         return new String(data);
-    }
-
-    private Object upperCase(Object object) {
-        if (object == null) {
-            return null;
-        }
-        if (object instanceof CompletableFuture) {
-            return upperAsync((CompletableFuture) object);
-        } else {
-            return upperSync(object);
-        }
-
     }
 }
 ```
@@ -564,7 +580,7 @@ public class Query {
 After this we have to create schema from objects:
 
 ```java
-AdaptedGraphQLSchema schema=AdaptedGraphQLSchemaBuilder
+AdaptedGraphQLSchema schema=AdaptedGraphQLSchema
         .newBuilder()
         .add(AppendStringParam.class)
         .add(Query.class)
@@ -579,8 +595,8 @@ Now we can execute our queries like this:
 ```java
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschemabuilder.AdaptedGraphQLSchemaBuilder;
+import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
+import grphaqladapter.adaptedschema.AdaptedGraphQLSchemaBuilder;
 import tests.T1.schema.directives.UpperCase;
 
 import java.util.Map;

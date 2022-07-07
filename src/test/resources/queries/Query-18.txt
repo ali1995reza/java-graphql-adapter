@@ -1,0 +1,3 @@
+query @InputProvider(input: null) {
+    serializeToStringFromDirective(separator: ":")
+}

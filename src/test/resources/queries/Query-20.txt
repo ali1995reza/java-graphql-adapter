@@ -1,0 +1,3 @@
+query @InputProvider(input: {name:"mn", value:"mv", priority:99, inner: null}) {
+    serializeToStringFromDirective
+}

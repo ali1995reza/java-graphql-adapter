@@ -1,22 +1,40 @@
+/*
+ * Copyright 2022 Alireza Akhoundi
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package tests.T1.schema;
 
+import graphql.language.IntValue;
 import graphql.language.StringValue;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
+import grphaqladapter.annotations.GraphqlDescription;
+import grphaqladapter.annotations.GraphqlScalar;
+import tests.T1.schema.directives.Since;
 
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+@GraphqlScalar(name = "Period", coercing = IntPeriodScalar.CoercingImpl.class)
+@GraphqlDescription("This is an custom description")
+@Since("1.0.2")
 public class IntPeriodScalar {
 
-
-    private final static Pattern PeriodPattern =
-            Pattern.compile("[\\[(]\\d+[:]\\d+[)\\]]");
-
-    public final static Coercing Coercing = new Coercing() {
-
+    public final static class CoercingImpl implements Coercing {
 
         @Override
         public Object serialize(Object o) throws CoercingSerializeException {
@@ -32,9 +50,17 @@ public class IntPeriodScalar {
         public Object parseValue(Object o) throws CoercingParseValueException {
             if (o instanceof String) {
                 return IntPeriodScalar.parse((String) o);
+            } else if (o instanceof Integer) {
+                return new IntPeriodScalar(new Bound((Integer) o, true), new Bound((Integer) o, true));
+            } else if (o instanceof Byte) {
+                return new IntPeriodScalar(new Bound((Byte) o, true), new Bound((Byte) o, true));
+            } else if (o instanceof Short) {
+                return new IntPeriodScalar(new Bound((Short) o, true), new Bound((Short) o, true));
+            } else if (o instanceof IntPeriodScalar) {
+                return o;
             }
 
-            throw new CoercingParseValueException("Expect String but found [" + o.getClass() + "]");
+            throw new CoercingParseValueException("Expect String or IntPeriodScalar but found [" + o.getClass() + "]");
 
         }
 
@@ -43,12 +69,19 @@ public class IntPeriodScalar {
 
             if (o instanceof StringValue) {
                 return IntPeriodScalar.parse(((StringValue) o).getValue());
+            } else if (o instanceof IntValue) {
+                int bound = ((IntValue)o).getValue().intValue();
+                return IntPeriodScalar.of(bound, bound);
             }
 
             throw new CoercingParseLiteralException("Expect String but found [" + o.getClass() + "]");
 
         }
-    };
+    }
+
+
+    private final static Pattern PeriodPattern =
+            Pattern.compile("[\\[(]\\d+[:]\\d+[)\\]]");
 
 
     private final Bound lowBound;
@@ -70,7 +103,7 @@ public class IntPeriodScalar {
 
     public static IntPeriodScalar parse(String asString) {
         if (PeriodPattern.matcher(asString).matches()) {
-            String split[] = asString.split(":");
+            String[] split = asString.split(":");
             return new IntPeriodScalar(
                     new Bound(Integer.parseInt(split[0].substring(1)), split[0].charAt(0) == '['),
                     new Bound(Integer.parseInt(split[1].substring(0, split[1].length() - 1)), split[1].charAt(split[1].length() - 1) == ']')
@@ -79,6 +112,10 @@ public class IntPeriodScalar {
 
 
         throw new IllegalStateException("invalid format");
+    }
+
+    public static IntPeriodScalar of(int lowerBound, int upperBound) {
+        return new IntPeriodScalar(new Bound(lowerBound, true), new Bound(upperBound, true));
     }
 
     public Bound lowBound() {

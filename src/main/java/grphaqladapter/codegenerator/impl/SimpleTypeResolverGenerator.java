@@ -1,11 +1,27 @@
+/*
+ * Copyright 2022 Alireza Akhoundi
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package grphaqladapter.codegenerator.impl;
 
 import graphql.TypeResolutionEnvironment;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.TypeResolver;
-import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredInterfaceType;
-import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredObjectType;
-import grphaqladapter.adaptedschemabuilder.discovered.DiscoveredUnionType;
+import grphaqladapter.adaptedschema.discovered.DiscoveredInterfaceType;
+import grphaqladapter.adaptedschema.discovered.DiscoveredObjectType;
+import grphaqladapter.adaptedschema.discovered.DiscoveredUnionType;
 import grphaqladapter.codegenerator.TypeResolverGenerator;
 
 import java.util.List;
@@ -28,7 +44,7 @@ public class SimpleTypeResolverGenerator implements TypeResolverGenerator {
     private final static class TypeResolverImpl implements TypeResolver {
 
         private final List<DiscoveredObjectType> possibleTypes;
-        private ConcurrentHashMap<Class, GraphQLObjectType> resolvedTypesCache = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<Class, GraphQLObjectType> resolvedTypesCache = new ConcurrentHashMap<>();
 
         private TypeResolverImpl(List<DiscoveredObjectType> possibleTypes) {
             this.possibleTypes = possibleTypes;
@@ -46,18 +62,18 @@ public class SimpleTypeResolverGenerator implements TypeResolverGenerator {
             this(interfaceType.implementors());
         }
 
+        @Override
+        public GraphQLObjectType getType(TypeResolutionEnvironment typeResolutionEnvironment) {
+            Class clazz = typeResolutionEnvironment.getObject().getClass();
+            return resolvedTypesCache.computeIfAbsent(clazz, this::findType);
+        }
+
         private GraphQLObjectType findType(Class clazz) {
             for (DiscoveredObjectType objectType : possibleTypes) {
                 if (objectType.asMappedElement().baseClass().isAssignableFrom(clazz))
                     return objectType.asGraphqlElement();
             }
             return null;
-        }
-
-        @Override
-        public GraphQLObjectType getType(TypeResolutionEnvironment typeResolutionEnvironment) {
-            Class clazz = typeResolutionEnvironment.getObject().getClass();
-            return resolvedTypesCache.computeIfAbsent(clazz, this::findType);
         }
     }
 
