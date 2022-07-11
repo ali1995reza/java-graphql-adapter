@@ -57,16 +57,8 @@ public class MappedInputFieldMethodBuilder extends MappedMethodBuilder<MappedInp
     @Override
     public MappedInputFieldMethodBuilder refresh() {
         this.setter = null;
+        this.defaultValue = null;
         return super.refresh();
-    }
-
-    public Method setter() {
-        return setter;
-    }
-
-    public MappedInputFieldMethodBuilder setter(Method setter) {
-        this.setter = setter;
-        return this;
     }
 
     public MappedInputFieldMethodBuilder defaultValue(Object defaultValue) {
@@ -76,5 +68,14 @@ public class MappedInputFieldMethodBuilder extends MappedMethodBuilder<MappedInp
 
     public Object defaultValue() {
         return defaultValue;
+    }
+
+    public Method setter() {
+        return setter;
+    }
+
+    public MappedInputFieldMethodBuilder setter(Method setter) {
+        this.setter = setter;
+        return this;
     }
 }

@@ -20,4 +20,8 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNam
 
 public interface GraphqlEnumDescription extends GraphqlTypeNameDescription {
 
+    static TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, GraphqlEnumDescription>, GraphqlEnumDescription> newEnumDescription() {
+        return TypesDescriptionBuilder.newBuilder(GraphqlEnumDescriptionImpl::new);
+    }
+
 }

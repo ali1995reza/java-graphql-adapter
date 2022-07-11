@@ -16,10 +16,10 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.parameter;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 
 import java.lang.reflect.Parameter;
 import java.util.List;
@@ -42,6 +42,16 @@ final class MappedParameterImpl extends MappedElementImpl implements MappedParam
     }
 
     @Override
+    public <T> T defaultValue() {
+        return (T) defaultValue;
+    }
+
+    @Override
+    public int index() {
+        return index;
+    }
+
+    @Override
     public ParameterModel model() {
         return model;
     }
@@ -52,17 +62,7 @@ final class MappedParameterImpl extends MappedElementImpl implements MappedParam
     }
 
     @Override
-    public int index() {
-        return 0;
-    }
-
-    @Override
     public TypeInformation type() {
         return type;
-    }
-
-    @Override
-    public <T> T defaultValue() {
-        return (T)defaultValue;
     }
 }

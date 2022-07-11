@@ -20,4 +20,7 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlNullabl
 
 public interface GraphqlFieldDescription extends GraphqlNullableContainerElementDescription {
 
+    static GraphqlFieldDescriptionBuilder newFieldDescription() {
+        return GraphqlFieldDescriptionBuilder.newBuilder();
+    }
 }

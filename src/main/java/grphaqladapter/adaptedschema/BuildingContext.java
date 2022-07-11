@@ -39,13 +39,13 @@ interface BuildingContext {
 
     GraphQLTypeReference getInputObjectTypeFor(Class clazz);
 
-    GraphQLTypeReference getPossibleInputTypeFor(Class clazz);
-
     GraphQLTypeReference getInterfaceFor(Class clazz);
 
     <T extends MappedClass> T getMappedClassFor(Class clazz, MappedElementType mappedElementType);
 
     GraphQLTypeReference getObjectTypeFor(Class clazz);
+
+    GraphQLTypeReference getPossibleInputTypeFor(Class clazz);
 
     GraphQLTypeReference getScalarTypeFor(Class clazz);
 
@@ -59,16 +59,16 @@ interface BuildingContext {
         return getUnionTypeFor(clazz) != null;
     }
 
-    default boolean isScalar(Class clazz) {
-        return getScalarTypeFor(clazz) != null;
-    }
-
     default boolean isEnum(Class clazz) {
         return getEnumFor(clazz) != null;
     }
 
     default boolean isInputType(Class clazz) {
         return getInputObjectTypeFor(clazz) != null;
+    }
+
+    default boolean isScalar(Class clazz) {
+        return getScalarTypeFor(clazz) != null;
     }
 
     ObjectConstructor objectConstructor();

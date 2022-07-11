@@ -33,12 +33,12 @@ public class EmptyChain<T> implements Chain<T> {
     }
 
     @Override
-    public int size() {
-        return 0;
+    public Iterator<T> iterator() {
+        return Collections.emptyIterator();
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return Collections.emptyIterator();
+    public int size() {
+        return 0;
     }
 }

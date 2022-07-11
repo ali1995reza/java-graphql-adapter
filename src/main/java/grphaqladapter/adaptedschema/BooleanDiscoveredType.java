@@ -18,15 +18,18 @@ package grphaqladapter.adaptedschema;
 
 import graphql.Scalars;
 import grphaqladapter.adaptedschema.discovered.DiscoveredScalarType;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedScalarClassBuilder;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedScalarClass;
 
 final class BooleanDiscoveredType extends DiscoveredScalarTypeImpl {
 
     private final static BooleanDiscoveredType INSTANCE = new BooleanDiscoveredType();
 
+    public static DiscoveredScalarType getInstance() {
+        return INSTANCE;
+    }
+
     private BooleanDiscoveredType() {
-        super(MappedScalarClassBuilder
-                        .newBuilder()
+        super(MappedScalarClass.newScalarClass()
                         .baseClass(Boolean.class)
                         .name(Scalars.GraphQLBoolean.getName())
                         .description(Scalars.GraphQLBoolean.getDescription())
@@ -34,9 +37,5 @@ final class BooleanDiscoveredType extends DiscoveredScalarTypeImpl {
                         .build(),
                 Scalars.GraphQLBoolean.getName(),
                 Scalars.GraphQLBoolean);
-    }
-
-    public static DiscoveredScalarType getInstance() {
-        return INSTANCE;
     }
 }

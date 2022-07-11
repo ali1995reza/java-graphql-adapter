@@ -22,5 +22,9 @@ import java.util.Map;
 
 public interface MappedInputTypeClass extends MappedClass {
 
+    static MappedInputTypeClassBuilder newInputTypeClass() {
+        return MappedInputTypeClassBuilder.newBuilder();
+    }
+
     Map<String, MappedInputFieldMethod> inputFiledMethods();
 }

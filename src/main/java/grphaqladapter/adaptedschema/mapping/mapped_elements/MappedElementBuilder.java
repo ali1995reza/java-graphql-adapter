@@ -16,14 +16,16 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements;
 
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
+import grphaqladapter.adaptedschema.utils.builder.IBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>, E extends MappedElement> {
+public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>, E extends MappedElement> implements IBuilder<T, E> {
 
     private final MappedElementType elementType;
     private final List<AppliedAnnotation> appliedAnnotations = new ArrayList<>();
@@ -32,6 +34,24 @@ public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>,
 
     protected MappedElementBuilder(MappedElementType elementType) {
         this.elementType = elementType;
+    }
+
+    @Override
+    public T copy(E element) {
+        if (!element.mappedType().is(elementType())) {
+            throw new IllegalStateException("can not copy element - difference types [" + element.mappedType() + " , " + elementType() + "]");
+        }
+        this.refresh();
+        element.appliedAnnotations().forEach(this::addAppliedAnnotation);
+        return name(element.name())
+                .description(element.description());
+    }
+
+    public T refresh() {
+        this.clearAppliedAnnotations();
+        this.name = null;
+        this.description = null;
+        return (T) this;
     }
 
     public T addAppliedAnnotation(AppliedAnnotation annotation) {
@@ -45,21 +65,9 @@ public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>,
         return Collections.unmodifiableList(new ArrayList<>(this.appliedAnnotations));
     }
 
-    public abstract E build();
-
     public T clearAppliedAnnotations() {
         this.appliedAnnotations.clear();
         return (T) this;
-    }
-
-    public T copy(E element) {
-        if (!element.mappedType().is(elementType())) {
-            throw new IllegalStateException("can not copy element - difference types [" + element.mappedType() + " , " + elementType() + "]");
-        }
-        this.refresh();
-        element.appliedAnnotations().forEach(this::addAppliedAnnotation);
-        return name(element.name())
-                .description(element.description());
     }
 
     public T description(String description) {
@@ -84,13 +92,6 @@ public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>,
         return name;
     }
 
-    public T refresh() {
-        this.clearAppliedAnnotations();
-        this.name = null;
-        this.description = null;
-        return (T) this;
-    }
-
     public T removeAppliedAnnotation(AppliedAnnotation annotation) {
         this.appliedAnnotations.remove(annotation);
         return (T) this;
@@ -103,14 +104,6 @@ public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>,
 
     private final static class AppliedAnnotationClassPredictor implements Predicate<AppliedAnnotation> {
 
-        private static Predicate<AppliedAnnotation> of(Class clazz) {
-            return new AppliedAnnotationClassPredictor(clazz);
-        }
-
-        private static Predicate<AppliedAnnotation> of(AppliedAnnotation annotation) {
-            return of(annotation.annotationClass());
-        }
-
         private final Class clazz;
 
         private AppliedAnnotationClassPredictor(Class clazz) {
@@ -120,6 +113,14 @@ public abstract class MappedElementBuilder<T extends MappedElementBuilder<T, E>,
         @Override
         public boolean test(AppliedAnnotation annotation) {
             return annotation.annotationClass() == clazz;
+        }
+
+        private static Predicate<AppliedAnnotation> of(Class clazz) {
+            return new AppliedAnnotationClassPredictor(clazz);
+        }
+
+        private static Predicate<AppliedAnnotation> of(AppliedAnnotation annotation) {
+            return of(annotation.annotationClass());
         }
     }
 }

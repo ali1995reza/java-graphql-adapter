@@ -19,12 +19,9 @@ package grphaqladapter.adaptedschema.mapping.strategy.descriptors.method;
 import grphaqladapter.adaptedschema.functions.impl.RawValueParser;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlDirectiveArgumentDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlDirectiveArgumentDescriptionBuilder;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlFieldDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlFieldDescriptionBuilder;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlInputFieldDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlInputFieldDescriptionBuilder;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -54,7 +51,7 @@ public class PojoMethodDescriptor implements MethodDescriptor {
             return null;
         }
         TypeInformation information = TypeInformation.of(method, !method.getReturnType().isPrimitive());
-        return GraphqlDirectiveArgumentDescriptionBuilder.newBuilder()
+        return GraphqlDirectiveArgumentDescription.newDirectiveArgumentDescription()
                 .name(getName(method))
                 .description(DescriptorUtils.getDescription(method))
                 .defaultValue(DescriptorUtils.getDefaultValueOfAnnotationMethod(method, RawValueParser.class))
@@ -118,7 +115,7 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         if (setter == null) {
             return null;
         }
-        return GraphqlInputFieldDescriptionBuilder.newBuilder()
+        return GraphqlInputFieldDescription.newInputFieldDescription()
                 .name(getName(method))
                 .nullable(isNullable(method))
                 .setter(setter)
@@ -137,7 +134,7 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         if (!(method.getName().startsWith(GET_PREFIX) || method.getName().startsWith(IS_PREFIX))) {
             return null;
         }
-        return GraphqlFieldDescriptionBuilder.newBuilder()
+        return GraphqlFieldDescription.newFieldDescription()
                 .name(getName(method))
                 .nullable(isNullable(method))
                 .build();

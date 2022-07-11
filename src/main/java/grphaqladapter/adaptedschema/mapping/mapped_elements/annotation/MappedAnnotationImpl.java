@@ -21,6 +21,7 @@ import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedAnnotationMethod;
+import grphaqladapter.adaptedschema.utils.CollectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -35,8 +36,8 @@ final class MappedAnnotationImpl extends MappedClassImpl implements MappedAnnota
 
     MappedAnnotationImpl(String name, String description, Class<? extends Annotation> baseClass, Map<String, MappedAnnotationMethod> mappedMethods, Set<Introspection.DirectiveLocation> locations, Class<? extends GraphqlDirectiveFunction> functionality) {
         super(name, MappedElementType.DIRECTIVE, description, Collections.emptyList(), baseClass);
-        this.mappedMethods = mappedMethods;
-        this.locations = locations;
+        this.mappedMethods = CollectionUtils.getOrEmptyMap(mappedMethods);
+        this.locations = CollectionUtils.getOrEmptySet(locations);
         this.functionality = functionality;
     }
 

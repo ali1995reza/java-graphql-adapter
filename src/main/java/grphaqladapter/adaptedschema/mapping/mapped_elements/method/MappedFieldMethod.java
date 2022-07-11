@@ -23,6 +23,10 @@ import java.util.Map;
 
 public interface MappedFieldMethod extends MappedMethod {
 
+    static MappedFieldMethodBuilder newFieldMethod() {
+        return MappedFieldMethodBuilder.newBuilder();
+    }
+
     List<MappedParameter> parameters();
 
     Map<String, MappedParameter> parametersByName();

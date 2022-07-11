@@ -25,6 +25,7 @@ public class TypeDescriptionsBuilder {
     public static TypeDescriptionsBuilder newBuilder() {
         return new TypeDescriptionsBuilder();
     }
+
     private GraphqlObjectTypeDescription objectTypeDescription;
     private GraphqlInputTypeDescription inputTypeDescription;
     private GraphqlInterfaceDescription interfaceDescription;

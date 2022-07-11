@@ -16,12 +16,9 @@
 
 package grphaqladapter.adaptedschema.system_objects.directive;
 
-import java.util.Collections;
 import java.util.Map;
 
 public class FragmentDirectives {
-
-    private final static FragmentDirectives EMPTY = new FragmentDirectives(Collections.emptyMap());
 
     private final Map<Class, GraphqlDirectivesList> directivesByType;
 
@@ -31,9 +28,5 @@ public class FragmentDirectives {
 
     public Map<Class, GraphqlDirectivesList> directivesByType() {
         return directivesByType;
-    }
-
-    public static FragmentDirectives empty() {
-        return EMPTY;
     }
 }

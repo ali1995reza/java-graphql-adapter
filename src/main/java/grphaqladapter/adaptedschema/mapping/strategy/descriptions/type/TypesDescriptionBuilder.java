@@ -16,71 +16,60 @@
 
 package grphaqladapter.adaptedschema.mapping.strategy.descriptions.type;
 
-import graphql.schema.Coercing;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNameDescription;
+import grphaqladapter.adaptedschema.utils.builder.IBuilder;
 
-public class TypesDescriptionBuilder {
+import java.util.function.BiFunction;
 
-    public static TypesDescriptionBuilder newBuilder() {
-        return new TypesDescriptionBuilder();
+public class TypesDescriptionBuilder<B extends TypesDescriptionBuilder<B, E>, E extends GraphqlTypeNameDescription> implements IBuilder<TypesDescriptionBuilder<B, E>, E> {
+
+    public static <E extends GraphqlTypeNameDescription> TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, E>, E> newBuilder(BiFunction<String, String, E> builder) {
+        return new TypesDescriptionBuilder(builder);
     }
 
+    private final BiFunction<String, String, E> builder;
     private String name;
     private String description;
 
-    private TypesDescriptionBuilder() {
+    TypesDescriptionBuilder(BiFunction<String, String, E> builder) {
+        this.builder = builder;
     }
 
-    public GraphqlEnumDescription buildEnumDescription() {
-        return new GraphqlEnumDescriptionImpl(name(), description());
+
+    public B description(String description) {
+        this.description = description;
+        return (B) this;
     }
 
-    public GraphqlInputTypeDescription buildInputTypeDescription() {
-        return new GraphqlInputTypeDescriptionImpl(name(), description());
+    public String description() {
+        return description;
     }
 
-    public GraphqlInterfaceDescription buildInterfaceDescription() {
-        return new GraphqlInterfaceDescriptionImpl(name(), description());
-    }
-
-    public GraphqlMutationDescription buildMutationDescription() {
-        return new GraphqlMutationDescriptionImpl(name(), description());
-    }
-
-    public GraphqlObjectTypeDescription buildObjectTypeDescription() {
-        return new GraphqlObjectTypeDescriptionImpl(name(), description());
-    }
-
-    public GraphqlQueryDescription buildQueryDescription() {
-        return new GraphqlQueryDescriptionImpl(name(), description());
-    }
-
-    public GraphqlScalarDescription buildScalarDescription(Class<? extends Coercing> coercing) {
-        return new GraphqlScalarDescriptionImpl(name(), description(), coercing);
-    }
-
-    public GraphqlSubscriptionDescription buildSubscriptionDescription() {
-        return new GraphqlSubscriptionDescriptionImpl(name(), description());
-    }
-
-    public GraphqlUnionDescription buildUnionDescription() {
-        return new GraphqlUnionDescriptionImpl(name(), description());
-    }
-
-    public TypesDescriptionBuilder name(String name) {
+    public B name(String name) {
         this.name = name;
-        return this;
+        return (B) this;
     }
 
     public String name() {
         return name;
     }
 
-    public TypesDescriptionBuilder description(String description) {
-        this.description = description;
-        return this;
+    @Override
+    public E build() {
+        return builder.apply(name(), description());
     }
 
-    public String description() {
-        return description;
+    @Override
+    public B copy(E e) {
+        return refresh()
+                .description(e.description())
+                .name(e.name());
+    }
+
+    @Override
+    public B refresh() {
+        this.name = null;
+        this.description = null;
+        return (B) this;
     }
 }

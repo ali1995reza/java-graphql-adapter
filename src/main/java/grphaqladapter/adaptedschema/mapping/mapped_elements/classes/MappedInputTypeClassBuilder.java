@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.classes;
 
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedInputFieldMethod;

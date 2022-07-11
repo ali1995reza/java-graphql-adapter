@@ -29,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import tests.T1.schema.*;
 import tests.T1.schema.directives.*;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tests.T1.TestUtils.isParameterNamePresent;
 
@@ -36,7 +38,7 @@ public class TestSchemaObjectTypes {
 
     @Test
     public void overallTest() {
-        assertEquals(10, TestSchemaProvider.schema().discoveredObjectTypes().size());
+        assertEquals(11, TestSchemaProvider.schema().discoveredObjectTypes().size());
     }
 
     @Test
@@ -56,20 +58,6 @@ public class TestSchemaObjectTypes {
     }
 
     @Test
-    public void testNormalUserType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(NormalUser.class, "User", 2);
-
-        StaticTests.findFieldAndTest("name", type, TypeInformation.nonNullable(String.class));
-
-        StaticTests.findFieldAndTest("type", type, TypeInformation.nonNullable(UserType.class));
-
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
-
-        StaticTests.findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
-    }
-
-    @Test
     public void testBankAccountType() {
         DiscoveredObjectType type = StaticTests.findAndTestObjectType(BankAccount.class, "BankAccount", 3);
 
@@ -78,24 +66,6 @@ public class TestSchemaObjectTypes {
         StaticTests.findFieldAndTest("username", type, TypeInformation.nullable(String.class));
 
         StaticTests.findFieldAndTest("balance", type, TypeInformation.nullable(Double.class));
-
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
-    }
-
-    @Test
-    public void testIntListType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(IntList.class, "IntList", 4);
-
-        StaticTests.findFieldAndTest("data", type, TypeInformation.nullableList(Integer.class));
-
-        StaticTests.findFieldAndTest("isEmpty", type, TypeInformation.nonNullable(boolean.class));
-
-        MappedFieldMethod sizeField = StaticTests.findFieldAndTest("size", type, 1, TypeInformation.nonNullable(int.class));
-        StaticTests.findParameterAndTest(null, sizeField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 0, TypeInformation.nullable(DataFetchingEnvironment.class));
-
-        MappedFieldMethod getField = StaticTests.findFieldAndTest("get", type, 1, TypeInformation.nullable(Integer.class));
-        StaticTests.findParameterAndTest("index", getField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), 0);
 
         StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
         StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
@@ -138,18 +108,6 @@ public class TestSchemaObjectTypes {
     }
 
     @Test
-    public void testPageDetailsType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(PageDetails.class, "PageDetails", 2);
-
-        StaticTests.findFieldAndTest("page", type, TypeInformation.nonNullable(int.class));
-
-        StaticTests.findFieldAndTest("size", type, TypeInformation.nonNullable(int.class));
-
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
-    }
-
-    @Test
     public void testComplexOutputType() {
 
         DiscoveredObjectType type = StaticTests.findAndTestObjectType(Complex.class, "ComplexOutput", 4, 1);
@@ -168,8 +126,26 @@ public class TestSchemaObjectTypes {
     }
 
     @Test
+    public void testIntListType() {
+        DiscoveredObjectType type = StaticTests.findAndTestObjectType(IntList.class, "IntList", 4);
+
+        StaticTests.findFieldAndTest("data", type, TypeInformation.nullableList(Integer.class));
+
+        StaticTests.findFieldAndTest("isEmpty", type, TypeInformation.nonNullable(boolean.class));
+
+        MappedFieldMethod sizeField = StaticTests.findFieldAndTest("size", type, 1, TypeInformation.nonNullable(int.class));
+        StaticTests.findParameterAndTest(null, sizeField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 0, TypeInformation.nullable(DataFetchingEnvironment.class));
+
+        MappedFieldMethod getField = StaticTests.findFieldAndTest("get", type, 1, TypeInformation.nullable(Integer.class));
+        StaticTests.findParameterAndTest("index", getField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), 0);
+
+        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
+        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+    }
+
+    @Test
     public void testMutation() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(TestMutation.class, "TestMutation", 4, 0, MappedElementType.MUTATION);
+        DiscoveredObjectType type = StaticTests.findAndTestObjectType(TestMutation.class, "TestMutation", 6, 0, MappedElementType.MUTATION);
 
         MappedFieldMethod encodeToBase64Field = StaticTests.findFieldAndTest("encodeToBase64", type, 1, TypeInformation.nullable(String.class));
         StaticTests.findParameterAndTest("input", encodeToBase64Field, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(String.class));
@@ -187,11 +163,78 @@ public class TestSchemaObjectTypes {
         MappedFieldMethod listToArrayField = StaticTests.findFieldAndTest("listToArray", type, 1, 0, TypeInformation.nullableArray(int.class));
         StaticTests.findParameterAndTest(isParameterNamePresent() ? "list" : "arg0", listToArrayField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableList(Integer.class));
 
+        MappedFieldMethod inputToOutputField = StaticTests.findFieldAndTest("inputToOutput", type, 1, 1, TypeInformation.nullable(Foo.class));
+        StaticTests.findParameterAndTest("input", inputToOutputField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Foo.class),
+                new Foo().setIntValue(-1).setIntValue2(-2).setIntArray(new int[]{1, 2, 3, 4}));
+        StaticTests.findAppliedAnnotationAndTest(FooProvider.class, "FooProvider", inputToOutputField, "value", new Foo().setIntValue(-100).setIntValue2(-200),
+                "arrayValues", new Foo[]{new Foo().setIntValue(-25), new Foo().setIntValue(-26), new Foo().setIntValue(-27)},
+                "listValues", Arrays.asList(new Foo().setIntValue(-1000), new Foo().setIntValue(-2000), new Foo().setIntValue(-3000)));
+
+        MappedFieldMethod inputToOutputFromDirectiveField = StaticTests.findFieldAndTest("inputToOutputFromDirective", type, 2, 0, TypeInformation.nullable(Foo.class));
+        StaticTests.findParameterAndTest("index", inputToOutputFromDirectiveField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), -1);
+
+
         StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
         StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
 
         StaticTests.findInterfaceTypeAndTest(MutationInterface.class, "MutationInterface", type);
 
+    }
+
+    @Test
+    public void testNormalUserType() {
+        DiscoveredObjectType type = StaticTests.findAndTestObjectType(NormalUser.class, "User", 2);
+
+        StaticTests.findFieldAndTest("name", type, TypeInformation.nonNullable(String.class));
+
+        StaticTests.findFieldAndTest("type", type, TypeInformation.nonNullable(UserType.class));
+
+        StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
+        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+
+        StaticTests.findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
+    }
+
+    @Test
+    public void testFooOutputType() {
+        DiscoveredObjectType objectType = StaticTests.findAndTestObjectType(Foo.class, "FooOutput", 12);
+
+        StaticTests.findFieldAndTest("stringValue", objectType, 0, TypeInformation.nullable(String.class));
+
+        StaticTests.findFieldAndTest("longValue", objectType, 0, TypeInformation.nonNullable(long.class));
+
+        StaticTests.findFieldAndTest("intValue", objectType, 0, TypeInformation.nonNullable(int.class));
+
+        StaticTests.findFieldAndTest("intValue2", objectType, 0, TypeInformation.nonNullable(int.class));
+
+        StaticTests.findFieldAndTest("doubleValue", objectType, 0, TypeInformation.nonNullable(double.class));
+
+        StaticTests.findFieldAndTest("floatValue", objectType, 0, TypeInformation.nonNullable(float.class));
+
+        StaticTests.findFieldAndTest("byteValue", objectType, 0, TypeInformation.nonNullable(byte.class));
+
+        StaticTests.findFieldAndTest("shortValue", objectType, 0, TypeInformation.nonNullable(short.class));
+
+        StaticTests.findFieldAndTest("charValue", objectType, 0, TypeInformation.nonNullable(char.class));
+
+        StaticTests.findFieldAndTest("booleanValue", objectType, 0, TypeInformation.nonNullable(boolean.class));
+
+        StaticTests.findFieldAndTest("booleanValue2", objectType, 0, TypeInformation.nonNullable(boolean.class));
+
+        StaticTests.findFieldAndTest("intArray", objectType, 0, TypeInformation.nullableArray(int.class));
+
+    }
+
+    @Test
+    public void testPageDetailsType() {
+        DiscoveredObjectType type = StaticTests.findAndTestObjectType(PageDetails.class, "PageDetails", 2);
+
+        StaticTests.findFieldAndTest("page", type, TypeInformation.nonNullable(int.class));
+
+        StaticTests.findFieldAndTest("size", type, TypeInformation.nonNullable(int.class));
+
+        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
+        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
     }
 
     @Test
@@ -203,8 +246,10 @@ public class TestSchemaObjectTypes {
         StaticTests.findParameterAndTest("period", getListField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(IntPeriodScalar.class));
 
         MappedFieldMethod multiplyMatrixField = StaticTests.findFieldAndTest("multiplyMatrices", type, 2, TypeInformation.nullableList(Integer.class, 2));
-        StaticTests.findParameterAndTest("m1", multiplyMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nonNullableList(Integer.class, 2));
-        StaticTests.findParameterAndTest("m2", multiplyMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, TypeInformation.nonNullableArray(Integer.class, 2));
+        StaticTests.findParameterAndTest("m1", multiplyMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullableList(Integer.class, 2),
+                Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6), Arrays.asList(7, 8, 9)));
+        StaticTests.findParameterAndTest("m2", multiplyMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullableArray(Integer.class, 2),
+                new Integer[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
 
         MappedFieldMethod getUserField = StaticTests.findFieldAndTest("getUser", type, 1, TypeInformation.nullable(UserInterface.class));
         StaticTests.findParameterAndTest("user", getUserField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nonNullable(InputUser.class));

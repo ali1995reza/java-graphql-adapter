@@ -19,4 +19,8 @@ package grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
 
 public interface MappedUnionInterface extends MappedClass {
+
+    static MappedUnionInterfaceBuilder newUnionInterface() {
+        return MappedUnionInterfaceBuilder.newBuilder();
+    }
 }

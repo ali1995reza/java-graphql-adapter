@@ -17,8 +17,7 @@
 package grphaqladapter.adaptedschema.mapping.mapper;
 
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.exceptions.MappingGraphqlTypeException;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElement;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
@@ -45,11 +44,11 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.Annot
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterAutomaticDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
 import grphaqladapter.adaptedschema.scalar.ScalarEntry;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import grphaqladapter.adaptedschema.utils.ClassUtils;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
-import grphaqladapter.adaptedschema.utils.TypoUtils;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.utils.chain.ChainBuilder;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.lang.annotation.Annotation;
@@ -60,31 +59,30 @@ import static grphaqladapter.adaptedschema.exceptions.SchemaExceptionBuilder.exc
 
 public final class ClassMapper {
 
-    public final static Chain<ClassDescriptor> DEFAULT_CLASS_DESCRIPTORS =
-            ChainBuilder.newBuilder()
-                    .addToLast(new AnnotationBaseClassDescriptor())
-                    .build();
-    public final static Chain<MethodDescriptor> DEFAULT_METHOD_DESCRIPTORS =
-            ChainBuilder.newBuilder()
-                    .addToLast(new AnnotationBaseMethodDescriptor())
-                    .addToLast(new PojoMethodDescriptor(true))
-                    .build();
-    public final static Chain<ParameterDescriptor> DEFAULT_PARAMETER_DESCRIPTORS =
-            ChainBuilder.newBuilder()
-                    .addToLast(new AnnotationBaseParameterDescriptor())
-                    .addToLast(ParameterAutomaticDescriptor.newBuilder()
-                            .argNameIfNotPresent("arg")
-                            .build())
-                    .build();
-    public final static Chain<EnumConstantDescriptor> DEFAULT_ENUM_CONSTANT_DESCRIPTORS =
-            ChainBuilder.newBuilder()
-                    .addToLast(new AnnotationBaseEnumConstantDescriptor())
-                    .addToLast(new AutomaticEnumConstantDescriptor())
-                    .build();
-    public final static Chain<AppliedDirectiveDescriptor> DEFAULT_APPLIED_DIRECTIVE_DESCRIPTORS =
-            ChainBuilder.newBuilder()
-                    .addToLast(new AnnotationBaseDirectiveDescriptor())
-                    .build();
+    public final static Chain<ClassDescriptor> DEFAULT_CLASS_DESCRIPTORS = Chain.newChain()
+            .addToLast(new AnnotationBaseClassDescriptor())
+            .build();
+
+    public final static Chain<MethodDescriptor> DEFAULT_METHOD_DESCRIPTORS = Chain.newChain()
+            .addToLast(new AnnotationBaseMethodDescriptor())
+            .addToLast(new PojoMethodDescriptor(true))
+            .build();
+
+    public final static Chain<ParameterDescriptor> DEFAULT_PARAMETER_DESCRIPTORS = Chain.newChain()
+            .addToLast(new AnnotationBaseParameterDescriptor())
+            .addToLast(ParameterAutomaticDescriptor.newBuilder()
+                    .argNameIfNotPresent("arg")
+                    .build())
+            .build();
+
+    public final static Chain<EnumConstantDescriptor> DEFAULT_ENUM_CONSTANT_DESCRIPTORS = Chain.newChain()
+            .addToLast(new AnnotationBaseEnumConstantDescriptor())
+            .addToLast(new AutomaticEnumConstantDescriptor())
+            .build();
+
+    public final static Chain<AppliedDirectiveDescriptor> DEFAULT_APPLIED_DIRECTIVE_DESCRIPTORS = Chain.newChain()
+            .addToLast(new AnnotationBaseDirectiveDescriptor())
+            .build();
 
     private Chain<ClassDescriptor> classDescriptorChain;
     private Chain<MethodDescriptor> methodDescriptorChain;
@@ -155,7 +153,7 @@ public final class ClassMapper {
         if (clazz.isInterface()) {
             return mapInterfaceOrInterfaceUnionClass(clazz, annotations, constructor, builder);
         }
-        return Utils.getOrCompute(mapScalarClass(clazz, annotations, constructor, builder),
+        return NullifyUtils.getOrCompute(mapScalarClass(clazz, annotations, constructor, builder),
                 () -> mapInputAndObjectType(clazz, annotations, constructor, builder));
     }
 
@@ -206,48 +204,6 @@ public final class ClassMapper {
 
     }
 
-    private List<MappedClass> mapAnnotationClass(Class<? extends Annotation> clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        MappedAnnotation mappedAnnotation = new AnnotationMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain)
-                .mapAnnotation(clazz, annotations, constructor, builder);
-        if (mappedAnnotation != null) {
-            return Arrays.asList(mappedAnnotation);
-        }
-        return null;
-    }
-
-    private List<MappedClass> mapInterfaceOrInterfaceUnionClass(Class clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        MappedInterface mappedInterface = new InterfaceMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain)
-                .mapInterface(clazz, annotations, constructor, builder);
-        if (mappedInterface != null) {
-            return Arrays.asList(mappedInterface);
-        }
-
-        MappedUnionInterface unionInterface = new UnionInterfaceMapper(classDescriptorChain, appliedDirectiveDescriptorChain)
-                .mapUnionInterface(clazz, annotations, constructor, builder);
-        if (unionInterface != null) {
-            return Arrays.asList(unionInterface);
-        }
-        return null;
-    }
-
-    private List<MappedClass> mapEnumClass(Class<? extends Enum> clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        MappedEnum mappedEnum = new EnumMapper(classDescriptorChain, enumConstantDescriptorChain, appliedDirectiveDescriptorChain)
-                .mapEnum(clazz, annotations, constructor, builder);
-        if (mappedEnum != null) {
-            return Arrays.asList(mappedEnum);
-        }
-        return null;
-    }
-
-    private List<MappedClass> mapScalarClass(Class clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        MappedScalarClass scalarClass = new ScalarClassMapper(classDescriptorChain, appliedDirectiveDescriptorChain)
-                .mapScalarClass(clazz, annotations, constructor, builder);
-        if (scalarClass != null) {
-            return Arrays.asList(scalarClass);
-        }
-        return null;
-    }
-
     public ClassMapper methodDescriptorChain(Chain<MethodDescriptor> methodDescriptorChain) {
         Assert.isNotNull(methodDescriptorChain, new IllegalStateException("provided chain is null"));
         this.methodDescriptorChain = methodDescriptorChain;
@@ -263,14 +219,6 @@ public final class ClassMapper {
     public ClassMapper reset() {
         this.setDefaultDescriptors();
         return this;
-    }
-
-    private void setDefaultDescriptors() {
-        this.classDescriptorChain = DEFAULT_CLASS_DESCRIPTORS;
-        this.methodDescriptorChain = DEFAULT_METHOD_DESCRIPTORS;
-        this.parameterDescriptorChain = DEFAULT_PARAMETER_DESCRIPTORS;
-        this.appliedDirectiveDescriptorChain = DEFAULT_APPLIED_DIRECTIVE_DESCRIPTORS;
-        this.enumConstantDescriptorChain = DEFAULT_ENUM_CONSTANT_DESCRIPTORS;
     }
 
     private ObjectBuilder createObjectBuilder(Collection<ScalarEntry> scalarEntries, Collection<Class> classes, Collection<MappedClass> defaultClasses, ObjectConstructor constructor, boolean usePairClassesAsEachOther) {
@@ -309,9 +257,59 @@ public final class ClassMapper {
         }
 
         if (usePairClassesAsEachOther) {
-            TypoUtils.addPairTypesWithSameValue(scalars, enums, inputTypes);
+            ClassUtils.addPairTypesWithSameValue(scalars, enums, inputTypes);
         }
 
         return new ObjectBuilder(scalars, enums, inputTypes, constructor);
+    }
+
+    private List<MappedClass> mapAnnotationClass(Class<? extends Annotation> clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        MappedAnnotation mappedAnnotation = new AnnotationMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain)
+                .mapAnnotation(clazz, annotations, constructor, builder);
+        if (mappedAnnotation != null) {
+            return Arrays.asList(mappedAnnotation);
+        }
+        return null;
+    }
+
+    private List<MappedClass> mapEnumClass(Class<? extends Enum> clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        MappedEnum mappedEnum = new EnumMapper(classDescriptorChain, enumConstantDescriptorChain, appliedDirectiveDescriptorChain)
+                .mapEnum(clazz, annotations, constructor, builder);
+        if (mappedEnum != null) {
+            return Arrays.asList(mappedEnum);
+        }
+        return null;
+    }
+
+    private List<MappedClass> mapInterfaceOrInterfaceUnionClass(Class clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        MappedInterface mappedInterface = new InterfaceMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain)
+                .mapInterface(clazz, annotations, constructor, builder);
+        if (mappedInterface != null) {
+            return Arrays.asList(mappedInterface);
+        }
+
+        MappedUnionInterface unionInterface = new UnionInterfaceMapper(classDescriptorChain, appliedDirectiveDescriptorChain)
+                .mapUnionInterface(clazz, annotations, constructor, builder);
+        if (unionInterface != null) {
+            return Arrays.asList(unionInterface);
+        }
+        return null;
+    }
+
+    private List<MappedClass> mapScalarClass(Class clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        MappedScalarClass scalarClass = new ScalarClassMapper(classDescriptorChain, appliedDirectiveDescriptorChain)
+                .mapScalarClass(clazz, annotations, constructor, builder);
+        if (scalarClass != null) {
+            return Arrays.asList(scalarClass);
+        }
+        return null;
+    }
+
+    private void setDefaultDescriptors() {
+        this.classDescriptorChain = DEFAULT_CLASS_DESCRIPTORS;
+        this.methodDescriptorChain = DEFAULT_METHOD_DESCRIPTORS;
+        this.parameterDescriptorChain = DEFAULT_PARAMETER_DESCRIPTORS;
+        this.appliedDirectiveDescriptorChain = DEFAULT_APPLIED_DIRECTIVE_DESCRIPTORS;
+        this.enumConstantDescriptorChain = DEFAULT_ENUM_CONSTANT_DESCRIPTORS;
     }
 }

@@ -16,19 +16,23 @@
 
 package grphaqladapter.adaptedschema.exceptions;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class SchemaExceptionBuilder<T extends Throwable> {
 
-    private final Class<T> exceptionClazz;
-
-    public SchemaExceptionBuilder(Class<T> exceptionClazz) {
-        this.exceptionClazz = exceptionClazz;
-    }
-
     public static <T extends Throwable> T exception(Class<T> cls, String message, Class clazz, Method method, Parameter parameter) {
         String exceptionMessage = message + location(clazz, method, parameter);
+        try {
+            return cls.getConstructor(String.class).newInstance(exceptionMessage);
+        } catch (Exception ex) {
+            throw new Error(ex);
+        }
+    }
+
+    public static <T extends Throwable> T exception(Class<T> cls, String message, Class clazz, Field field) {
+        String exceptionMessage = message + location(clazz, field);
         try {
             return cls.getConstructor(String.class).newInstance(exceptionMessage);
         } catch (Exception ex) {
@@ -46,6 +50,11 @@ public class SchemaExceptionBuilder<T extends Throwable> {
 
     public static <T extends Throwable> T exception(Class<T> cls, String message, Method method) {
         return exception(cls, message, null, method, null);
+    }
+    private final Class<T> exceptionClazz;
+
+    public SchemaExceptionBuilder(Class<T> exceptionClazz) {
+        this.exceptionClazz = exceptionClazz;
     }
 
     public T exception(String message, Class clazz, Method method, Parameter parameter) {
@@ -77,4 +86,23 @@ public class SchemaExceptionBuilder<T extends Throwable> {
         return string.toString();
     }
 
+    private static String location(Class clazz, Field field) {
+        if (clazz == null && field == null) {
+            return "";
+        }
+        StringBuilder string = new StringBuilder();
+        string.append("\r\nLocation : ")
+                .append("\r\n");
+        if (clazz != null) {
+            string.append("\t")
+                    .append("Class : [ " + clazz + " ]")
+                    .append("\r\n");
+        }
+        if (field != null) {
+            string.append("\t")
+                    .append("Field : [ " + field + " ]")
+                    .append("\r\n");
+        }
+        return string.toString();
+    }
 }

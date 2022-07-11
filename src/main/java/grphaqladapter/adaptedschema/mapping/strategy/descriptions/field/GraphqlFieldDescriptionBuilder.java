@@ -27,6 +27,7 @@ public class GraphqlFieldDescriptionBuilder extends NullableContainerDescription
     private GraphqlFieldDescriptionBuilder() {
     }
 
+    @Override
     public GraphqlFieldDescription build() {
         return new GraphqlFieldDescriptionImpl(name(), description(), isNullable());
     }

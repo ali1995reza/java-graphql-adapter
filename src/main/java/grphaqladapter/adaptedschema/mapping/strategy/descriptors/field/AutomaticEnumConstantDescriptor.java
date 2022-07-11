@@ -17,13 +17,16 @@
 package grphaqladapter.adaptedschema.mapping.strategy.descriptors.field;
 
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.enum_value.GraphqlEnumValueDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
 
 import java.lang.reflect.Field;
 
 public class AutomaticEnumConstantDescriptor implements EnumConstantDescriptor {
     @Override
     public GraphqlEnumValueDescription describeEnumValue(Enum value, Field field, Class<? extends Enum> clazz) {
-        return GraphqlEnumValueDescription.newValue(value.name(), DescriptorUtils.getDescription(field));
+        return GraphqlEnumValueDescription.newEnumValueDescription()
+                .name(value.name())
+                .description(DescriptorUtils.getDescription(field))
+                .build();
     }
 }

@@ -16,13 +16,12 @@
 
 package tests.T1;
 
-import grphaqladapter.adaptedschema.assertutil.NameValidator;
 import grphaqladapter.adaptedschema.discovered.*;
 import grphaqladapter.adaptedschema.functions.ValueParser;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElement;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedInputTypeClass;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
@@ -33,6 +32,7 @@ import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedInputFi
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedMethod;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.parameter.MappedParameter;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.parameter.ParameterModel;
+import grphaqladapter.adaptedschema.utils.NameValidationUtils;
 
 import java.lang.annotation.Annotation;
 
@@ -40,54 +40,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class StaticTests {
 
-    public static MappedMethod testMethod(MappedMethod method) {
-        testMappedElement(method);
-        assertNotNull(method);
-        assertNotNull(method.method());
-        assertTrue(NameValidator.isNameValid(method.name()));
-        assertNotNull(method.type());
-        if (method instanceof MappedInputFieldMethod) {
-            assertEquals(method.mappedType(), MappedElementType.INPUT_FIELD);
+    public static void assertAndTestNumberOfImplementedInterfaces(int expected, DiscoveredObjectType objectType) {
+        assertEquals(expected, objectType.implementedInterfaces().size());
+        assertEquals(expected, objectType.implementedInterfacesByClass().size());
+        assertEquals(expected, objectType.implementedInterfacesByName().size());
+        for (DiscoveredInterfaceType interfaceType : objectType.implementedInterfaces()) {
+            assertEquals(interfaceType, objectType.implementedInterfacesByClass().get(interfaceType.asMappedElement().baseClass()));
+            assertEquals(interfaceType, objectType.implementedInterfacesByName().get(interfaceType.name()));
         }
+    }
 
-        if (method instanceof MappedFieldMethod) {
-            assertEquals(method.mappedType(), MappedElementType.FIELD);
+    public static void assertAndTestNumberOfPossibleUnions(int expected, DiscoveredObjectType objectType) {
+        assertEquals(expected, objectType.possibleUnionTypes().size());
+        assertEquals(expected, objectType.possibleUnionTypesByClass().size());
+        assertEquals(expected, objectType.possibleUnionTypesByName().size());
+        for (DiscoveredUnionType unionType : objectType.possibleUnionTypes()) {
+            assertEquals(unionType, objectType.possibleUnionTypesByClass().get(unionType.asMappedElement().baseClass()));
+            assertEquals(unionType, objectType.possibleUnionTypesByName().get(unionType.name()));
         }
-
-        if (method instanceof MappedAnnotationMethod) {
-            assertEquals(method.mappedType(), MappedElementType.ARGUMENT);
-        }
-        return method;
-    }
-
-    public static MappedInputFieldMethod testInputFieldMethod(MappedInputFieldMethod method) {
-        testMethod(method);
-        assertNotNull(method.setter());
-        return method;
-    }
-
-    public static MappedAnnotationMethod testAnnotationMethod(MappedAnnotationMethod method) {
-        testMethod(method);
-        assertNotNull(method.valueParser());
-        assertTrue(ValueParser.class.isAssignableFrom(method.valueParser()));
-        return method;
-    }
-
-    public static MappedFieldMethod testFieldMethod(MappedFieldMethod method) {
-        testMethod(method);
-        return method;
-    }
-
-    public static MappedParameter testParameter(MappedParameter parameter) {
-        testMappedElement(parameter);
-        return parameter;
-    }
-
-    public static DiscoveredScalarType findAndTestScalarType(Class clazz, String name) {
-        DiscoveredScalarType typeByClass = TestSchemaProvider.schema().typeFinder().findScalarTypeByClass(clazz);
-        DiscoveredScalarType typeByName = TestSchemaProvider.schema().typeFinder().findScalarTypeByName(name);
-        assertEquals(typeByClass, typeByName);
-        return testScalarType(typeByClass);
     }
 
     public static DiscoveredDirective findAndTestDirective(Class clazz, String name, int expectedNumberOfArguments) {
@@ -97,6 +67,16 @@ public class StaticTests {
         assertEquals(directiveByName, directiveByClass);
         assertEquals(expectedNumberOfArguments, directiveByClass.asMappedElement().mappedMethods().size());
         return testDirective(directiveByClass);
+    }
+
+    public static DiscoveredEnumType findAndTestEnumType(Class clazz, String name, int expectedNumberOfConstants, int expectedNumberOfAppliedAnnotation) {
+        DiscoveredEnumType typeByClass = TestSchemaProvider.schema().typeFinder().findEnumTypeByClass(clazz);
+        DiscoveredEnumType typeByName = TestSchemaProvider.schema().typeFinder().findEnumTypeByName(name);
+        assertNotNull(typeByClass);
+        assertEquals(typeByClass, typeByName);
+        assertEquals(expectedNumberOfConstants, typeByClass.asMappedElement().constantsByName().size());
+        assertEquals(expectedNumberOfAppliedAnnotation, typeByClass.asMappedElement().appliedAnnotations().size());
+        return testEnumType(typeByClass);
     }
 
     public static DiscoveredInputType findAndTestInputType(Class clazz, String name, int expectedNumberOfInputFields, int expectedNumberOfAppliedAnnotations) {
@@ -110,6 +90,23 @@ public class StaticTests {
 
     public static DiscoveredInputType findAndTestInputType(Class clazz, String name, int expectedNumberOfInputFields) {
         return findAndTestInputType(clazz, name, expectedNumberOfInputFields, 0);
+    }
+
+    public static DiscoveredInterfaceType findAndTestInterfaceType(Class clazz, String name, int expectedNumberOfAppliedAnnotation, int expectedNumberOfFields, Class... expectedImplementors) {
+        DiscoveredInterfaceType typeByClass = TestSchemaProvider.schema().typeFinder().findInterfaceTypeByClass(clazz);
+        DiscoveredInterfaceType typeByName = TestSchemaProvider.schema().typeFinder().findInterfaceTypeByName(name);
+        assertNotNull(typeByClass);
+        assertEquals(typeByClass, typeByName);
+        assertEquals(expectedNumberOfFields, typeByClass.asMappedElement().fieldMethods().size());
+        int expectedNumberOfPossibleTypes = expectedImplementors == null ? 0 : expectedImplementors.length;
+        assertEquals(expectedNumberOfPossibleTypes, typeByClass.implementors().size());
+        assertEquals(expectedNumberOfAppliedAnnotation, typeByClass.asMappedElement().appliedAnnotations().size());
+        if (expectedImplementors != null) {
+            for (Class expectedImplementor : expectedImplementors) {
+                assertNotNull(typeByClass.implementorsByClass().get(expectedImplementor));
+            }
+        }
+        return testInterfaceType(typeByClass);
     }
 
     public static DiscoveredObjectType findAndTestObjectType(Class clazz, String name, int expectedNumberOfFields, int expectedNumberOfAppliedAnnotations, MappedElementType expectedElementType) {
@@ -131,6 +128,13 @@ public class StaticTests {
 
     }
 
+    public static DiscoveredScalarType findAndTestScalarType(Class clazz, String name) {
+        DiscoveredScalarType typeByClass = TestSchemaProvider.schema().typeFinder().findScalarTypeByClass(clazz);
+        DiscoveredScalarType typeByName = TestSchemaProvider.schema().typeFinder().findScalarTypeByName(name);
+        assertEquals(typeByClass, typeByName);
+        return testScalarType(typeByClass);
+    }
+
     public static DiscoveredUnionType findAndTestUnionType(Class clazz, String name, int expectedNumberOfAppliedAnnotation, Class... expectedPossibleTypes) {
         DiscoveredUnionType typeByClass = TestSchemaProvider.schema().typeFinder().findUnionTypeByClass(clazz);
         DiscoveredUnionType typeByName = TestSchemaProvider.schema().typeFinder().findUnionTypeByName(name);
@@ -147,31 +151,45 @@ public class StaticTests {
         return testUnionType(typeByClass);
     }
 
-    public static DiscoveredInterfaceType findAndTestInterfaceType(Class clazz, String name, int expectedNumberOfAppliedAnnotation, int expectedNumberOfFields, Class... expectedImplementors) {
-        DiscoveredInterfaceType typeByClass = TestSchemaProvider.schema().typeFinder().findInterfaceTypeByClass(clazz);
-        DiscoveredInterfaceType typeByName = TestSchemaProvider.schema().typeFinder().findInterfaceTypeByName(name);
-        assertNotNull(typeByClass);
-        assertEquals(typeByClass, typeByName);
-        assertEquals(expectedNumberOfFields, typeByClass.asMappedElement().fieldMethods().size());
-        int expectedNumberOfPossibleTypes = expectedImplementors == null ? 0 : expectedImplementors.length;
-        assertEquals(expectedNumberOfPossibleTypes, typeByClass.implementors().size());
-        assertEquals(expectedNumberOfAppliedAnnotation, typeByClass.asMappedElement().appliedAnnotations().size());
-        if (expectedImplementors != null) {
-            for (Class expectedImplementor : expectedImplementors) {
-                assertNotNull(typeByClass.implementorsByClass().get(expectedImplementor));
-            }
-        }
-        return testInterfaceType(typeByClass);
+    public static MappedAnnotationMethod findAnnotationMethodAndTest(String name, MappedAnnotation annotation, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType, Object expectedDefaultValue) {
+        MappedAnnotationMethod method = annotation.mappedMethods().get(name);
+        assertNotNull(method);
+        assertNotNull(name, method.name());
+        assertEquals(expectedType, method.type());
+        assertEquals(expectedNumberOfAppliedAnnotations, method.appliedAnnotations().size());
+        TestUtils.assertEquals(expectedDefaultValue, method.defaultValue());
+        return testAnnotationMethod(method);
     }
 
-    public static DiscoveredEnumType findAndTestEnumType(Class clazz, String name, int expectedNumberOfConstants, int expectedNumberOfAppliedAnnotation) {
-        DiscoveredEnumType typeByClass = TestSchemaProvider.schema().typeFinder().findEnumTypeByClass(clazz);
-        DiscoveredEnumType typeByName = TestSchemaProvider.schema().typeFinder().findEnumTypeByName(name);
-        assertNotNull(typeByClass);
-        assertEquals(typeByClass, typeByName);
-        assertEquals(expectedNumberOfConstants, typeByClass.asMappedElement().constantsByName().size());
-        assertEquals(expectedNumberOfAppliedAnnotation, typeByClass.asMappedElement().appliedAnnotations().size());
-        return testEnumType(typeByClass);
+    public static MappedAnnotationMethod findAnnotationMethodAndTest(String name, DiscoveredDirective directive, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType, Object expectedDefaultValue) {
+        return findAnnotationMethodAndTest(name, directive.asMappedElement(), expectedNumberOfAppliedAnnotations, expectedType, expectedDefaultValue);
+    }
+
+    public static MappedAnnotationMethod findAnnotationMethodAndTest(String name, DiscoveredDirective directive, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType) {
+        return findAnnotationMethodAndTest(name, directive, expectedNumberOfAppliedAnnotations, expectedType, null);
+    }
+
+    public static AppliedAnnotation findAppliedAnnotationAndTest(Class<? extends Annotation> clazz, String name, MappedElement element, Object... args) {
+        AppliedAnnotation appliedAnnotationByClass = element.appliedAnnotationsByClass().get(clazz);
+        AppliedAnnotation appliedAnnotationByName = element.appliedAnnotationsByName().get(name);
+        assertNotNull(appliedAnnotationByClass);
+        assertEquals(appliedAnnotationByClass, appliedAnnotationByName);
+        assertTrue(element.appliedAnnotations().contains(appliedAnnotationByClass));
+        if (args != null) {
+            assertEquals(0, args.length % 2);
+        }
+        int expectedNumberOfArgs = args == null ? 0 : args.length / 2;
+        assertEquals(expectedNumberOfArgs, appliedAnnotationByClass.arguments().size());
+        for (int i = 0; i < args.length; i += 2) {
+            String key = (String) args[i];
+            Object value = args[i + 1];
+            TestUtils.assertEquals(value, appliedAnnotationByClass.arguments().get(key));
+        }
+        return appliedAnnotationByClass;
+    }
+
+    public static AppliedAnnotation findAppliedAnnotationAndTest(Class<? extends Annotation> clazz, String name, DiscoveredElement element, Object... args) {
+        return findAppliedAnnotationAndTest(clazz, name, element.asMappedElement(), args);
     }
 
     public static MappedEnumConstant findEnumValueAndTest(String name, Enum value, DiscoveredEnumType enumType, int expectedNumberOfAppliedAnnotation) {
@@ -180,87 +198,6 @@ public class StaticTests {
         assertEquals(value, constant.constant());
         assertEquals(expectedNumberOfAppliedAnnotation, constant.appliedAnnotations().size());
         return testMappedEnumConstant(constant);
-    }
-
-    public static <T extends MappedElement> T testMappedElement(T element) {
-        if (element instanceof MappedParameter) {
-            MappedParameter parameter = (MappedParameter) element;
-            if (parameter.model().isSchemaArgument()) {
-                assertTrue(NameValidator.isNameValid(element.name()));
-            } else {
-                assertNull(element.name());
-            }
-        } else {
-            assertTrue(NameValidator.isNameValid(element.name()));
-        }
-        assertNotNull(element.mappedType());
-        int expectedAppliedAnnotations = element.appliedAnnotations().size();
-        assertEquals(expectedAppliedAnnotations, element.appliedAnnotationsByClass().size());
-        assertEquals(expectedAppliedAnnotations, element.appliedAnnotationsByName().size());
-        for (AppliedAnnotation annotation : element.appliedAnnotations()) {
-            assertEquals(annotation, element.appliedAnnotationsByClass().get(annotation.annotationClass()));
-            assertEquals(annotation, element.appliedAnnotationsByName().get(annotation.name()));
-        }
-        return element;
-    }
-
-    public static MappedEnumConstant testMappedEnumConstant(MappedEnumConstant constant) {
-        testMappedElement(constant);
-        return constant;
-    }
-
-    public static <T extends DiscoveredElement> T testDiscoveredElement(T discoveredElement) {
-        testMappedElement(discoveredElement.asMappedElement());
-        return discoveredElement;
-    }
-
-    public static DiscoveredObjectType testObjectType(DiscoveredObjectType objectType) {
-        testDiscoveredElement(objectType);
-        assertTrue(objectType.asMappedElement().mappedType().isTopLevelType() ||
-                objectType.asMappedElement().mappedType().isObjectType());
-        return objectType;
-    }
-
-    public static DiscoveredEnumType testEnumType(DiscoveredEnumType enumType) {
-        testDiscoveredElement(enumType);
-        return enumType;
-    }
-
-    public static DiscoveredScalarType testScalarType(DiscoveredScalarType scalarType) {
-        testDiscoveredElement(scalarType);
-        return scalarType;
-    }
-
-    public static DiscoveredInputType testInputType(DiscoveredInputType inputType) {
-        return testDiscoveredElement(inputType);
-    }
-
-    public static DiscoveredDirective testDirective(DiscoveredDirective directive) {
-        return testDiscoveredElement(directive);
-    }
-
-    public static DiscoveredUnionType testUnionType(DiscoveredUnionType unionType) {
-        testDiscoveredElement(unionType);
-        int expectedNumberPossibleTypes = unionType.possibleTypes().size();
-        assertEquals(expectedNumberPossibleTypes, unionType.possibleTypesByClass().size());
-        assertEquals(expectedNumberPossibleTypes, unionType.possibleTypesByName().size());
-        for (DiscoveredObjectType objectType : unionType.possibleTypes()) {
-            assertEquals(objectType, unionType.possibleTypesByClass().get(objectType.asMappedElement().baseClass()));
-            assertEquals(objectType, unionType.possibleTypesByName().get(objectType.name()));
-        }
-        return unionType;
-    }
-
-    public static DiscoveredInterfaceType testInterfaceType(DiscoveredInterfaceType interfaceType) {
-        testDiscoveredElement(interfaceType);
-        int expectedNumberOfImplementors = interfaceType.implementors().size();
-        assertEquals(expectedNumberOfImplementors, interfaceType.implementorsByClass().size());
-        assertEquals(expectedNumberOfImplementors, interfaceType.implementorsByName().size());
-        for (DiscoveredObjectType objectType : interfaceType.implementors()) {
-            assertEquals(objectType, interfaceType.implementorsByClass().get(objectType.asMappedElement().baseClass()));
-            assertEquals(objectType, interfaceType.implementorsByName().get(objectType.name()));
-        }
-        return interfaceType;
     }
 
     public static MappedFieldMethod findFieldAndTest(String name, MappedObjectTypeClass mappedClass, int expectedNumberOfParameters, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType) {
@@ -301,7 +238,7 @@ public class StaticTests {
         MappedInputFieldMethod inputField = testInputFieldMethod(mappedClass.inputFiledMethods().get(name));
         assertEquals(expectedType, inputField.type());
         assertEquals(expectedNumberOfAppliedAnnotations, inputField.appliedAnnotations().size());
-        assertEquals(expectedDefaultValue, inputField.defaultValue());
+        TestUtils.assertEquals(expectedDefaultValue, inputField.defaultValue());
         return testInputFieldMethod(inputField);
     }
 
@@ -324,20 +261,14 @@ public class StaticTests {
         return testInterfaceType(interfaceByClass);
     }
 
-    public static DiscoveredUnionType findUnionTypeAndTest(Class clazz, String name, DiscoveredObjectType objectType) {
-        DiscoveredUnionType unionTypeByClass = objectType.possibleUnionTypesByClass().get(clazz);
-        DiscoveredUnionType unionTypeByName = objectType.possibleUnionTypesByName().get(name);
-        assertEquals(unionTypeByClass, unionTypeByName);
-        return testUnionType(unionTypeByClass);
-    }
-
     public static MappedParameter findParameterAndTest(String name, MappedFieldMethod field, ParameterModel expectedModel, int expectedIndex, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType, Object expectedDefaultValue) {
         MappedParameter parameter = field.parameters().get(expectedIndex);
         assertEquals(name, parameter.name());
         assertEquals(expectedModel, parameter.model());
         assertEquals(expectedType, parameter.type());
         assertEquals(expectedNumberOfAppliedAnnotations, parameter.appliedAnnotations().size());
-        assertEquals(expectedDefaultValue, parameter.defaultValue());
+        assertEquals(expectedIndex, parameter.index());
+        TestUtils.assertEquals(expectedDefaultValue, parameter.defaultValue());
         return testParameter(parameter);
     }
 
@@ -349,59 +280,134 @@ public class StaticTests {
         return findParameterAndTest(name, field, expectedModel, expectedIndex, 0, expectedType, null);
     }
 
-    public static MappedAnnotationMethod findAnnotationMethodAndTest(String name, MappedAnnotation annotation, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType) {
-        MappedAnnotationMethod method = annotation.mappedMethods().get(name);
+    public static DiscoveredUnionType findUnionTypeAndTest(Class clazz, String name, DiscoveredObjectType objectType) {
+        DiscoveredUnionType unionTypeByClass = objectType.possibleUnionTypesByClass().get(clazz);
+        DiscoveredUnionType unionTypeByName = objectType.possibleUnionTypesByName().get(name);
+        assertEquals(unionTypeByClass, unionTypeByName);
+        return testUnionType(unionTypeByClass);
+    }
+
+    public static MappedAnnotationMethod testAnnotationMethod(MappedAnnotationMethod method) {
+        testMethod(method);
+        assertNotNull(method.valueParser());
+        assertTrue(ValueParser.class.isAssignableFrom(method.valueParser()));
+        return method;
+    }
+
+    public static DiscoveredDirective testDirective(DiscoveredDirective directive) {
+        return testDiscoveredElement(directive);
+    }
+
+    public static <T extends DiscoveredElement> T testDiscoveredElement(T discoveredElement) {
+        testMappedElement(discoveredElement.asMappedElement());
+        return discoveredElement;
+    }
+
+    public static DiscoveredEnumType testEnumType(DiscoveredEnumType enumType) {
+        testDiscoveredElement(enumType);
+        return enumType;
+    }
+
+    public static MappedFieldMethod testFieldMethod(MappedFieldMethod method) {
+        testMethod(method);
+        return method;
+    }
+
+    public static MappedInputFieldMethod testInputFieldMethod(MappedInputFieldMethod method) {
+        testMethod(method);
+        assertNotNull(method.setter());
+        return method;
+    }
+
+    public static DiscoveredInputType testInputType(DiscoveredInputType inputType) {
+        return testDiscoveredElement(inputType);
+    }
+
+    public static DiscoveredInterfaceType testInterfaceType(DiscoveredInterfaceType interfaceType) {
+        testDiscoveredElement(interfaceType);
+        int expectedNumberOfImplementors = interfaceType.implementors().size();
+        assertEquals(expectedNumberOfImplementors, interfaceType.implementorsByClass().size());
+        assertEquals(expectedNumberOfImplementors, interfaceType.implementorsByName().size());
+        for (DiscoveredObjectType objectType : interfaceType.implementors()) {
+            assertEquals(objectType, interfaceType.implementorsByClass().get(objectType.asMappedElement().baseClass()));
+            assertEquals(objectType, interfaceType.implementorsByName().get(objectType.name()));
+        }
+        return interfaceType;
+    }
+
+    public static <T extends MappedElement> T testMappedElement(T element) {
+        if (element instanceof MappedParameter) {
+            MappedParameter parameter = (MappedParameter) element;
+            if (parameter.model().isSchemaArgument()) {
+                assertTrue(NameValidationUtils.isNameValid(element.name()));
+            } else {
+                assertNull(element.name());
+            }
+        } else {
+            assertTrue(NameValidationUtils.isNameValid(element.name()));
+        }
+        assertNotNull(element.mappedType());
+        int expectedAppliedAnnotations = element.appliedAnnotations().size();
+        assertEquals(expectedAppliedAnnotations, element.appliedAnnotationsByClass().size());
+        assertEquals(expectedAppliedAnnotations, element.appliedAnnotationsByName().size());
+        for (AppliedAnnotation annotation : element.appliedAnnotations()) {
+            assertEquals(annotation, element.appliedAnnotationsByClass().get(annotation.annotationClass()));
+            assertEquals(annotation, element.appliedAnnotationsByName().get(annotation.name()));
+        }
+        return element;
+    }
+
+    public static MappedEnumConstant testMappedEnumConstant(MappedEnumConstant constant) {
+        testMappedElement(constant);
+        return constant;
+    }
+
+    public static MappedMethod testMethod(MappedMethod method) {
+        testMappedElement(method);
         assertNotNull(method);
-        assertNotNull(name, method.name());
-        assertEquals(expectedType, method.type());
-        assertEquals(expectedNumberOfAppliedAnnotations, method.appliedAnnotations().size());
-        return testAnnotationMethod(method);
-    }
-
-    public static MappedAnnotationMethod findAnnotationMethodAndTest(String name, DiscoveredDirective directive, int expectedNumberOfAppliedAnnotations, TypeInformation expectedType) {
-        return findAnnotationMethodAndTest(name, directive.asMappedElement(), expectedNumberOfAppliedAnnotations, expectedType);
-    }
-
-    public static void assertAndTestNumberOfImplementedInterfaces(int expected, DiscoveredObjectType objectType) {
-        assertEquals(expected, objectType.implementedInterfaces().size());
-        assertEquals(expected, objectType.implementedInterfacesByClass().size());
-        assertEquals(expected, objectType.implementedInterfacesByName().size());
-        for (DiscoveredInterfaceType interfaceType : objectType.implementedInterfaces()) {
-            assertEquals(interfaceType, objectType.implementedInterfacesByClass().get(interfaceType.asMappedElement().baseClass()));
-            assertEquals(interfaceType, objectType.implementedInterfacesByName().get(interfaceType.name()));
+        assertNotNull(method.method());
+        assertTrue(NameValidationUtils.isNameValid(method.name()));
+        assertNotNull(method.type());
+        if (method instanceof MappedInputFieldMethod) {
+            assertEquals(method.mappedType(), MappedElementType.INPUT_FIELD);
         }
+
+        if (method instanceof MappedFieldMethod) {
+            assertEquals(method.mappedType(), MappedElementType.FIELD);
+        }
+
+        if (method instanceof MappedAnnotationMethod) {
+            assertEquals(method.mappedType(), MappedElementType.ARGUMENT);
+        }
+        return method;
     }
 
-    public static void assertAndTestNumberOfPossibleUnions(int expected, DiscoveredObjectType objectType) {
-        assertEquals(expected, objectType.possibleUnionTypes().size());
-        assertEquals(expected, objectType.possibleUnionTypesByClass().size());
-        assertEquals(expected, objectType.possibleUnionTypesByName().size());
-        for (DiscoveredUnionType unionType : objectType.possibleUnionTypes()) {
-            assertEquals(unionType, objectType.possibleUnionTypesByClass().get(unionType.asMappedElement().baseClass()));
-            assertEquals(unionType, objectType.possibleUnionTypesByName().get(unionType.name()));
-        }
+    public static DiscoveredObjectType testObjectType(DiscoveredObjectType objectType) {
+        testDiscoveredElement(objectType);
+        assertTrue(objectType.asMappedElement().mappedType().isTopLevelType() ||
+                objectType.asMappedElement().mappedType().isObjectType());
+        return objectType;
     }
 
-    public static AppliedAnnotation findAppliedAnnotationAndTest(Class<? extends Annotation> clazz, String name, MappedElement element, Object... args) {
-        AppliedAnnotation appliedAnnotationByClass = element.appliedAnnotationsByClass().get(clazz);
-        AppliedAnnotation appliedAnnotationByName = element.appliedAnnotationsByName().get(name);
-        assertNotNull(appliedAnnotationByClass);
-        assertEquals(appliedAnnotationByClass, appliedAnnotationByName);
-        assertTrue(element.appliedAnnotations().contains(appliedAnnotationByClass));
-        if (args != null) {
-            assertEquals(0, args.length % 2);
-        }
-        int expectedNumberOfArgs = args == null ? 0 : args.length / 2;
-        assertEquals(expectedNumberOfArgs, appliedAnnotationByClass.arguments().size());
-        for (int i = 0; i < args.length; i += 2) {
-            String key = (String) args[i];
-            Object value = args[i + 1];
-            assertEquals(value, appliedAnnotationByClass.arguments().get(key));
-        }
-        return appliedAnnotationByClass;
+    public static MappedParameter testParameter(MappedParameter parameter) {
+        testMappedElement(parameter);
+        return parameter;
     }
 
-    public static AppliedAnnotation findAppliedAnnotationAndTest(Class<? extends Annotation> clazz, String name, DiscoveredElement element, Object... args) {
-        return findAppliedAnnotationAndTest(clazz, name, element.asMappedElement(), args);
+    public static DiscoveredScalarType testScalarType(DiscoveredScalarType scalarType) {
+        testDiscoveredElement(scalarType);
+        return scalarType;
+    }
+
+    public static DiscoveredUnionType testUnionType(DiscoveredUnionType unionType) {
+        testDiscoveredElement(unionType);
+        int expectedNumberPossibleTypes = unionType.possibleTypes().size();
+        assertEquals(expectedNumberPossibleTypes, unionType.possibleTypesByClass().size());
+        assertEquals(expectedNumberPossibleTypes, unionType.possibleTypesByName().size());
+        for (DiscoveredObjectType objectType : unionType.possibleTypes()) {
+            assertEquals(objectType, unionType.possibleTypesByClass().get(objectType.asMappedElement().baseClass()));
+            assertEquals(objectType, unionType.possibleTypesByName().get(objectType.name()));
+        }
+        return unionType;
     }
 }

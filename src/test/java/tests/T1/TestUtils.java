@@ -16,14 +16,28 @@
 
 package tests.T1;
 
+import org.junit.jupiter.api.Assertions;
+
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.List;
 
 public class TestUtils {
 
     private static Boolean isParameterNamePresent = null;
+
+    public static String base64Hash(String input, String algorithm) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            digest.update(input.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     public static boolean isParameterNamePresent() {
         if (isParameterNamePresent == null) {
@@ -38,13 +52,26 @@ public class TestUtils {
         return isParameterNamePresent;
     }
 
-    public static String base64Hash(String input, String algorithm) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
-            digest.update(input.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(digest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
+    public static void assertEquals(Object first, Object second) {
+        if (first == null || second == null) {
+            Assertions.assertEquals(first, second);
+        } else if (first.getClass().isArray()) {
+            Assertions.assertEquals(first.getClass(), second.getClass());
+            int firstLen = Array.getLength(first);
+            int secondLen = Array.getLength(second);
+            Assertions.assertEquals(firstLen, secondLen);
+            for (int i = 0; i < firstLen; i++) {
+                assertEquals(Array.get(first, i), Array.get(second, i));
+            }
+        } else if (first instanceof List) {
+            List firstList = (List) first;
+            List secondList = (List) second;
+            Assertions.assertEquals(firstList.size(), secondList.size());
+            for (int i = 0; i < firstList.size(); i++) {
+                assertEquals(firstList.get(i), secondList.get(i));
+            }
+        } else {
+            Assertions.assertEquals(first, second);
         }
     }
 }

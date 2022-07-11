@@ -18,14 +18,17 @@ package grphaqladapter.adaptedschema;
 
 import graphql.schema.GraphQLSchema;
 import grphaqladapter.adaptedschema.discovered.*;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import grphaqladapter.adaptedschema.tools.type_finder.TypeFinder;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
+import grphaqladapter.adaptedschema.utils.sdl.SDLUtils;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.util.List;
 
 public final class AdaptedGraphQLSchema {
 
-    public static AdaptedGraphQLSchemaBuilder newBuilder() {
+    public static AdaptedGraphQLSchemaBuilder newSchema() {
         return AdaptedGraphQLSchemaBuilder.newBuilder();
     }
 
@@ -46,7 +49,7 @@ public final class AdaptedGraphQLSchema {
 
     AdaptedGraphQLSchema(GraphQLSchema schema, List<DiscoveredElement> discoveredElements, ObjectConstructor objectConstructor, boolean usePariTypesForEachOther) {
         this.schema = schema;
-        this.sdl = SDLStatic.toSDL(schema);
+        this.sdl = SDLUtils.toSDL(schema);
         this.discoveredInputTypes = CollectionUtils.separateToImmutableList(discoveredElements, DiscoveredInputType.class);
         this.discoveredInterfacesTypes = CollectionUtils.separateToImmutableList(discoveredElements, DiscoveredInterfaceType.class);
         this.discoveredObjectTypes = CollectionUtils.separateToImmutableList(discoveredElements, DiscoveredObjectType.class);

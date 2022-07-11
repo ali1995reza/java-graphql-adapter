@@ -17,8 +17,8 @@
 package grphaqladapter.adaptedschema.mapping.strategy.descriptors.field;
 
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.enum_value.GraphqlEnumValueDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 import grphaqladapter.annotations.GraphqlEnumValue;
 
 import java.lang.reflect.Field;
@@ -32,8 +32,10 @@ public class AnnotationBaseEnumConstantDescriptor implements EnumConstantDescrip
         if (annotation == null) {
             return null;
         }
-        return GraphqlEnumValueDescription.newValue(Utils.getOrDefault(annotation.name(), value.name()),
-                DescriptorUtils.getDescription(field));
+        return GraphqlEnumValueDescription.newEnumValueDescription()
+                .name(NullifyUtils.getOrDefault(annotation.name(), value.name()))
+                .description(DescriptorUtils.getDescription(field))
+                .build();
     }
 
     @Override

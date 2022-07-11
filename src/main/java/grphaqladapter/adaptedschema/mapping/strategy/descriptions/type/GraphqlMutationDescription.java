@@ -20,4 +20,7 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNam
 
 public interface GraphqlMutationDescription extends GraphqlTypeNameDescription {
 
+    static TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, GraphqlMutationDescription>, GraphqlMutationDescription> newMutationDescription() {
+        return TypesDescriptionBuilder.newBuilder(GraphqlMutationDescriptionImpl::new);
+    }
 }

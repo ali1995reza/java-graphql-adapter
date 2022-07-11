@@ -18,11 +18,21 @@ package tests.T1.schema;
 
 import grphaqladapter.annotations.GraphqlInputType;
 
+import java.util.Objects;
+
 @GraphqlInputType
 public class PageParameters {
 
     private int page;
     private int size;
+
+    @Override
+    public String toString() {
+        return "PageParameters{" +
+                "page=" + page +
+                ", size=" + size +
+                '}';
+    }
 
     public int getPage() {
         return page;
@@ -41,10 +51,15 @@ public class PageParameters {
     }
 
     @Override
-    public String toString() {
-        return "PageParameters{" +
-                "page=" + page +
-                ", size=" + size +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PageParameters that = (PageParameters) o;
+        return page == that.page && size == that.size;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(page, size);
     }
 }

@@ -20,4 +20,8 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNam
 
 public interface GraphqlObjectTypeDescription extends GraphqlTypeNameDescription {
 
+    static TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, GraphqlObjectTypeDescription>, GraphqlObjectTypeDescription> newObjectTypeDescription() {
+        return TypesDescriptionBuilder.newBuilder(GraphqlObjectTypeDescriptionImpl::new);
+    }
+
 }

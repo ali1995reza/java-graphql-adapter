@@ -22,9 +22,13 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefault
 
 public interface GraphqlDirectiveArgumentDescription extends GraphqlDefaultValueContainerElementDescription {
 
-    int dimensions();
+    static GraphqlDirectiveArgumentDescriptionBuilder newDirectiveArgumentDescription() {
+        return GraphqlDirectiveArgumentDescriptionBuilder.newBuilder();
+    }
 
     DimensionModel dimensionModel();
+
+    int dimensions();
 
     Class type();
 

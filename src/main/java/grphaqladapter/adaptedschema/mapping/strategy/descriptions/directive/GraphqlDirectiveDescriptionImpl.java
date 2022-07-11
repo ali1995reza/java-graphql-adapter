@@ -19,15 +19,18 @@ package grphaqladapter.adaptedschema.mapping.strategy.descriptions.directive;
 import graphql.introspection.Introspection;
 import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlElementDescriptionImpl;
+import grphaqladapter.adaptedschema.utils.CollectionUtils;
+
+import java.util.Set;
 
 public class GraphqlDirectiveDescriptionImpl extends GraphqlElementDescriptionImpl implements GraphqlDirectiveDescription {
 
-    private final Introspection.DirectiveLocation[] locations;
+    private final Set<Introspection.DirectiveLocation> locations;
     private final Class<? extends GraphqlDirectiveFunction> functionality;
 
-    GraphqlDirectiveDescriptionImpl(String name, String description, Introspection.DirectiveLocation[] locations, Class<? extends GraphqlDirectiveFunction> functionality) {
+    GraphqlDirectiveDescriptionImpl(String name, String description, Set<Introspection.DirectiveLocation> locations, Class<? extends GraphqlDirectiveFunction> functionality) {
         super(name, description);
-        this.locations = locations;
+        this.locations = CollectionUtils.getOrEmptySet(locations);
         this.functionality = functionality;
     }
 
@@ -37,7 +40,7 @@ public class GraphqlDirectiveDescriptionImpl extends GraphqlElementDescriptionIm
     }
 
     @Override
-    public Introspection.DirectiveLocation[] locations() {
+    public Set<Introspection.DirectiveLocation> locations() {
         return locations;
     }
 }

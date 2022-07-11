@@ -20,10 +20,7 @@ import grphaqladapter.adaptedschema.discovered.DiscoveredInputType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedInputFieldMethod;
 import org.junit.jupiter.api.Test;
-import tests.T1.schema.Complex;
-import tests.T1.schema.InputUser;
-import tests.T1.schema.PageParameters;
-import tests.T1.schema.UserType;
+import tests.T1.schema.*;
 import tests.T1.schema.directives.Since;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +29,25 @@ public class TestSchemaInputTypes {
 
     @Test
     public void overallTest() {
-        assertEquals(3, TestSchemaProvider.schema().discoveredInputTypes().size());
+        assertEquals(4, TestSchemaProvider.schema().discoveredInputTypes().size());
+    }
+
+    @Test
+    public void testComplexInputType() {
+
+        DiscoveredInputType inputType = StaticTests.findAndTestInputType(Complex.class, "ComplexInput", 4, 1);
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.25");
+
+        StaticTests.findInputFieldAndTest("name", inputType, TypeInformation.nullable(String.class));
+
+        StaticTests.findInputFieldAndTest("value", inputType, TypeInformation.nullable(String.class));
+
+        MappedInputFieldMethod priorityField = StaticTests.findInputFieldAndTest("priority", inputType, 1, TypeInformation.nonNullable(int.class));
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
+
+        StaticTests.findInputFieldAndTest("inner", inputType, 0, TypeInformation.nullable(Complex.class),
+                new Complex().setName("dn").setValue("dv").setPriority(100).setInner(new Complex().setName("idn").setValue("idv").setPriority(101)));
+
     }
 
     @Test
@@ -58,20 +73,32 @@ public class TestSchemaInputTypes {
     }
 
     @Test
-    public void testComplexInputType() {
+    public void testFooInputType() {
+        DiscoveredInputType inputType = StaticTests.findAndTestInputType(Foo.class, "FooInput", 12);
 
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(Complex.class, "ComplexInput", 4, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.25");
+        StaticTests.findInputFieldAndTest("stringValue", inputType, 0, TypeInformation.nullable(String.class), "DV1");
 
-        StaticTests.findInputFieldAndTest("name", inputType, TypeInformation.nullable(String.class));
+        StaticTests.findInputFieldAndTest("longValue", inputType, 0, TypeInformation.nonNullable(long.class), 9223372036854775807L);
 
-        StaticTests.findInputFieldAndTest("value", inputType, TypeInformation.nullable(String.class));
+        StaticTests.findInputFieldAndTest("intValue", inputType, 0, TypeInformation.nonNullable(int.class), 1);
 
-        MappedInputFieldMethod priorityField = StaticTests.findInputFieldAndTest("priority", inputType, 1, TypeInformation.nonNullable(int.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
+        StaticTests.findInputFieldAndTest("intValue2", inputType, 0, TypeInformation.nonNullable(int.class), 10);
 
-        StaticTests.findInputFieldAndTest("inner", inputType, 0, TypeInformation.nullable(Complex.class),
-                new Complex().setName("dn").setValue("dv").setPriority(100).setInner(new Complex().setName("idn").setValue("idv").setPriority(101)));
+        StaticTests.findInputFieldAndTest("doubleValue", inputType, 0, TypeInformation.nonNullable(double.class), 2123455500000.21D);
+
+        StaticTests.findInputFieldAndTest("floatValue", inputType, 0, TypeInformation.nonNullable(float.class), 15477542.236F);
+
+        StaticTests.findInputFieldAndTest("byteValue", inputType, 0, TypeInformation.nonNullable(byte.class), (byte) 120);
+
+        StaticTests.findInputFieldAndTest("shortValue", inputType, 0, TypeInformation.nonNullable(short.class), (short) 20000);
+
+        StaticTests.findInputFieldAndTest("charValue", inputType, 0, TypeInformation.nonNullable(char.class), 'c');
+
+        StaticTests.findInputFieldAndTest("booleanValue", inputType, 0, TypeInformation.nonNullable(boolean.class), true);
+
+        StaticTests.findInputFieldAndTest("booleanValue2", inputType, 0, TypeInformation.nonNullable(boolean.class), false);
+
+        StaticTests.findInputFieldAndTest("intArray", inputType, 0, TypeInformation.nullableArray(int.class), new int[]{1, 2, 3});
 
     }
 

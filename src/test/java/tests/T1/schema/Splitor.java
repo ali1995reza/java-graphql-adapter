@@ -16,7 +16,9 @@
 
 package tests.T1.schema;
 
+import graphql.language.NullValue;
 import graphql.language.StringValue;
+import graphql.language.Value;
 import graphql.schema.Coercing;
 import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
@@ -25,6 +27,7 @@ import tests.T1.schema.directives.Since;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Since("1.0.3")
 public class Splitor {
@@ -39,11 +42,37 @@ public class Splitor {
         return Arrays.asList(s.split(str));
     }
 
+    public String getSplitorString() {
+        return str;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Splitor splitor = (Splitor) o;
+        return Objects.equals(str, splitor.str);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(str);
+    }
+
+    @Override
+    public String toString() {
+        return "Splitor{" +
+                "str='" + str + '\'' +
+                '}';
+    }
+
     public final static class CoercingImpl implements Coercing {
 
         @Override
         public Object parseLiteral(Object o) throws CoercingParseLiteralException {
-
+            if (o == null || o instanceof NullValue) {
+                return null;
+            }
             if (o instanceof StringValue) {
                 return new Splitor(((StringValue) o).getValue());
             }
@@ -54,8 +83,13 @@ public class Splitor {
 
         @Override
         public Object parseValue(Object o) throws CoercingParseValueException {
+            if (o == null) {
+                return null;
+            }
             if (o instanceof String) {
                 return new Splitor((String) o);
+            } else if (o instanceof Splitor) {
+                return o;
             }
 
             throw new CoercingParseValueException("Expect String but found [" + o.getClass() + "]");
@@ -65,11 +99,20 @@ public class Splitor {
         @Override
         public Object serialize(Object o) throws CoercingSerializeException {
             if (o instanceof Splitor) {
-                return "$plitor(" + ((Splitor) o).str + ")";
+                return ((Splitor) o).str;
             }
 
             throw new CoercingSerializeException("Expect Splitor but found [" + o.getClass() + "]");
 
+        }
+
+        @Override
+        public  Value valueToLiteral(Object input) {
+            if(input instanceof Splitor) {
+                return StringValue.of(((Splitor) input).getSplitorString());
+            }
+
+            throw new CoercingSerializeException("Expect Splitor but found [" + input.getClass() + "]");
         }
     }
 

@@ -21,5 +21,9 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNam
 
 public interface GraphqlScalarDescription extends GraphqlTypeNameDescription {
 
+    static GraphqlScalarDescriptionBuilder newScalarDescription() {
+        return GraphqlScalarDescriptionBuilder.newBuilder();
+    }
+
     Class<? extends Coercing> coercing();
 }

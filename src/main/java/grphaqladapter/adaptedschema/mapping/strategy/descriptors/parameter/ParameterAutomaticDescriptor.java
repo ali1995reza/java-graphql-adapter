@@ -18,10 +18,9 @@ package grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter;
 
 import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescriptionBuilder;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
 
 import java.lang.reflect.Method;
@@ -43,12 +42,12 @@ public class ParameterAutomaticDescriptor implements ParameterDescriptor {
     public GraphqlArgumentDescription describeFieldArgument(Method method, Parameter parameter, int parameterIndex) {
 
         if (isSystemParameter(parameter)) {
-            return GraphqlArgumentDescriptionBuilder.newBuilder()
+            return GraphqlArgumentDescription.newArgumentDescription()
                     .systemParameter(true)
                     .build();
         }
 
-        return GraphqlArgumentDescriptionBuilder.newBuilder()
+        return GraphqlArgumentDescription.newArgumentDescription()
                 .name(getName(parameter, parameterIndex))
                 .nullable(isNullable(parameter))
                 .description(DescriptorUtils.getDescription(parameter))
@@ -69,6 +68,12 @@ public class ParameterAutomaticDescriptor implements ParameterDescriptor {
         return !parameter.getType().isPrimitive();
     }
 
+    private boolean isSystemParameter(Parameter parameter) {
+        return parameter.getType() == DataFetchingEnvironment.class ||
+                parameter.getType() == GraphqlDirectivesHolder.class ||
+                parameter.getType() == AdaptedGraphQLSchema.class;
+    }
+
     public static class Builder {
         private String argNameIfNotPresent;
 
@@ -80,11 +85,5 @@ public class ParameterAutomaticDescriptor implements ParameterDescriptor {
         public ParameterDescriptor build() {
             return new ParameterAutomaticDescriptor(argNameIfNotPresent);
         }
-    }
-
-    private boolean isSystemParameter(Parameter parameter) {
-        return parameter.getType() == DataFetchingEnvironment.class ||
-                parameter.getType() == GraphqlDirectivesHolder.class ||
-                parameter.getType() == AdaptedGraphQLSchema.class;
     }
 }

@@ -16,10 +16,11 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.classes;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedInputFieldMethod;
+import grphaqladapter.adaptedschema.utils.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class MappedInputTypeClassImpl extends MappedClassImpl implements MappedI
 
     protected MappedInputTypeClassImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Class baseClass, Map<String, MappedInputFieldMethod> inputFieldMethods) {
         super(name, MappedElementType.INPUT_TYPE, description, appliedAnnotations, baseClass);
-        this.inputFieldMethods = inputFieldMethods;
+        this.inputFieldMethods = CollectionUtils.getOrEmptyMap(inputFieldMethods);
     }
 
     @Override

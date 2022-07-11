@@ -16,10 +16,11 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
+import grphaqladapter.adaptedschema.utils.CollectionUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ final class MappedInterfaceImpl extends MappedClassImpl implements MappedInterfa
 
     MappedInterfaceImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Class baseClass, Map<String, MappedFieldMethod> fieldMethods) {
         super(name, MappedElementType.INTERFACE, description, appliedAnnotations, baseClass);
-        this.fieldMethods = fieldMethods;
+        this.fieldMethods = CollectionUtils.getOrEmptyMap(fieldMethods);
     }
 
     @Override

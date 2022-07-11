@@ -16,7 +16,6 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces.MappedUnionInterface;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces.MappedUnionInterfaceBuilder;
@@ -24,9 +23,10 @@ import grphaqladapter.adaptedschema.mapping.mapper.ElementMapperWithMethodMapper
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.type.GraphqlUnionDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.validator.TypeValidator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.util.Collection;
@@ -45,14 +45,15 @@ public class UnionInterfaceMapper extends ElementMapperWithMethodMapper {
             return null;
         }
 
-        MappedUnionInterfaceBuilder mappedUnionInterfaceBuilder = MappedUnionInterfaceBuilder.newBuilder()
+        MappedUnionInterfaceBuilder mappedUnionInterfaceBuilder = MappedUnionInterface.newUnionInterface()
                 .name(unionDescription.name())
                 .baseClass(clazz)
                 .description(unionDescription.description());
 
         MappedUnionInterface unionInterface = mappedUnionInterfaceBuilder.build();
-        unionInterface = addAppliedAnnotations(MappedUnionInterfaceBuilder::newBuilder, unionInterface, annotations, constructor, builder);
-        TypeValidator.validate(unionInterface, clazz);
+        unionInterface = addAppliedAnnotations(MappedUnionInterface::newUnionInterface, unionInterface, annotations, constructor, builder);
+
+        ClassValidator.validateUnionInterface(unionInterface, clazz);
 
         return unionInterface;
     }

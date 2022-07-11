@@ -16,10 +16,10 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.method;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedMethodImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -36,12 +36,12 @@ public class MappedInputFieldMethodImpl extends MappedMethodImpl implements Mapp
     }
 
     @Override
-    public Method setter() {
-        return setter;
+    public <T> T defaultValue() {
+        return (T) defaultValue;
     }
 
     @Override
-    public <T> T defaultValue() {
-        return (T) defaultValue;
+    public Method setter() {
+        return setter;
     }
 }

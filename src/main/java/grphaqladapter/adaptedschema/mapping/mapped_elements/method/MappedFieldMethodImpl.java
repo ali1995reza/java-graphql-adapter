@@ -16,10 +16,10 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.method;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedMethodImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.parameter.MappedParameter;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 
@@ -34,8 +34,10 @@ final class MappedFieldMethodImpl extends MappedMethodImpl implements MappedFiel
 
     MappedFieldMethodImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Method method, TypeInformation type, List<MappedParameter> parameters) {
         super(name, MappedElementType.FIELD, description, appliedAnnotations, method, type);
-        this.parameters = parameters;
-        this.parametersByName = CollectionUtils.separateToImmutableMap(parameters, MappedParameter.class, MappedParameter::name, true);
+        this.parameters = CollectionUtils.getOrEmptyList(parameters);
+        this.parametersByName = CollectionUtils.getOrEmptyMap(
+                CollectionUtils.separateToImmutableMap(parameters, MappedParameter.class, MappedParameter::name, true)
+        );
     }
 
 

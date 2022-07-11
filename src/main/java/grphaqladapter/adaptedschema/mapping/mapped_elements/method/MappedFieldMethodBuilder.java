@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.method;
 
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedMethodBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.parameter.MappedParameter;
@@ -95,20 +95,11 @@ public class MappedFieldMethodBuilder extends MappedMethodBuilder<MappedFieldMet
 
     private final static class ParameterNamePredict implements Predicate<MappedParameter> {
 
-        private static Predicate<MappedParameter> of(String name) {
-            return new ParameterNamePredict(name);
-        }
-
-        private static Predicate<MappedParameter> of(MappedParameter parameter) {
-            return of(parameter.name());
-        }
-
         private final String parameterName;
 
         private ParameterNamePredict(String parameterName) {
             this.parameterName = parameterName;
         }
-
 
         @Override
         public boolean test(MappedParameter parameter) {
@@ -116,6 +107,14 @@ public class MappedFieldMethodBuilder extends MappedMethodBuilder<MappedFieldMet
                 return false;
             }
             return parameter.name().equals(parameterName);
+        }
+
+        private static Predicate<MappedParameter> of(String name) {
+            return new ParameterNamePredict(name);
+        }
+
+        private static Predicate<MappedParameter> of(MappedParameter parameter) {
+            return of(parameter.name());
         }
     }
 }

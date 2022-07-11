@@ -20,6 +20,10 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefault
 
 public interface GraphqlInputFieldDescription extends GraphqlDefaultValueContainerElementDescription {
 
+    static GraphqlInputFieldDescriptionBuilder newInputFieldDescription() {
+        return GraphqlInputFieldDescriptionBuilder.newBuilder();
+    }
+
     String setter();
 
 }

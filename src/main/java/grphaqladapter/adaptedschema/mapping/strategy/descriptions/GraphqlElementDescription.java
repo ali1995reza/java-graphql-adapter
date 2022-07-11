@@ -18,8 +18,8 @@ package grphaqladapter.adaptedschema.mapping.strategy.descriptions;
 
 public interface GraphqlElementDescription {
 
-    String name();
-
     String description();
+
+    String name();
 
 }

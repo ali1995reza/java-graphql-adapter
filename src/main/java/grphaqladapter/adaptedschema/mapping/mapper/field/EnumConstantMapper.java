@@ -16,15 +16,15 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.field;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.enums.MappedEnumConstant;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.enums.MappedEnumConstantsBuilder;
 import grphaqladapter.adaptedschema.mapping.mapper.AbstractElementMapper;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.enum_value.GraphqlEnumValueDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.field.EnumConstantDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.EnumConstantValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.adaptedschema.utils.FieldUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
 import grphaqladapter.codegenerator.ObjectConstructor;
@@ -39,21 +39,23 @@ public class EnumConstantMapper extends AbstractElementMapper {
     }
 
     public MappedEnumConstant mapEnumConstant(Class clazz, Enum enumConstant, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        Assert.isEquals(clazz, enumConstant.getDeclaringClass(), new IllegalStateException("enum value ["+enumConstant+"] dose not member of class ["+clazz+"]"));
+        Assert.isEquals(clazz, enumConstant.getDeclaringClass(), new IllegalStateException("enum value [" + enumConstant + "] dose not member of class [" + clazz + "]"));
         Field field = FieldUtils.getDeclaredField(clazz, enumConstant.name());
         GraphqlEnumValueDescription description = describeEnumValue(enumConstant, field, clazz);
         if (description == null) {
             return null;
         }
 
-        MappedEnumConstant constant = MappedEnumConstantsBuilder.newBuilder()
+        MappedEnumConstant constant = MappedEnumConstant.newEnumConstant()
                 .name(description.name())
                 .constant(enumConstant)
+                .field(field)
                 .description(description.description())
                 .build();
-        constant = addAppliedAnnotations(MappedEnumConstantsBuilder::newBuilder, constant, annotations, constructor, builder);
 
-        //todo validate
+        constant = addAppliedAnnotations(MappedEnumConstant::newEnumConstant, constant, annotations, constructor, builder);
+
+        EnumConstantValidator.validateEnumConstant(constant, clazz, field);
 
         return constant;
     }

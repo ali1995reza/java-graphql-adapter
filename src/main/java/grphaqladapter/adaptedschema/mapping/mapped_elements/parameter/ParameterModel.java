@@ -17,11 +17,17 @@
 package grphaqladapter.adaptedschema.mapping.mapped_elements.parameter;
 
 public enum ParameterModel {
-    SCHEMA_ARGUMENT,
-    ADAPTED_SCHEMA,
-    DATA_FETCHING_ENVIRONMENT,
-    DIRECTIVES,
-    SKIPPED;
+    SCHEMA_ARGUMENT(false),
+    ADAPTED_SCHEMA(true),
+    DATA_FETCHING_ENVIRONMENT(true),
+    DIRECTIVES(true),
+    SKIPPED(false);
+
+    private final boolean systemParameter;
+
+    ParameterModel(boolean systemParameter) {
+        this.systemParameter = systemParameter;
+    }
 
     public boolean is(ParameterModel other) {
         return this == other;
@@ -45,5 +51,9 @@ public enum ParameterModel {
 
     public boolean isSkipped() {
         return is(SKIPPED);
+    }
+
+    public boolean isSystemParameter() {
+        return systemParameter;
     }
 }

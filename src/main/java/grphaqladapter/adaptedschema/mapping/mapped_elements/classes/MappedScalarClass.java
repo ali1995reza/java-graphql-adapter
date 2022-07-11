@@ -20,5 +20,9 @@ import graphql.schema.Coercing;
 
 public interface MappedScalarClass extends MappedClass {
 
+    static MappedScalarClassBuilder newScalarClass() {
+        return MappedScalarClassBuilder.newBuilder();
+    }
+
     Coercing<?, ?> coercing();
 }

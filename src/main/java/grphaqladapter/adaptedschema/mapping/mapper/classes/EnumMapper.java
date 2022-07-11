@@ -16,7 +16,6 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.enums.MappedEnum;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.enums.MappedEnumBuilder;
@@ -27,9 +26,10 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.type.GraphqlEn
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.field.EnumConstantDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.validator.TypeValidator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.util.Collection;
@@ -45,13 +45,21 @@ public class EnumMapper extends AbstractElementMapper {
         this.enumConstantMapper = new EnumConstantMapper(enumValueDescriptorChain, appliedDirectiveDescriptorChain);
     }
 
+    public EnumConstantMapper enumConstantMapper() {
+        return enumConstantMapper;
+    }
+
+    public MappedEnum mapEnum(Class<? extends Enum> clazz) {
+        return mapEnum(clazz, Collections.emptyMap(), null, null);
+    }
+
     public MappedEnum mapEnum(Class<? extends Enum> clazz, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
         GraphqlEnumDescription enumDescription = describeEnumType(clazz);
         if (enumDescription == null) {
             return null;
         }
 
-        MappedEnumBuilder mappedEnumBuilder = MappedEnumBuilder.newBuilder()
+        MappedEnumBuilder mappedEnumBuilder = MappedEnum.newEnum()
                 .name(enumDescription.name())
                 .baseClass(clazz)
                 .description(enumDescription.description());
@@ -68,27 +76,20 @@ public class EnumMapper extends AbstractElementMapper {
         }
 
         MappedEnum mappedEnum = mappedEnumBuilder.build();
-        mappedEnum = addAppliedAnnotations(MappedEnumBuilder::newBuilder, mappedEnum, annotations, constructor, builder);
-        TypeValidator.validate(mappedEnum, clazz);
+        mappedEnum = addAppliedAnnotations(MappedEnum::newEnum, mappedEnum, annotations, constructor, builder);
+
+        ClassValidator.validateEnum(mappedEnum, clazz);
 
         return mappedEnum;
 
-    }
-
-    public MappedEnum mapEnum(Class<? extends Enum> clazz) {
-        return mapEnum(clazz, Collections.emptyMap(), null, null);
-    }
-
-    public Map<Class, MappedEnum> mapEnums(Collection<Class> classes, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        checkDuplicate(classes);
-        return CollectionUtils.separateToMap(classes, Class.class, clazz -> clazz, clazz -> mapEnum(clazz, annotations, constructor, builder), true);
     }
 
     public Map<Class, MappedEnum> mapEnums(Collection<Class> classes) {
         return mapEnums(classes, Collections.emptyMap(), null, null);
     }
 
-    public EnumConstantMapper enumConstantMapper() {
-        return enumConstantMapper;
+    public Map<Class, MappedEnum> mapEnums(Collection<Class> classes, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        checkDuplicate(classes);
+        return CollectionUtils.separateToMap(classes, Class.class, clazz -> clazz, clazz -> mapEnum(clazz, annotations, constructor, builder), true);
     }
 }

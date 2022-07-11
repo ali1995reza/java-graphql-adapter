@@ -32,23 +32,23 @@ public class GraphqlDirectivesHolder {
         return fieldDirectives;
     }
 
-    public boolean isFieldDirectivesPresent() {
-        return fieldDirectives != null;
-    }
-
     public FragmentDirectives fragmentDirectives() {
         return fragmentDirectives;
+    }
+
+    public boolean isFieldDirectivesPresent() {
+        return fieldDirectives != null;
     }
 
     public boolean isFragmentDirectivesPresent() {
         return fragmentDirectives != null;
     }
 
-    public OperationDirectives operationDirectives() {
-        return operationDirectives;
-    }
-
     public boolean isOperationDirectivesPresent() {
         return operationDirectives != null;
+    }
+
+    public OperationDirectives operationDirectives() {
+        return operationDirectives;
     }
 }

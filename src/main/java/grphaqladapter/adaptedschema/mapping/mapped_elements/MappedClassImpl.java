@@ -16,6 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements;
 
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
 
 import java.util.List;

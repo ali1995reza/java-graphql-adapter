@@ -17,6 +17,7 @@
 package tests;
 
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -30,6 +31,19 @@ public class Randomer {
 
     public static <T> T random(T... list) {
         return list[RANDOM.nextInt(list.length)];
+    }
+
+    public static <T> T random(Collection<T> collection)
+    {
+        int len = collection.size();
+        int where = RANDOM.nextInt(len);
+        for(T t: collection) {
+            if(--where < 0) {
+                return t;
+            }
+        }
+
+        throw new IllegalStateException("collection bad behavior");
     }
 
     public static boolean randomBoolean() {

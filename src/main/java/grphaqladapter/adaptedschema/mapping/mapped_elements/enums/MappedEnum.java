@@ -22,10 +22,11 @@ import java.util.Map;
 
 public interface MappedEnum extends MappedClass {
 
-    @Override
-    Class<? extends Enum> baseClass();
-
-    Map<String, MappedEnumConstant> constantsByName();
+    static MappedEnumBuilder newEnum() {
+        return MappedEnumBuilder.newBuilder();
+    }
 
     Map<Object, MappedEnumConstant> constantsByEnumValue();
+
+    Map<String, MappedEnumConstant> constantsByName();
 }

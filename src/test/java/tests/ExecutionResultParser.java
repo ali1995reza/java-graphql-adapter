@@ -22,18 +22,18 @@ import java.util.Map;
 
 public class ExecutionResultParser {
 
+    public static ExecutionResultParser of(ExecutionResult result) {
+        return new ExecutionResultParser(result);
+    }
     private final ExecutionResult result;
 
     public ExecutionResultParser(ExecutionResult result) {
         this.result = result;
     }
 
-    public static ExecutionResultParser of(ExecutionResult result) {
-        return new ExecutionResultParser(result);
-    }
-
-    public boolean hasError() {
-        return result.getErrors() != null && !result.getErrors().isEmpty();
+    @Override
+    public String toString() {
+        return result.toString();
     }
 
     public <T> T getData(String key) {
@@ -48,8 +48,11 @@ public class ExecutionResultParser {
         return (T) objectMap.get(routes[routes.length - 1]);
     }
 
-    @Override
-    public String toString() {
-        return result.toString();
+    public boolean hasError() {
+        return result.getErrors() != null && !result.getErrors().isEmpty();
+    }
+
+    public ExecutionResult getResult() {
+        return result;
     }
 }

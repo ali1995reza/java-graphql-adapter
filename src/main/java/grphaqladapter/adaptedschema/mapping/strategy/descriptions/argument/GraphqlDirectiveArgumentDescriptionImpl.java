@@ -20,7 +20,7 @@ import grphaqladapter.adaptedschema.functions.ValueParser;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.DimensionModel;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.DefaultValueDetails;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefaultValueContainerElementDescriptionImpl;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 
 public class GraphqlDirectiveArgumentDescriptionImpl extends GraphqlDefaultValueContainerElementDescriptionImpl implements GraphqlDirectiveArgumentDescription {
 
@@ -32,19 +32,19 @@ public class GraphqlDirectiveArgumentDescriptionImpl extends GraphqlDefaultValue
     public GraphqlDirectiveArgumentDescriptionImpl(String name, String description, boolean nullable, DefaultValueDetails defaultValue, int dimensions, DimensionModel dimensionModel, Class type, Class<? extends ValueParser> valueParser) {
         super(name, description, nullable, defaultValue);
         this.dimensions = dimensions;
-        this.dimensionModel = Utils.getOrDefault(dimensionModel, DimensionModel.NOT_SET);
+        this.dimensionModel = NullifyUtils.getOrDefault(dimensionModel, DimensionModel.SINGLE);
         this.type = type;
         this.valueParser = valueParser;
     }
 
     @Override
-    public int dimensions() {
-        return dimensions;
+    public DimensionModel dimensionModel() {
+        return dimensionModel;
     }
 
     @Override
-    public DimensionModel dimensionModel() {
-        return dimensionModel;
+    public int dimensions() {
+        return dimensions;
     }
 
     @Override

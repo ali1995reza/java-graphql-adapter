@@ -1,0 +1,16 @@
+
+mutation {
+    a: inputToOutputFromDirective(index: 5) @FooProvider {
+        stringValue
+        longValue
+        intValue
+        intValue2
+        doubleValue
+        floatValue
+        shortValue
+        charValue
+        booleanValue
+        booleanValue2
+        intArray
+    }
+}

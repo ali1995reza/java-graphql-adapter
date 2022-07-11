@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.utils.chain;
 
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -27,7 +27,7 @@ final class ChainImpl<T> implements Chain<T> {
     private final List<T> chainList;
 
     ChainImpl(List<T> chainList) {
-        this.chainList = Utils.getOrDefault(chainList, Collections.EMPTY_LIST);
+        this.chainList = NullifyUtils.getOrDefault(chainList, Collections.EMPTY_LIST);
     }
 
     @Override

@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces;
 
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
@@ -38,13 +38,6 @@ public class MappedInterfaceBuilder extends MappedClassBuilder<MappedInterfaceBu
     }
 
     @Override
-    public MappedInterfaceBuilder copy(MappedInterface element) {
-        super.copy(element);
-        element.fieldMethods().values().forEach(this::addFieldMethod);
-        return this;
-    }
-
-    @Override
     public MappedInterface build() {
         return new MappedInterfaceImpl(
                 name(),
@@ -53,6 +46,13 @@ public class MappedInterfaceBuilder extends MappedClassBuilder<MappedInterfaceBu
                 baseClass(),
                 fieldMethods()
         );
+    }
+
+    @Override
+    public MappedInterfaceBuilder copy(MappedInterface element) {
+        super.copy(element);
+        element.fieldMethods().values().forEach(this::addFieldMethod);
+        return this;
     }
 
     @Override

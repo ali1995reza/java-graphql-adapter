@@ -17,10 +17,9 @@
 package grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes;
 
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.directive.GraphqlDirectiveDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.directive.GraphqlDirectiveDescriptionBuilder;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.type.*;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 import grphaqladapter.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -31,61 +30,27 @@ public class AnnotationBaseClassDescriptor implements ClassDescriptor {
     }
 
     @Override
+    public GraphqlDirectiveDescription describeDirective(Class<? extends Annotation> clazz) {
+        GraphqlDirective annotation = clazz.getAnnotation(GraphqlDirective.class);
+        if (annotation != null) {
+            return GraphqlDirectiveDescription.newDirectiveDescription()
+                    .name(typeName(annotation.name(), clazz))
+                    .description(DescriptorUtils.getDescription(clazz))
+                    .addLocations(annotation.locations())
+                    .functionality(annotation.functionality())
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
     public GraphqlEnumDescription describeEnumType(Class<? extends Enum> clazz) {
         GraphqlEnum annotation = clazz.getAnnotation(GraphqlEnum.class);
         if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
+            return GraphqlEnumDescription.newEnumDescription()
                     .name(typeName(annotation.name(), clazz))
                     .description(DescriptorUtils.getDescription(clazz))
-                    .buildEnumDescription();
-        }
-        return null;
-    }
-
-    @Override
-    public GraphqlObjectTypeDescription describeObjectType(Class<?> clazz) {
-        GraphqlObjectType annotation = clazz.getAnnotation(GraphqlObjectType.class);
-        if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
-                    .name(typeName(annotation.name(), clazz))
-                    .description(DescriptorUtils.getDescription(clazz))
-                    .buildObjectTypeDescription();
-        }
-        return null;
-    }
-
-    @Override
-    public GraphqlQueryDescription describeQueryType(Class<?> clazz) {
-        GraphqlQuery annotation = clazz.getAnnotation(GraphqlQuery.class);
-        if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
-                    .name(typeName(annotation.name(), clazz))
-                    .description(DescriptorUtils.getDescription(clazz))
-                    .buildQueryDescription();
-        }
-        return null;
-    }
-
-    @Override
-    public GraphqlMutationDescription describeMutationType(Class<?> clazz) {
-        GraphqlMutation annotation = clazz.getAnnotation(GraphqlMutation.class);
-        if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
-                    .name(typeName(annotation.name(), clazz))
-                    .description(DescriptorUtils.getDescription(clazz))
-                    .buildMutationDescription();
-        }
-        return null;
-    }
-
-    @Override
-    public GraphqlSubscriptionDescription describeSubscriptionType(Class<?> clazz) {
-        GraphqlSubscription annotation = clazz.getAnnotation(GraphqlSubscription.class);
-        if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
-                    .name(typeName(annotation.name(), clazz))
-                    .description(DescriptorUtils.getDescription(clazz))
-                    .buildSubscriptionDescription();
+                    .build();
         }
         return null;
     }
@@ -94,10 +59,10 @@ public class AnnotationBaseClassDescriptor implements ClassDescriptor {
     public GraphqlInputTypeDescription describeInputType(Class<?> clazz) {
         GraphqlInputType annotation = clazz.getAnnotation(GraphqlInputType.class);
         if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
+            return GraphqlInputTypeDescription.newInputTypeDescription()
                     .name(typeName(annotation.name(), clazz))
                     .description(DescriptorUtils.getDescription(clazz))
-                    .buildInputTypeDescription();
+                    .build();
         }
         return null;
     }
@@ -106,22 +71,46 @@ public class AnnotationBaseClassDescriptor implements ClassDescriptor {
     public GraphqlInterfaceDescription describeInterfaceType(Class<?> clazz) {
         GraphqlInterface annotation = clazz.getAnnotation(GraphqlInterface.class);
         if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
+            return GraphqlInterfaceDescription.newInterfaceDescription()
                     .name(typeName(annotation.name(), clazz))
                     .description(DescriptorUtils.getDescription(clazz))
-                    .buildInterfaceDescription();
+                    .build();
         }
         return null;
     }
 
     @Override
-    public GraphqlUnionDescription describeUnionType(Class<?> clazz) {
-        GraphqlUnion annotation = clazz.getAnnotation(GraphqlUnion.class);
+    public GraphqlMutationDescription describeMutationType(Class<?> clazz) {
+        GraphqlMutation annotation = clazz.getAnnotation(GraphqlMutation.class);
         if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
+            return GraphqlMutationDescription.newMutationDescription()
                     .name(typeName(annotation.name(), clazz))
                     .description(DescriptorUtils.getDescription(clazz))
-                    .buildUnionDescription();
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
+    public GraphqlObjectTypeDescription describeObjectType(Class<?> clazz) {
+        GraphqlObjectType annotation = clazz.getAnnotation(GraphqlObjectType.class);
+        if (annotation != null) {
+            return GraphqlObjectTypeDescription.newObjectTypeDescription()
+                    .name(typeName(annotation.name(), clazz))
+                    .description(DescriptorUtils.getDescription(clazz))
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
+    public GraphqlQueryDescription describeQueryType(Class<?> clazz) {
+        GraphqlQuery annotation = clazz.getAnnotation(GraphqlQuery.class);
+        if (annotation != null) {
+            return GraphqlQueryDescription.newQueryDescription()
+                    .name(typeName(annotation.name(), clazz))
+                    .description(DescriptorUtils.getDescription(clazz))
+                    .build();
         }
         return null;
     }
@@ -130,23 +119,34 @@ public class AnnotationBaseClassDescriptor implements ClassDescriptor {
     public GraphqlScalarDescription describeScalarType(Class<?> clazz) {
         GraphqlScalar annotation = clazz.getAnnotation(GraphqlScalar.class);
         if (annotation != null) {
-            return TypesDescriptionBuilder.newBuilder()
+            return GraphqlScalarDescription.newScalarDescription()
                     .name(typeName(annotation.name(), clazz))
                     .description(DescriptorUtils.getDescription(clazz))
-                    .buildScalarDescription(annotation.coercing());
+                    .coercing(annotation.coercing())
+                    .build();
         }
         return null;
     }
 
     @Override
-    public GraphqlDirectiveDescription describeDirective(Class<? extends Annotation> clazz) {
-        GraphqlDirective annotation = clazz.getAnnotation(GraphqlDirective.class);
+    public GraphqlSubscriptionDescription describeSubscriptionType(Class<?> clazz) {
+        GraphqlSubscription annotation = clazz.getAnnotation(GraphqlSubscription.class);
         if (annotation != null) {
-            return GraphqlDirectiveDescriptionBuilder.newBuilder()
+            return GraphqlSubscriptionDescription.newSubscriptionDescription()
                     .name(typeName(annotation.name(), clazz))
                     .description(DescriptorUtils.getDescription(clazz))
-                    .addLocations(annotation.locations())
-                    .functionality(annotation.functionality())
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
+    public GraphqlUnionDescription describeUnionType(Class<?> clazz) {
+        GraphqlUnion annotation = clazz.getAnnotation(GraphqlUnion.class);
+        if (annotation != null) {
+            return GraphqlUnionDescription.newUnionDescription()
+                    .name(typeName(annotation.name(), clazz))
+                    .description(DescriptorUtils.getDescription(clazz))
                     .build();
         }
         return null;
@@ -158,6 +158,6 @@ public class AnnotationBaseClassDescriptor implements ClassDescriptor {
     }
 
     private static String typeName(String name, Class clazz) {
-        return Utils.getOrDefault(name, clazz.getSimpleName());
+        return NullifyUtils.getOrDefault(name, clazz.getSimpleName());
     }
 }

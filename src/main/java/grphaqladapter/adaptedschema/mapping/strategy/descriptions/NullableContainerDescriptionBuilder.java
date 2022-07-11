@@ -16,9 +16,21 @@
 
 package grphaqladapter.adaptedschema.mapping.strategy.descriptions;
 
-public abstract class NullableContainerDescriptionBuilder<T extends NullableContainerDescriptionBuilder<T, E>, E extends GraphqlElementDescription> extends GraphqlElementDescriptionBuilder<T, E> {
+public abstract class NullableContainerDescriptionBuilder<T extends NullableContainerDescriptionBuilder<T, E>, E extends GraphqlNullableContainerElementDescription> extends GraphqlElementDescriptionBuilder<T, E> {
 
-    private boolean nullable;
+    private boolean nullable = false;
+
+    @Override
+    public T copy(E e) {
+        return super.copy(e)
+                .nullable(e.nullable());
+    }
+
+    @Override
+    public T refresh() {
+        this.nullable = false;
+        return super.refresh();
+    }
 
     public boolean isNullable() {
         return nullable;

@@ -20,7 +20,7 @@ package grphaqladapter.adaptedschema.scalar.impl;
 import graphql.schema.Coercing;
 import grphaqladapter.adaptedschema.scalar.ScalarEntry;
 
-class ScalaEntryImpl implements ScalarEntry {
+final class ScalaEntryImpl implements ScalarEntry {
 
     private final Class type;
     private final String name;

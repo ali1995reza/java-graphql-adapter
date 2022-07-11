@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.functions;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 public final class ValueParsingContext {
@@ -29,13 +29,11 @@ public final class ValueParsingContext {
         this.objectBuilder = objectBuilder;
     }
 
+    public ObjectBuilder objectBuilder() {
+        return objectBuilder;
+    }
 
     public ObjectConstructor objectConstructor() {
         return objectConstructor;
-    }
-
-
-    public ObjectBuilder objectBuilder() {
-        return objectBuilder;
     }
 }

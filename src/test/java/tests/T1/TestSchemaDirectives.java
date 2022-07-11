@@ -21,7 +21,10 @@ import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedAnnotationMethod;
 import org.junit.jupiter.api.Test;
 import tests.T1.schema.Complex;
+import tests.T1.schema.Foo;
 import tests.T1.schema.directives.*;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -29,7 +32,7 @@ public class TestSchemaDirectives {
 
     @Test
     public void overallTest() {
-        assertEquals(9, TestSchemaProvider.schema().discoveredDirectives().size());
+        assertEquals(10, TestSchemaProvider.schema().discoveredDirectives().size());
     }
 
     @Test
@@ -51,13 +54,26 @@ public class TestSchemaDirectives {
         StaticTests.findAnnotationMethodAndTest("seconds", directive, 0, TypeInformation.nonNullable(int.class));
     }
 
-
     @Test
     public void testHashDirective() {
         DiscoveredDirective directive = StaticTests.findAndTestDirective(Hash.class, "Hash", 2);
 
-        StaticTests.findAnnotationMethodAndTest("algorithm", directive, 0, TypeInformation.nonNullable(String.class));
-        StaticTests.findAnnotationMethodAndTest("salt", directive, 0, TypeInformation.nullable(String.class));
+        StaticTests.findAnnotationMethodAndTest("algorithm", directive, 0, TypeInformation.nonNullable(String.class), "SHA-256");
+        StaticTests.findAnnotationMethodAndTest("salt", directive, 0, TypeInformation.nullable(String.class), "");
+    }
+
+    @Test
+    public void testInputProviderDirective() {
+        DiscoveredDirective directive = StaticTests.findAndTestDirective(ComplexInputProvider.class, "InputProvider", 1);
+
+        MappedAnnotationMethod versionArgument = StaticTests.findAnnotationMethodAndTest("input", directive, 1, TypeInformation.nullable(Complex.class),
+                new Complex("k1", "v1", 1).setInner(new Complex("k2", "v2", 2).setInner(new Complex("k3", "v3", 3))));
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", versionArgument, "version", "1.0.20");
+    }
+
+    @Test
+    public void testReverseDirective() {
+        StaticTests.findAndTestDirective(Reverse.class, "Reverse", 0);
     }
 
     @Test
@@ -79,16 +95,16 @@ public class TestSchemaDirectives {
     }
 
     @Test
-    public void testReverseDirective() {
-        StaticTests.findAndTestDirective(Reverse.class, "Reverse", 0);
+    public void testFooProviderDirective() {
+        DiscoveredDirective directive = StaticTests.findAndTestDirective(FooProvider.class, "FooProvider", 3);
+
+        StaticTests.findAnnotationMethodAndTest("value", directive, 0, TypeInformation.nonNullable(Foo.class),
+                new Foo().setIntValue(-101).setIntValue2(-102).setIntArray(new int[]{1, 2, 3, 4, 5, 6}));
+
+        StaticTests.findAnnotationMethodAndTest("arrayValues", directive, 0, TypeInformation.nullableArray(Foo.class, 1),
+                new Foo[]{new Foo().setIntValue(-25), new Foo().setIntValue(-26), new Foo().setIntValue(-27)});
+
+        StaticTests.findAnnotationMethodAndTest("listValues", directive, 0, TypeInformation.nonNullableList(Foo.class, 1),
+                Arrays.asList(new Foo().setIntValue(-28), new Foo().setIntValue(-29), new Foo().setIntValue(-30)));
     }
-
-    @Test
-    public void testInputProviderDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(ComplexInputProvider.class, "InputProvider", 1);
-
-        MappedAnnotationMethod versionArgument = StaticTests.findAnnotationMethodAndTest("input", directive, 1, TypeInformation.nullable(Complex.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", versionArgument, "version", "1.0.20");
-    }
-
 }

@@ -18,8 +18,16 @@ package grphaqladapter.adaptedschema.mapping.mapped_elements.enums;
 
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElement;
 
+import java.lang.reflect.Field;
+
 public interface MappedEnumConstant extends MappedElement {
 
+    static MappedEnumConstantBuilder newEnumConstant() {
+        return MappedEnumConstantBuilder.newBuilder();
+    }
+
     Enum constant();
+
+    Field field();
 
 }

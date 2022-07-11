@@ -16,16 +16,13 @@
 
 package grphaqladapter.adaptedschema.mapping.strategy.descriptors.method;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.DimensionModel;
-import grphaqladapter.adaptedschema.mapping.mapper.MappingStatics;
+import grphaqladapter.adaptedschema.mapping.mapper.utils.MappingUtils;
+import grphaqladapter.adaptedschema.mapping.mapper.utils.TypeDetails;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlDirectiveArgumentDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlDirectiveArgumentDescriptionBuilder;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlFieldDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlFieldDescriptionBuilder;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlInputFieldDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlInputFieldDescriptionBuilder;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 import grphaqladapter.annotations.GraphqlDirectiveArgument;
 import grphaqladapter.annotations.GraphqlField;
 import grphaqladapter.annotations.GraphqlInputField;
@@ -42,24 +39,32 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
             return null;
         }
 
-        String name = Utils.getOrDefault(directiveArgumentAnnotation.name(), method.getName());
-        MappingStatics.TypeDetails details = MappingStatics.findTypeDetails(method);
+        String name = NullifyUtils.getOrDefault(directiveArgumentAnnotation.name(), method.getName());
+        TypeDetails details = MappingUtils.findTypeDetails(method);
 
-        Class type = directiveArgumentAnnotation.type() == Void.class ? details.type() : directiveArgumentAnnotation.type();
-        int dimensions = directiveArgumentAnnotation.dimensions() == -1 ? details.dimension() : directiveArgumentAnnotation.dimensions();
-        DimensionModel dimensionModel = dimensions > 0 ? (directiveArgumentAnnotation.dimensionModel().isSet() ?
-                directiveArgumentAnnotation.dimensionModel() : DimensionModel.ARRAY) : DimensionModel.NOT_SET;
-
-        return GraphqlDirectiveArgumentDescriptionBuilder.newBuilder()
-                .name(name)
-                .nullable(directiveArgumentAnnotation.nullable())
-                .type(type)
-                .dimensions(dimensions)
-                .dimensionModel(dimensionModel)
-                .valueParser(directiveArgumentAnnotation.valueParser())
-                .defaultValue(DescriptorUtils.getDefaultValueOfAnnotationMethod(method, directiveArgumentAnnotation.valueParser()))
-                .description(DescriptorUtils.getDescription(method))
-                .build();
+        if(directiveArgumentAnnotation.type() == Void.class) {
+            return GraphqlDirectiveArgumentDescription.newDirectiveArgumentDescription()
+                    .name(name)
+                    .nullable(directiveArgumentAnnotation.nullable())
+                    .type(details.type())
+                    .dimensions(details.dimensions())
+                    .dimensionModel(details.dimensionModel())
+                    .valueParser(directiveArgumentAnnotation.valueParser())
+                    .defaultValue(DescriptorUtils.getDefaultValueOfAnnotationMethod(method, directiveArgumentAnnotation.valueParser()))
+                    .description(DescriptorUtils.getDescription(method))
+                    .build();
+        } else {
+            return GraphqlDirectiveArgumentDescription.newDirectiveArgumentDescription()
+                    .name(name)
+                    .nullable(directiveArgumentAnnotation.nullable())
+                    .type(directiveArgumentAnnotation.type())
+                    .dimensions(directiveArgumentAnnotation.dimensions())
+                    .dimensionModel(directiveArgumentAnnotation.dimensionModel())
+                    .valueParser(directiveArgumentAnnotation.valueParser())
+                    .defaultValue(DescriptorUtils.getDefaultValueOfAnnotationMethod(method, directiveArgumentAnnotation.valueParser()))
+                    .description(DescriptorUtils.getDescription(method))
+                    .build();
+        }
     }
 
     @Override
@@ -70,9 +75,9 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
             return null;
         }
 
-        String name = Utils.getOrDefault(fieldAnnotation.name(), method.getName());
+        String name = NullifyUtils.getOrDefault(fieldAnnotation.name(), method.getName());
 
-        return GraphqlFieldDescriptionBuilder.newBuilder()
+        return GraphqlFieldDescription.newFieldDescription()
                 .name(name)
                 .nullable(fieldAnnotation.nullable())
                 .description(DescriptorUtils.getDescription(method))
@@ -87,9 +92,9 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
             return null;
         }
 
-        String name = Utils.getOrDefault(inputFieldAnnotation.name(), method.getName());
+        String name = NullifyUtils.getOrDefault(inputFieldAnnotation.name(), method.getName());
 
-        return GraphqlInputFieldDescriptionBuilder.newBuilder()
+        return GraphqlInputFieldDescription.newInputFieldDescription()
                 .name(name)
                 .nullable(inputFieldAnnotation.nullable())
                 .setter(inputFieldAnnotation.setter())

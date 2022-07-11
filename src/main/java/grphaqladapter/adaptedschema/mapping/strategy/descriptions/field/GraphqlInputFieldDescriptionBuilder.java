@@ -29,8 +29,21 @@ public class GraphqlInputFieldDescriptionBuilder extends DefaultValueContainerEl
     private GraphqlInputFieldDescriptionBuilder() {
     }
 
+    @Override
     public GraphqlInputFieldDescription build() {
         return new GraphqlInputFieldDescriptionImpl(name(), description(), isNullable(), defaultValue(), setter());
+    }
+
+    @Override
+    public GraphqlInputFieldDescriptionBuilder copy(GraphqlInputFieldDescription graphqlInputFieldDescription) {
+        return super.copy(graphqlInputFieldDescription)
+                .setter(graphqlInputFieldDescription.setter());
+    }
+
+    @Override
+    public GraphqlInputFieldDescriptionBuilder refresh() {
+        this.setter = null;
+        return super.refresh();
     }
 
     public GraphqlInputFieldDescriptionBuilder setter(String setter) {

@@ -18,5 +18,5 @@ package grphaqladapter.adaptedschema.functions.impl;
 
 import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
 
-public class DefaultGraphqlDirectiveFunction implements GraphqlDirectiveFunction {
+public class DefaultGraphqlDirectiveFunction implements GraphqlDirectiveFunction<Object> {
 }

@@ -16,23 +16,31 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.enums;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 final class MappedEnumConstantImpl extends MappedElementImpl implements MappedEnumConstant {
 
     private final Enum constant;
+    private final Field field;
 
-    MappedEnumConstantImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Enum constant) {
+    MappedEnumConstantImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Enum constant, Field field) {
         super(name, MappedElementType.ENUM_VALUE, description, appliedAnnotations);
         this.constant = constant;
+        this.field = field;
     }
 
     @Override
     public Enum constant() {
         return constant;
+    }
+
+    @Override
+    public Field field() {
+        return field;
     }
 }

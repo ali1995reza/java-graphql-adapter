@@ -16,21 +16,21 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces.MappedInterface;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces.MappedInterfaceBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 import grphaqladapter.adaptedschema.mapping.mapper.ElementMapperWithMethodMapper;
-import grphaqladapter.adaptedschema.mapping.mapper.MappingStatics;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.type.GraphqlInterfaceDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import grphaqladapter.adaptedschema.utils.ClassUtils;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.validator.TypeValidator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.lang.reflect.Method;
@@ -50,12 +50,12 @@ public class InterfaceMapper extends ElementMapperWithMethodMapper {
             return null;
         }
 
-        MappedInterfaceBuilder mappedInterfaceBuilder = MappedInterfaceBuilder.newBuilder()
+        MappedInterfaceBuilder mappedInterfaceBuilder = MappedInterface.newInterface()
                 .name(interfaceDescription.name())
                 .baseClass(clazz)
                 .description(interfaceDescription.description());
 
-        for (Method method : MappingStatics.getAllMethods(clazz)) {
+        for (Method method : ClassUtils.getAllMethods(clazz)) {
             MappedFieldMethod mappedMethod = methodMapper().mapFieldMethod(clazz, method, annotations, constructor, builder);
 
             if (mappedMethod == null) continue;
@@ -64,8 +64,9 @@ public class InterfaceMapper extends ElementMapperWithMethodMapper {
         }
 
         MappedInterface mappedInterface = mappedInterfaceBuilder.build();
-        mappedInterface = addAppliedAnnotations(MappedInterfaceBuilder::newBuilder, mappedInterface, annotations, constructor, builder);
-        TypeValidator.validate(mappedInterface, clazz);
+        mappedInterface = addAppliedAnnotations(MappedInterface::newInterface, mappedInterface, annotations, constructor, builder);
+
+        ClassValidator.validaInterface(mappedInterface, clazz);
 
         return mappedInterface;
     }

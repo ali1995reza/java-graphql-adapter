@@ -20,13 +20,13 @@ import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLNamedType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElement;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
-import grphaqladapter.adaptedschema.utils.TypoUtils;
+import grphaqladapter.adaptedschema.utils.ClassUtils;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.util.*;
@@ -40,17 +40,17 @@ final class BuildingContextImpl implements BuildingContext {
     private final Map<MappedAnnotation, GraphQLDirective> directives = new HashMap<>();
     private final DirectiveHandlingContextImpl directiveHandlingContext;
     private final ObjectConstructor objectConstructor;
-    private final boolean usePrimitivesPairTypesForEachOther;
+    private final boolean useParirTypesForEachOther;
 
     BuildingContextImpl(Map<Class, Map<MappedElementType, MappedElement>> mappedClasses,
                         GraphQLSchema.Builder schemaBuilder,
                         ObjectConstructor objectConstructor,
-                        boolean usePrimitivesPairTypesForEachOther) {
+                        boolean useParirTypesForEachOther) {
         Assert.isNotNull(mappedClasses, new IllegalStateException("mapped classes is null"));
         Assert.isNotNull(schemaBuilder, new IllegalStateException("provided schema builder is null"));
         this.mappedClasses = mappedClasses;
         this.objectConstructor = objectConstructor;
-        this.usePrimitivesPairTypesForEachOther = usePrimitivesPairTypesForEachOther;
+        this.useParirTypesForEachOther = useParirTypesForEachOther;
         this.directiveHandlingContext = new DirectiveHandlingContextImpl(elementsByName(mappedClasses));
     }
 
@@ -118,20 +118,6 @@ final class BuildingContextImpl implements BuildingContext {
     }
 
     @Override
-    public GraphQLTypeReference getPossibleInputTypeFor(Class c) {
-        GraphQLTypeReference reference = getInputObjectTypeFor(c);
-        if (reference != null) {
-            return reference;
-        }
-        reference = getEnumFor(c);
-        if (reference != null) {
-            return reference;
-        }
-        reference = getScalarTypeFor(c);
-        return reference;
-    }
-
-    @Override
     public GraphQLTypeReference getInterfaceFor(Class c) {
         MappedClass mappedClass =
                 getMappedClassFor(c, MappedElementType.INTERFACE);
@@ -145,10 +131,10 @@ final class BuildingContextImpl implements BuildingContext {
         if (mappedClasses.containsKey(cls)) {
             return (T) mappedClasses.get(cls).get(mappedElementType);
         }
-        if (!usePrimitivesPairTypesForEachOther) {
+        if (!useParirTypesForEachOther) {
             return null;
         }
-        cls = TypoUtils.getPairType(cls);
+        cls = ClassUtils.getPairType(cls);
         if (cls == null) {
             return null;
         }
@@ -163,6 +149,20 @@ final class BuildingContextImpl implements BuildingContext {
         MappedClass mappedClass =
                 getMappedClassFor(c, MappedElementType.OBJECT_TYPE);
         return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
+    }
+
+    @Override
+    public GraphQLTypeReference getPossibleInputTypeFor(Class c) {
+        GraphQLTypeReference reference = getInputObjectTypeFor(c);
+        if (reference != null) {
+            return reference;
+        }
+        reference = getEnumFor(c);
+        if (reference != null) {
+            return reference;
+        }
+        reference = getScalarTypeFor(c);
+        return reference;
     }
 
     @Override

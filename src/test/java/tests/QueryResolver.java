@@ -31,10 +31,6 @@ public class QueryResolver {
         }
     }
 
-    private static InputStream getResource(String name) {
-        return QueryResolver.class.getResourceAsStream(name);
-    }
-
     public static byte[] readAllBytes(InputStream inputStream) throws IOException {
         final int bufLen = 1024;
         byte[] buf = new byte[bufLen];
@@ -63,5 +59,9 @@ public class QueryResolver {
 
     public static String readString(InputStream stream) throws IOException {
         return new String(readAllBytes(stream));
+    }
+
+    private static InputStream getResource(String name) {
+        return QueryResolver.class.getResourceAsStream(name);
     }
 }

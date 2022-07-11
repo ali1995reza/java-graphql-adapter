@@ -23,11 +23,15 @@ import java.lang.reflect.Parameter;
 
 public interface MappedParameter extends DefaultValueContainerMappedElement {
 
+    static MappedParameterBuilder newParameter() {
+        return MappedParameterBuilder.newBuilder();
+    }
+
+    int index();
+
     ParameterModel model();
 
     Parameter parameter();
-
-    int index();
 
     TypeInformation type();
 

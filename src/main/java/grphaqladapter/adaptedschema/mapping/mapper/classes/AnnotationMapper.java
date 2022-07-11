@@ -16,17 +16,18 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotationBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedAnnotationMethod;
 import grphaqladapter.adaptedschema.mapping.mapper.ElementMapperWithMethodMapper;
-import grphaqladapter.adaptedschema.mapping.mapper.MappingStatics;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.directive.GraphqlDirectiveDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import grphaqladapter.adaptedschema.utils.ClassUtils;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
 import grphaqladapter.codegenerator.ObjectConstructor;
@@ -48,14 +49,14 @@ public class AnnotationMapper extends ElementMapperWithMethodMapper {
             return null;
         }
 
-        MappedAnnotationBuilder mappedAnnotationBuilder = MappedAnnotationBuilder.newBuilder()
+        MappedAnnotationBuilder mappedAnnotationBuilder = MappedAnnotation.newAnnotation()
                 .name(directiveDescription.name())
                 .description(directiveDescription.description())
                 .baseClass(clazz)
                 .functionality(directiveDescription.functionality())
                 .addLocations(directiveDescription.locations());
 
-        for (Method method : MappingStatics.getAllMethods(clazz)) {
+        for (Method method : ClassUtils.getAllMethods(clazz)) {
             MappedAnnotationMethod mappedMethod = methodMapper().mapAnnotationMethod(clazz, method, annotations, constructor, builder);
 
             if (mappedMethod == null) {
@@ -65,7 +66,11 @@ public class AnnotationMapper extends ElementMapperWithMethodMapper {
             mappedAnnotationBuilder.addMethod(mappedMethod);
         }
 
-        return mappedAnnotationBuilder.build();
+        MappedAnnotation mappedAnnotation = mappedAnnotationBuilder.build();
+
+        ClassValidator.validateAnnotation(mappedAnnotation, clazz);
+
+        return mappedAnnotation;
     }
 
     public MappedAnnotation mapAnnotation(Class<? extends Annotation> clazz) {

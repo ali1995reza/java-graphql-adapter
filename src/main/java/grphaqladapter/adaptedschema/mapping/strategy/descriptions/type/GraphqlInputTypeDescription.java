@@ -20,4 +20,7 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNam
 
 public interface GraphqlInputTypeDescription extends GraphqlTypeNameDescription {
 
+    static TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, GraphqlInputTypeDescription>, GraphqlInputTypeDescription> newInputTypeDescription() {
+        return TypesDescriptionBuilder.newBuilder(GraphqlInputTypeDescriptionImpl::new);
+    }
 }

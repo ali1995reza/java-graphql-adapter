@@ -17,7 +17,7 @@
 package grphaqladapter.adaptedschema.system_objects.directive;
 
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -27,14 +27,14 @@ import java.util.stream.Collectors;
 
 public class GraphqlDirectivesList {
 
-    private final static GraphqlDirectivesList EMPTY = new GraphqlDirectivesList(Collections.emptyList());
     private final List<GraphqlDirectiveDetails> directives;
     private Map<Class<? extends Annotation>, GraphqlDirectiveDetails> directivesByClass;
+    private Map<String, GraphqlDirectiveDetails> directivesByName;
 
     public GraphqlDirectivesList(List<GraphqlDirectiveDetails> directives) {
-        this.directives = Utils.getOrDefault(directives, Collections.emptyList());
+        this.directives = NullifyUtils.getOrDefault(directives, Collections.emptyList());
         if (CollectionUtils.isEmpty(this.directives)) {
-            directivesByClass = Collections.emptyMap();
+            this.directivesByClass = Collections.emptyMap();
         }
     }
 
@@ -51,7 +51,12 @@ public class GraphqlDirectivesList {
         return this.directivesByClass;
     }
 
-    public static GraphqlDirectivesList empty() {
-        return EMPTY;
+    public Map<String, GraphqlDirectiveDetails> directivesByName() {
+        if (this.directivesByName == null) {
+            this.directivesByName = directives.stream().collect(Collectors.toMap(directive -> directive.annotation().name(), d -> d));
+            this.directivesByName = Collections.unmodifiableMap(this.directivesByName);
+        }
+
+        return this.directivesByName;
     }
 }

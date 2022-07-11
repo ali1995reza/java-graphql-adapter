@@ -17,10 +17,10 @@
 package grphaqladapter.adaptedschema.mapping.mapped_elements.method;
 
 import grphaqladapter.adaptedschema.functions.ValueParser;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedMethodImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -37,12 +37,12 @@ final class MappedAnnotationMethodImpl extends MappedMethodImpl implements Mappe
     }
 
     @Override
-    public Class<? extends ValueParser> valueParser() {
-        return valueParser;
+    public <T> T defaultValue() {
+        return (T) defaultValue;
     }
 
     @Override
-    public <T> T defaultValue() {
-        return (T) defaultValue;
+    public Class<? extends ValueParser> valueParser() {
+        return valueParser;
     }
 }

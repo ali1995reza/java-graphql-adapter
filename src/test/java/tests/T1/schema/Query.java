@@ -20,6 +20,7 @@ import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
+import grphaqladapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
 import grphaqladapter.annotations.*;
 import tests.Randomer;
 import tests.T1.schema.directives.*;
@@ -67,7 +68,7 @@ public class Query {
     @GraphqlField
     public PageDetails getPageDetails(AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
         PageParameters parameters = schema.objectBuilder()
-                .buildFromObject(PageParameters.class, environment.getArgument("pageParameters"), true);
+                .buildFromObject(environment.getArgument("pageParameters"), PageParameters.class, BuildingObjectConfig.ONLY_USE_EXACT_LIST);
         return new PageDetails(parameters.getPage(), parameters.getSize());
     }
 
@@ -80,7 +81,7 @@ public class Query {
     }
 
     @GraphqlField
-    public Vehicle getVehicle(@DefaultValue("true")@GraphqlArgument(name = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
+    public Vehicle getVehicle(@DefaultValue("true") @GraphqlArgument(name = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
         if (isCar) {
             Car car = new Car();
             car.setModel(Randomer.random("Ferrari", "Lamborghini", "Bugatti"));
@@ -116,8 +117,8 @@ public class Query {
     }
 
     @GraphqlField
-    public List<List<Integer>> multiplyMatrices(@GraphqlArgument(name = "m1", nullable = false) List<List<Integer>> first,
-                                                @GraphqlArgument(name = "m2", nullable = false) Integer[][] second) {
+    public List<List<Integer>> multiplyMatrices(@DefaultValue("[[1, 2, 3], [4, 5, 6], [7, 8, 9]]") @GraphqlArgument(name = "m1", nullable = false) List<List<Integer>> first,
+                                                @DefaultValue("[[1, 2, 3], [4, 5, 6], [7, 8, 9]]") @GraphqlArgument(name = "m2", nullable = false) Integer[][] second) {
         int i, j, k;
 
         int row1 = first.size();

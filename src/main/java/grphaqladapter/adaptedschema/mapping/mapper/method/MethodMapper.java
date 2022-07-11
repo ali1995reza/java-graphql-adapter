@@ -16,7 +16,6 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.method;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.exceptions.MappingGraphqlFieldException;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
@@ -29,8 +28,9 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlI
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.MethodValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.validator.FieldValidator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.lang.annotation.Annotation;
@@ -48,61 +48,6 @@ public class MethodMapper extends AbstractElementMapper {
         this.parameterMapper = new ParameterMapper(parameterDescriptorChain, appliedDirectiveDescriptorChain);
     }
 
-    public MappedFieldMethod mapFieldMethod(Class clazz, Method method, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-
-        GraphqlFieldDescription description = describeField(method, clazz);
-
-        if (description == null) {
-            return null;
-        }
-
-        FieldValidator.validate(description, clazz, method);
-
-        MappedFieldMethodBuilder methodBuilder = MappedFieldMethodBuilder.newBuilder();
-
-        for (int index = 0; index < method.getParameters().length; index++) {
-            methodBuilder.addParameter(
-                    parameterMapper.mapParameter(clazz, method, method.getParameters()[index], index, annotations, constructor, builder)
-            );
-        }
-
-        MappedFieldMethod mappedMethod = methodBuilder.method(method)
-                .description(description.description())
-                .name(description.name())
-                .type(TypeInformation.of(method, description.nullable()))
-                .build();
-
-        mappedMethod = addAppliedAnnotations(MappedFieldMethodBuilder::newBuilder, mappedMethod, annotations, constructor, builder);
-
-        FieldValidator.validate(mappedMethod, clazz, method);
-
-        return mappedMethod;
-    }
-
-    public MappedInputFieldMethod mapInputFieldMethod(Class clazz, Method method, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        GraphqlInputFieldDescription inputFieldDescription = describeInputField(method, clazz);
-        if (inputFieldDescription == null) {
-            return null;
-        }
-
-        FieldValidator.validate(inputFieldDescription, clazz, method);
-        Method setterMethod = detectSetter(inputFieldDescription.setter(), clazz, method);
-        MappedInputFieldMethodBuilder methodBuilder = MappedInputFieldMethodBuilder.newBuilder();
-        TypeInformation type = TypeInformation.of(method, inputFieldDescription.nullable());
-
-        MappedInputFieldMethod mappedMethod = methodBuilder.method(method)
-                .description(inputFieldDescription.description())
-                .name(inputFieldDescription.name())
-                .type(type)
-                .defaultValue(parseAndGetDefaultValue(inputFieldDescription.defaultValue(), type, constructor, builder))
-                .setter(setterMethod)
-                .build();
-
-        mappedMethod = addAppliedAnnotations(MappedInputFieldMethodBuilder::newBuilder, mappedMethod, annotations, constructor, builder);
-        FieldValidator.validate(mappedMethod, clazz, method);
-        return mappedMethod;
-    }
-
     public MappedAnnotationMethod mapAnnotationMethod(Class<? extends Annotation> clazz, Method method, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
         GraphqlDirectiveArgumentDescription argumentDescription = describeDirectiveArgument(method, clazz);
         if (argumentDescription == null) {
@@ -117,7 +62,7 @@ public class MethodMapper extends AbstractElementMapper {
                 argumentDescription.dimensionModel()
         );
 
-        MappedAnnotationMethod mappedMethod = MappedAnnotationMethodBuilder.newBuilder()
+        MappedAnnotationMethod mappedMethod = MappedAnnotationMethod.newAnnotationMethod()
                 .name(argumentDescription.name())
                 .method(method)
                 .type(type)
@@ -126,7 +71,63 @@ public class MethodMapper extends AbstractElementMapper {
                 .description(argumentDescription.description())
                 .build();
 
-        return addAppliedAnnotations(MappedAnnotationMethodBuilder::newBuilder, mappedMethod, annotations, constructor, builder);
+        MethodValidator.validateMappedAnnotationMethod(mappedMethod, clazz, method);
+
+        return addAppliedAnnotations(MappedAnnotationMethod::newAnnotationMethod, mappedMethod, annotations, constructor, builder);
+    }
+
+    public MappedFieldMethod mapFieldMethod(Class clazz, Method method, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+
+        GraphqlFieldDescription description = describeField(method, clazz);
+
+        if (description == null) {
+            return null;
+        }
+
+        MappedFieldMethodBuilder methodBuilder = MappedFieldMethod.newFieldMethod();
+
+        for (int index = 0; index < method.getParameters().length; index++) {
+            methodBuilder.addParameter(
+                    parameterMapper.mapParameter(clazz, method, method.getParameters()[index], index, annotations, constructor, builder)
+            );
+        }
+
+        MappedFieldMethod mappedMethod = methodBuilder.method(method)
+                .description(description.description())
+                .name(description.name())
+                .type(TypeInformation.of(method, description.nullable()))
+                .build();
+
+        mappedMethod = addAppliedAnnotations(MappedFieldMethod::newFieldMethod, mappedMethod, annotations, constructor, builder);
+
+        MethodValidator.validateFieldMethod(mappedMethod, clazz, method);
+
+        return mappedMethod;
+    }
+
+    public MappedInputFieldMethod mapInputFieldMethod(Class clazz, Method method, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        GraphqlInputFieldDescription inputFieldDescription = describeInputField(method, clazz);
+        if (inputFieldDescription == null) {
+            return null;
+        }
+
+        Method setterMethod = detectSetter(inputFieldDescription.setter(), clazz, method);
+        MappedInputFieldMethodBuilder methodBuilder = MappedInputFieldMethod.newInputFieldMethod();
+        TypeInformation type = TypeInformation.of(method, inputFieldDescription.nullable());
+
+        MappedInputFieldMethod mappedMethod = methodBuilder.method(method)
+                .description(inputFieldDescription.description())
+                .name(inputFieldDescription.name())
+                .type(type)
+                .defaultValue(parseAndGetDefaultValue(inputFieldDescription.defaultValue(), type, constructor, builder))
+                .setter(setterMethod)
+                .build();
+
+        mappedMethod = addAppliedAnnotations(MappedInputFieldMethod::newInputFieldMethod, mappedMethod, annotations, constructor, builder);
+
+        MethodValidator.validateInputFieldMethod(mappedMethod, clazz, method);
+
+        return mappedMethod;
     }
 
     public ParameterMapper parameterMapper() {
@@ -135,11 +136,10 @@ public class MethodMapper extends AbstractElementMapper {
 
     private Method detectSetter(String setter, Class clazz, Method method) {
         try {
+
             Method setterMethod = clazz.getMethod(setter, method.getReturnType());
-
-            FieldValidator.validateSetterMethod(setterMethod, clazz, method);
-
             return setterMethod;
+
         } catch (NoSuchMethodException e) {
             throw exception(MappingGraphqlFieldException.class, "can not find setter method", clazz, method);
         }

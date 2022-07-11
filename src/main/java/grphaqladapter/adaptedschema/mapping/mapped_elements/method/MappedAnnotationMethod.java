@@ -21,6 +21,10 @@ import grphaqladapter.adaptedschema.mapping.mapped_elements.DefaultValueContaine
 
 public interface MappedAnnotationMethod extends MappedMethod, DefaultValueContainerMappedElement {
 
+    static MappedAnnotationMethodBuilder newAnnotationMethod() {
+        return MappedAnnotationMethodBuilder.newBuilder();
+    }
+
     Class<? extends ValueParser> valueParser();
 
 }

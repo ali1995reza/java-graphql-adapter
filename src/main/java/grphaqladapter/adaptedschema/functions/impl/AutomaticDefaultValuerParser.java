@@ -19,13 +19,12 @@ package grphaqladapter.adaptedschema.functions.impl;
 import grphaqladapter.adaptedschema.functions.ValueParser;
 import grphaqladapter.adaptedschema.functions.ValueParsingContext;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import grphaqladapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
 
 public class AutomaticDefaultValuerParser implements ValueParser<String, Object> {
 
-
-
     @Override
     public Object parse(String input, TypeInformation type, ValueParsingContext context) {
-        return context.objectBuilder().buildFromObject(type, input, false);
+        return context.objectBuilder().buildFromObject(input, type, BuildingObjectConfig.DISABLE_BOTH);
     }
 }

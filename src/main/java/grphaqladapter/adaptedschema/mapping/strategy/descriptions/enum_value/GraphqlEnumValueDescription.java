@@ -20,12 +20,8 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlElement
 
 public interface GraphqlEnumValueDescription extends GraphqlElementDescription {
 
-    static GraphqlEnumValueDescription newValue(String name, String description) {
-        return new GraphqlEnumValueDescriptionImpl(name, description);
-    }
-
-    static GraphqlEnumValueDescription newValue(String name) {
-        return newValue(name, null);
+    static GraphqlEnumValueDescriptionBuilder newEnumValueDescription() {
+        return GraphqlEnumValueDescriptionBuilder.newBuilder();
     }
 
 }

@@ -18,13 +18,13 @@ package grphaqladapter.adaptedschema.functions;
 
 import graphql.schema.TypeResolver;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElement;
-import grphaqladapter.codegenerator.AdaptedDataFetcher;
+import grphaqladapter.codegenerator.AdaptedGraphQLDataFetcher;
 
 import java.util.function.Function;
 
 public interface SchemaDirectiveHandlingContext {
 
-    <T> SchemaDirectiveHandlingContext changeDataFetcherBehavior(String parent, String field, Function<AdaptedDataFetcher<T>, AdaptedDataFetcher<T>> function);
+    <T> SchemaDirectiveHandlingContext changeDataFetcherBehavior(String parent, String field, Function<AdaptedGraphQLDataFetcher<T>, AdaptedGraphQLDataFetcher<T>> function);
 
     SchemaDirectiveHandlingContext changeTypeResolverBehavior(String typeName, Function<TypeResolver, TypeResolver> function);
 

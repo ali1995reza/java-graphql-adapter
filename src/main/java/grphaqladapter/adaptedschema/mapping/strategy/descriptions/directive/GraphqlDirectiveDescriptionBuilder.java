@@ -17,12 +17,12 @@
 package grphaqladapter.adaptedschema.mapping.strategy.descriptions.directive;
 
 import graphql.introspection.Introspection;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlElementDescriptionBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptionBuilder<GraphqlDirectiveDescriptionBuilder, GraphqlDirectiveDescription> {
 
@@ -30,13 +30,25 @@ public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptio
         return new GraphqlDirectiveDescriptionBuilder();
     }
 
-    private final List<Introspection.DirectiveLocation> locations = new ArrayList<>();
+    private final Set<Introspection.DirectiveLocation> locations = new HashSet<>();
     private Class<? extends GraphqlDirectiveFunction> functionality;
 
     public GraphqlDirectiveDescription build() {
-        Introspection.DirectiveLocation[] locationsArray = new Introspection.DirectiveLocation[locations.size()];
-        locations.toArray(locationsArray);
-        return new GraphqlDirectiveDescriptionImpl(name(), description(), locationsArray, functionality());
+        return new GraphqlDirectiveDescriptionImpl(name(), description(), locations(), functionality());
+    }
+
+    @Override
+    public GraphqlDirectiveDescriptionBuilder copy(GraphqlDirectiveDescription graphqlDirectiveDescription) {
+        graphqlDirectiveDescription.locations().forEach(this::addLocation);
+        return super.copy(graphqlDirectiveDescription)
+                .functionality(graphqlDirectiveDescription.functionality());
+    }
+
+    @Override
+    public GraphqlDirectiveDescriptionBuilder refresh() {
+        this.clearLocations();
+        this.functionality = null;
+        return super.refresh();
     }
 
     public GraphqlDirectiveDescriptionBuilder addLocation(Introspection.DirectiveLocation location) {
@@ -56,6 +68,16 @@ public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptio
         return this;
     }
 
+    public GraphqlDirectiveDescriptionBuilder removeLocation(Introspection.DirectiveLocation location) {
+        this.locations.remove(location);
+        return this;
+    }
+
+    public GraphqlDirectiveDescriptionBuilder clearLocations() {
+        this.locations.clear();
+        return this;
+    }
+
     public GraphqlDirectiveDescriptionBuilder functionality(Class<? extends GraphqlDirectiveFunction> functionality) {
         this.functionality = functionality;
         return this;
@@ -65,8 +87,7 @@ public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptio
         return functionality;
     }
 
-    public List<Introspection.DirectiveLocation> locations() {
-        return new ArrayList<>(locations);
+    public Set<Introspection.DirectiveLocation> locations() {
+        return new HashSet<>(locations);
     }
-
 }

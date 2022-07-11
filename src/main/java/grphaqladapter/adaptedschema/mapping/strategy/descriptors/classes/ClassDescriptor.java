@@ -24,25 +24,25 @@ import java.lang.annotation.Annotation;
 
 public interface ClassDescriptor {
 
+    GraphqlDirectiveDescription describeDirective(Class<? extends Annotation> clazz);
+
     GraphqlEnumDescription describeEnumType(Class<? extends Enum> clazz);
-
-    GraphqlObjectTypeDescription describeObjectType(Class<?> clazz);
-
-    GraphqlQueryDescription describeQueryType(Class<?> clazz);
-
-    GraphqlMutationDescription describeMutationType(Class<?> clazz);
-
-    GraphqlSubscriptionDescription describeSubscriptionType(Class<?> clazz);
 
     GraphqlInputTypeDescription describeInputType(Class<?> clazz);
 
     GraphqlInterfaceDescription describeInterfaceType(Class<?> clazz);
 
-    GraphqlUnionDescription describeUnionType(Class<?> clazz);
+    GraphqlMutationDescription describeMutationType(Class<?> clazz);
+
+    GraphqlObjectTypeDescription describeObjectType(Class<?> clazz);
+
+    GraphqlQueryDescription describeQueryType(Class<?> clazz);
 
     GraphqlScalarDescription describeScalarType(Class<?> clazz);
 
-    GraphqlDirectiveDescription describeDirective(Class<? extends Annotation> clazz);
+    GraphqlSubscriptionDescription describeSubscriptionType(Class<?> clazz);
+
+    GraphqlUnionDescription describeUnionType(Class<?> clazz);
 
     default boolean skipType(Class clazz) {
         return false;

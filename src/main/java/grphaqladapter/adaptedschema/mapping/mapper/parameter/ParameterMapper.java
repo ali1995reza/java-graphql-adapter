@@ -18,7 +18,6 @@ package grphaqladapter.adaptedschema.mapping.mapper.parameter;
 
 import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.parameter.MappedParameter;
@@ -27,6 +26,8 @@ import grphaqladapter.adaptedschema.mapping.mapper.AbstractElementMapper;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ParameterValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
@@ -53,8 +54,7 @@ public class ParameterMapper extends AbstractElementMapper {
 
         TypeInformation type = TypeInformation.of(parameter, argumentDescription.nullable());
 
-        MappedParameter mappedParameter = MappedParameterBuilder
-                .newBuilder()
+        MappedParameter mappedParameter = MappedParameter.newParameter()
                 .name(argumentDescription.name())
                 .parameter(parameter)
                 .type(type)
@@ -63,9 +63,9 @@ public class ParameterMapper extends AbstractElementMapper {
                 .defaultValue(parseAndGetDefaultValue(argumentDescription.defaultValue(), type, constructor, builder))
                 .build();
 
-        mappedParameter = addAppliedAnnotations(MappedParameterBuilder::newBuilder, mappedParameter, annotations, constructor, builder);
+        mappedParameter = addAppliedAnnotations(MappedParameter::newParameter, mappedParameter, annotations, constructor, builder);
 
-        //ArgumentValidator.validate(mappedParameter, clazz, method, parameter);
+        ParameterValidator.validateParameter(mappedParameter, clazz, method, parameter);
 
         return mappedParameter;
     }

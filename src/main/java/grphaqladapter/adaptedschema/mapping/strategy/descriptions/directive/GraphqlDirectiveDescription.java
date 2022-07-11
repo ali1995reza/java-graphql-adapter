@@ -20,10 +20,16 @@ import graphql.introspection.Introspection;
 import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlElementDescription;
 
+import java.util.Set;
+
 public interface GraphqlDirectiveDescription extends GraphqlElementDescription {
+
+    static GraphqlDirectiveDescriptionBuilder newDirectiveDescription() {
+        return GraphqlDirectiveDescriptionBuilder.newBuilder();
+    }
 
     Class<? extends GraphqlDirectiveFunction> functionality();
 
-    Introspection.DirectiveLocation[] locations();
+    Set<Introspection.DirectiveLocation> locations();
 
 }

@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.enums;
 
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 
@@ -37,13 +37,6 @@ public class MappedEnumBuilder extends MappedClassBuilder<MappedEnumBuilder, Map
     }
 
     @Override
-    public MappedEnumBuilder copy(MappedEnum element) {
-        super.copy(element);
-        element.constantsByName().values().forEach(this::addEnumConstant);
-        return this;
-    }
-
-    @Override
     public MappedEnum build() {
         return new MappedEnumImpl(
                 name(),
@@ -52,6 +45,13 @@ public class MappedEnumBuilder extends MappedClassBuilder<MappedEnumBuilder, Map
                 baseClass(),
                 enumConstants()
         );
+    }
+
+    @Override
+    public MappedEnumBuilder copy(MappedEnum element) {
+        super.copy(element);
+        element.constantsByName().values().forEach(this::addEnumConstant);
+        return this;
     }
 
     @Override
@@ -71,13 +71,13 @@ public class MappedEnumBuilder extends MappedClassBuilder<MappedEnumBuilder, Map
         return this;
     }
 
+    public Map<String, MappedEnumConstant> enumConstants() {
+        return Collections.unmodifiableMap(new HashMap<>(enumConstants));
+    }
+
     public MappedEnumBuilder removeConstant(String name) {
         Assert.isTrue(enumConstants.containsKey(name), new IllegalStateException("enum constant with name [" + name + "] does not exists"));
         this.enumConstants.remove(name);
         return this;
-    }
-
-    public Map<String, MappedEnumConstant> enumConstants() {
-        return Collections.unmodifiableMap(new HashMap<>(enumConstants));
     }
 }

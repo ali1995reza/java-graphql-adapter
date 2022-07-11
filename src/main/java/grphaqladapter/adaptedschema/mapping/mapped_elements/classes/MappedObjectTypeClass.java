@@ -16,11 +16,16 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.classes;
 
+import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 
 import java.util.Map;
 
 public interface MappedObjectTypeClass extends MappedClass {
+
+    static MappedObjectTypeClassBuilder newObjectTypeClass(MappedElementType elementType) {
+        return MappedObjectTypeClassBuilder.newBuilder(elementType);
+    }
 
     Map<String, MappedFieldMethod> fieldMethods();
 }

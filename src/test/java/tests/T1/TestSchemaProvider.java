@@ -17,11 +17,15 @@
 package tests.T1;
 
 import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschema.scalar.impl.ScalarEntryBuilder;
+import grphaqladapter.adaptedschema.scalar.ScalarEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tests.T1.schema.CustomObjectConstructor;
 import tests.T1.schema.Splitor;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class TestSchemaProvider {
 
@@ -35,10 +39,10 @@ public class TestSchemaProvider {
             LOGGER.info("building test schema");
 
             SCHEMA = AdaptedGraphQLSchema
-                    .newBuilder()
+                    .newSchema()
                     .addAllBuiltInScalars()
-                    .addScalar(ScalarEntryBuilder
-                            .newBuilder()
+                    .addScalar(ScalarEntry
+                            .newScalarEntry()
                             .description("Splitor Description")
                             .name("Splitor")
                             .type(Splitor.class)
@@ -49,10 +53,24 @@ public class TestSchemaProvider {
                     .objectConstructor(new CustomObjectConstructor())
                     .build();
 
+            try {
+                write(SCHEMA.asSchemaDefinitionLanguage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             LOGGER.info("Result schema is : \r\n\r\n" + SCHEMA.asSchemaDefinitionLanguage());
 
         }
         return SCHEMA;
     }
 
+    private static void write(String sdl) throws Exception {
+        File file = new File("E://schema.gpql");
+        file.delete();
+        file.createNewFile();
+        FileOutputStream stream = new FileOutputStream(file);
+        stream.write(sdl.getBytes(StandardCharsets.UTF_8));
+        stream.close();
+    }
 }

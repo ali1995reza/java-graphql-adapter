@@ -16,9 +16,9 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.enums;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassImpl;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 
 import java.util.List;
@@ -31,17 +31,19 @@ final class MappedEnumImpl extends MappedClassImpl implements MappedEnum {
 
     MappedEnumImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Class<? extends Enum> baseClass, Map<String, MappedEnumConstant> constantsByName) {
         super(name, MappedElementType.ENUM, description, appliedAnnotations, baseClass);
-        this.constantsByName = constantsByName;
-        this.constantsByEnumValue = CollectionUtils.separateToImmutableMap(this.constantsByName.values(), MappedEnumConstant.class, MappedEnumConstant::constant);
-    }
-
-    @Override
-    public Map<String, MappedEnumConstant> constantsByName() {
-        return constantsByName;
+        this.constantsByName = CollectionUtils.getOrEmptyMap(constantsByName);
+        this.constantsByEnumValue = CollectionUtils.getOrEmptyMap(
+                CollectionUtils.separateToImmutableMap(this.constantsByName.values(), MappedEnumConstant.class, MappedEnumConstant::constant)
+        );
     }
 
     @Override
     public Map<Object, MappedEnumConstant> constantsByEnumValue() {
         return constantsByEnumValue;
+    }
+
+    @Override
+    public Map<String, MappedEnumConstant> constantsByName() {
+        return constantsByName;
     }
 }

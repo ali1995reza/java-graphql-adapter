@@ -16,15 +16,15 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedScalarClass;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedScalarClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapper.AbstractElementMapper;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.type.GraphqlScalarDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
 import grphaqladapter.adaptedschema.scalar.ScalarEntry;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
 import grphaqladapter.codegenerator.ObjectConstructor;
@@ -45,14 +45,16 @@ public class ScalarClassMapper extends AbstractElementMapper {
             return null;
         }
 
-        MappedScalarClass scalarClass = MappedScalarClassBuilder.newBuilder()
+        MappedScalarClass scalarClass = MappedScalarClass.newScalarClass()
                 .baseClass(clazz)
                 .name(scalarDescription.name())
                 .coercing(constructor.getInstance(scalarDescription.coercing()))
                 .description(scalarDescription.description())
                 .build();
 
-        return addAppliedAnnotations(MappedScalarClassBuilder::newBuilder, scalarClass, annotations, constructor, builder);
+        ClassValidator.validateScalar(scalarClass, clazz);
+
+        return addAppliedAnnotations(MappedScalarClass::newScalarClass, scalarClass, annotations, constructor, builder);
     }
 
     public MappedScalarClass mapScalarClass(Class clazz, ObjectConstructor constructor) {
@@ -68,24 +70,6 @@ public class ScalarClassMapper extends AbstractElementMapper {
         return mapScalarClasses(classes, Collections.emptyMap(), constructor, null);
     }
 
-    public MappedScalarClass mapScalarEntry(ScalarEntry entry, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        MappedScalarClass mappedClass = MappedScalarClassBuilder
-                .newBuilder()
-                .name(entry.name())
-                .baseClass(entry.type())
-                .description(entry.description())
-                .coercing(entry.coercing())
-                .build();
-
-        mappedClass = addAppliedAnnotations(MappedScalarClassBuilder::newBuilder, mappedClass, annotations, constructor, builder);
-
-        return mappedClass;
-    }
-
-    public MappedScalarClass mapScalarEntry(ScalarEntry entry) {
-        return mapScalarEntry(entry, Collections.emptyMap(), null, null);
-    }
-
     public Map<Class, MappedScalarClass> mapScalarEntries(Collection<ScalarEntry> entries, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
         CollectionUtils.checkDuplicates(clazz -> {
             throw new IllegalStateException("duplicate class [" + clazz + "]");
@@ -95,5 +79,22 @@ public class ScalarClassMapper extends AbstractElementMapper {
 
     public Map<Class, MappedScalarClass> mapScalarEntries(Collection<ScalarEntry> entries) {
         return mapScalarEntries(entries, Collections.emptyMap(), null, null);
+    }
+
+    public MappedScalarClass mapScalarEntry(ScalarEntry entry, Map<Class, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
+        MappedScalarClass mappedClass = MappedScalarClass.newScalarClass()
+                .name(entry.name())
+                .baseClass(entry.type())
+                .description(entry.description())
+                .coercing(entry.coercing())
+                .build();
+
+        mappedClass = addAppliedAnnotations(MappedScalarClass::newScalarClass, mappedClass, annotations, constructor, builder);
+
+        return mappedClass;
+    }
+
+    public MappedScalarClass mapScalarEntry(ScalarEntry entry) {
+        return mapScalarEntry(entry, Collections.emptyMap(), null, null);
     }
 }

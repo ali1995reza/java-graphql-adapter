@@ -29,9 +29,10 @@ import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObject
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedAnnotationMethod;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 import grphaqladapter.adaptedschema.system_objects.directive.*;
+import grphaqladapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
-import grphaqladapter.adaptedschema.utils.Utils;
-import grphaqladapter.codegenerator.AdaptedDataFetcher;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
+import grphaqladapter.codegenerator.AdaptedGraphQLDataFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +44,12 @@ public class DataFetcherHandler implements DataFetcher<Object> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DataFetcherHandler.class);
 
-    private final AdaptedDataFetcher wrapped;
+    private final AdaptedGraphQLDataFetcher wrapped;
     private final Supplier<AdaptedGraphQLSchema> schemaSupplier;
     private final MappedObjectTypeClass mappedObjectTypeClass;
     private final MappedFieldMethod mappedFieldMethod;
 
-    public DataFetcherHandler(AdaptedDataFetcher wrapped, MappedObjectTypeClass mappedObjectTypeClass, MappedFieldMethod mappedFieldMethod, Supplier<AdaptedGraphQLSchema> schemaSupplier) {
+    public DataFetcherHandler(AdaptedGraphQLDataFetcher wrapped, MappedObjectTypeClass mappedObjectTypeClass, MappedFieldMethod mappedFieldMethod, Supplier<AdaptedGraphQLSchema> schemaSupplier) {
         this.wrapped = wrapped;
         this.mappedObjectTypeClass = mappedObjectTypeClass;
         this.mappedFieldMethod = mappedFieldMethod;
@@ -71,6 +72,81 @@ public class DataFetcherHandler implements DataFetcher<Object> {
         }
     }
 
+    private DirectiveDetailsWithFunction getDirective(Directive directive, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler) {
+        DiscoveredDirective discoveredDirective = schema.typeFinder().findDirectiveByName(directive.getName());
+        GraphqlDirectiveFunction function = schema.objectConstructor().getInstance(discoveredDirective.asMappedElement()
+                .functionality());
+        DirectiveDetailsWithFunction details = new DirectiveDetailsWithFunction(
+                discoveredDirective.asMappedElement(),
+                getDirectiveArguments(directive, discoveredDirective, schema),
+                function
+        );
+        directiveHandler.accept(details);
+        return details;
+    }
+
+    private static Map<String, Object> getDirectiveArguments(Directive directive, DiscoveredDirective discoveredDirective, AdaptedGraphQLSchema schema) {
+        Map<String, Argument> argumentByName = NullifyUtils.getOrDefault(directive.getArgumentsByName(), Collections.emptyMap());
+        Map<String, Object> arguments = new HashMap<>();
+        for (MappedAnnotationMethod method : discoveredDirective.asMappedElement().mappedMethods().values()) {
+            Argument argument = argumentByName.get(method.name());
+            if (argument == null) {
+                if (method.hasDefaultValue()) {
+                    arguments.put(method.name(), method.defaultValue());
+                }
+            } else {
+                Object val = schema.objectBuilder().buildFromValue(argument.getValue(), method.type(), BuildingObjectConfig.ONLY_USE_DEFAULT_VALUES);
+                if (val != null) {
+                    arguments.put(method.name(), val);
+                }
+            }
+        }
+
+        return arguments;
+    }
+
+    private static Map<String, Object> getDirectiveArguments(QueryAppliedDirective directive, DiscoveredDirective discoveredDirective, AdaptedGraphQLSchema schema) {
+        List<QueryAppliedDirectiveArgument> appliedArguments = NullifyUtils.getOrDefault(directive.getArguments(), Collections.emptyList());
+
+        if (appliedArguments.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Object> arguments = new HashMap<>();
+        for (QueryAppliedDirectiveArgument argument : appliedArguments) {
+            if (argument.getArgumentValue().isSet() && argument.getArgumentValue().getValue() == null) {
+                continue;
+            }
+            MappedAnnotationMethod method = discoveredDirective.asMappedElement()
+                    .mappedMethods().get(argument.getName());
+            Object val = schema.objectBuilder().buildFromObject(argument.getValue(), method.type(), BuildingObjectConfig.ONLY_USE_EXACT_LIST);
+            if (val == null && method.hasDefaultValue()) {
+                val = method.defaultValue();
+            }
+            if (val == null) {
+                continue;
+            }
+            arguments.put(method.name(), val);
+        }
+
+        return arguments;
+    }
+
+    private List<GraphqlDirectiveDetails> getDirectives(List<Directive> directives, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler, List<GraphqlDirectiveDetails> list) {
+        if (CollectionUtils.isEmpty(directives)) {
+            return list;
+        }
+
+        for (Directive directive : directives) {
+            list.add(getDirective(directive, schema, directiveHandler));
+        }
+        return list;
+    }
+
+    private List<GraphqlDirectiveDetails> getDirectives(List<Directive> directives, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler) {
+        return getDirectives(directives, schema, directiveHandler, new ArrayList<>());
+    }
+
     private GraphqlDirectivesHolder getDirectivesAndExecutePreHandlers(Object source, AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
 
         OperationDirectives operationDirectives = getOperationDirectivesAndExecutePreHandlers(source, schema, environment);
@@ -80,14 +156,18 @@ public class DataFetcherHandler implements DataFetcher<Object> {
         return new GraphqlDirectivesHolder(operationDirectives, fragmentDirectives, fieldDirectives);
     }
 
-    private OperationDirectives getOperationDirectivesAndExecutePreHandlers(Object source, AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
-        if (isNotEmpty(environment.getOperationDefinition().getDirectives())) {
+    private FieldDirectives getFieldDirectivesAndExecutePreHandlers(Object source, AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
 
-            List<GraphqlDirectiveDetails> directivesList = getDirectives(environment.getOperationDefinition().getDirectives(), schema,
-                    directive -> directive.function.preHandleOperationDirective(directive, source, environment.getOperationDefinition(), mappedFieldMethod, environment));
+        if (environment.getQueryDirectives() != null) {
 
-            return new OperationDirectives(Collections.unmodifiableList(directivesList), environment.getOperationDefinition());
+            List<QueryAppliedDirective> appliedDirectives = environment.getQueryDirectives().getImmediateAppliedDirectivesByField().get(environment.getField());
+
+            List<GraphqlDirectiveDetails> detailsList = getQueryDirectives(appliedDirectives, schema,
+                    directive -> directive.function.preHandleFieldDirective(directive, source, mappedFieldMethod, environment));
+
+            return new FieldDirectives(Collections.unmodifiableList(detailsList), mappedFieldMethod);
         }
+
         return null;
     }
 
@@ -155,47 +235,15 @@ public class DataFetcherHandler implements DataFetcher<Object> {
         return null;
     }
 
-    private FieldDirectives getFieldDirectivesAndExecutePreHandlers(Object source, AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
+    private OperationDirectives getOperationDirectivesAndExecutePreHandlers(Object source, AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
+        if (isNotEmpty(environment.getOperationDefinition().getDirectives())) {
 
-        if (environment.getQueryDirectives() != null) {
+            List<GraphqlDirectiveDetails> directivesList = getDirectives(environment.getOperationDefinition().getDirectives(), schema,
+                    directive -> directive.function.preHandleOperationDirective(directive, source, environment.getOperationDefinition(), mappedFieldMethod, environment));
 
-            List<QueryAppliedDirective> appliedDirectives = environment.getQueryDirectives().getImmediateAppliedDirectivesByField().get(environment.getField());
-
-            List<GraphqlDirectiveDetails> detailsList = getQueryDirectives(appliedDirectives, schema,
-                    directive -> directive.function.preHandleFieldDirective(directive, source, mappedFieldMethod, environment));
-
-            return new FieldDirectives(Collections.unmodifiableList(detailsList), mappedFieldMethod);
+            return new OperationDirectives(Collections.unmodifiableList(directivesList), environment.getOperationDefinition());
         }
-
         return null;
-    }
-
-    private DirectiveDetailsWithFunction getDirective(Directive directive, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler) {
-        DiscoveredDirective discoveredDirective = schema.typeFinder().findDirectiveByName(directive.getName());
-        GraphqlDirectiveFunction function = schema.objectConstructor().getInstance(discoveredDirective.asMappedElement()
-                .functionality());
-        DirectiveDetailsWithFunction details = new DirectiveDetailsWithFunction(
-                discoveredDirective.asMappedElement(),
-                getDirectiveArguments(directive, discoveredDirective, schema),
-                function
-        );
-        directiveHandler.accept(details);
-        return details;
-    }
-
-    private List<GraphqlDirectiveDetails> getDirectives(List<Directive> directives, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler, List<GraphqlDirectiveDetails> list) {
-        if (CollectionUtils.isEmpty(directives)) {
-            return list;
-        }
-
-        for (Directive directive : directives) {
-            list.add(getDirective(directive, schema, directiveHandler));
-        }
-        return list;
-    }
-
-    private List<GraphqlDirectiveDetails> getDirectives(List<Directive> directives, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler) {
-        return getDirectives(directives, schema, directiveHandler, new ArrayList<>());
     }
 
     private GraphqlDirectiveDetails getQueryDirective(QueryAppliedDirective appliedDirective, AdaptedGraphQLSchema schema, Consumer<DirectiveDetailsWithFunction> directiveHandler) {
@@ -222,53 +270,6 @@ public class DataFetcherHandler implements DataFetcher<Object> {
         }
 
         return detailsList;
-    }
-
-    private static Map<String, Object> getDirectiveArguments(Directive directive, DiscoveredDirective discoveredDirective, AdaptedGraphQLSchema schema) {
-        Map<String, Argument> argumentByName = Utils.getOrDefault(directive.getArgumentsByName(), Collections.emptyMap());
-        Map<String, Object> arguments = new HashMap<>();
-        for (MappedAnnotationMethod method : discoveredDirective.asMappedElement().mappedMethods().values()) {
-            Argument argument = argumentByName.get(method.name());
-            if (argument == null) {
-                if (method.hasDefaultValue()) {
-                    arguments.put(method.name(), method.defaultValue());
-                }
-            } else {
-                Object val = schema.objectBuilder().buildFromValue(method.type(), argument.getValue(), true);
-                if (val != null) {
-                    arguments.put(method.name(), val);
-                }
-            }
-        }
-
-        return arguments;
-    }
-
-    private static Map<String, Object> getDirectiveArguments(QueryAppliedDirective directive, DiscoveredDirective discoveredDirective, AdaptedGraphQLSchema schema) {
-        List<QueryAppliedDirectiveArgument> appliedArguments = Utils.getOrDefault(directive.getArguments(), Collections.emptyList());
-
-        if (appliedArguments.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, Object> arguments = new HashMap<>();
-        for (QueryAppliedDirectiveArgument argument : appliedArguments) {
-            if (argument.getArgumentValue().isSet() && argument.getArgumentValue().getValue() == null) {
-                continue;
-            }
-            MappedAnnotationMethod method = discoveredDirective.asMappedElement()
-                    .mappedMethods().get(argument.getName());
-            Object val = schema.objectBuilder().buildFromObject(method.type(), argument.getValue(), false);
-            if (val == null && method.hasDefaultValue()) {
-                val = method.defaultValue();
-            }
-            if (val == null) {
-                continue;
-            }
-            arguments.put(method.name(), val);
-        }
-
-        return arguments;
     }
 
     private Object handleValueDirectives(AdaptedGraphQLSchema schema, Object result, Object source, GraphqlDirectivesHolder directivesHolder, DataFetchingEnvironment environment) {

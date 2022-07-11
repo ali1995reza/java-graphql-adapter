@@ -18,15 +18,18 @@ package grphaqladapter.adaptedschema;
 
 import graphql.Scalars;
 import grphaqladapter.adaptedschema.discovered.DiscoveredScalarType;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedScalarClassBuilder;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedScalarClass;
 
 final class StringDiscoveredType extends DiscoveredScalarTypeImpl {
 
     private final static StringDiscoveredType INSTANCE = new StringDiscoveredType();
 
+    public static DiscoveredScalarType getInstance() {
+        return INSTANCE;
+    }
+
     private StringDiscoveredType() {
-        super(MappedScalarClassBuilder
-                        .newBuilder()
+        super(MappedScalarClass.newScalarClass()
                         .baseClass(String.class)
                         .name(Scalars.GraphQLString.getName())
                         .description(Scalars.GraphQLString.getDescription())
@@ -39,9 +42,5 @@ final class StringDiscoveredType extends DiscoveredScalarTypeImpl {
     @Override
     public String toString() {
         return StringDiscoveredType.class.getSimpleName();
-    }
-
-    public static DiscoveredScalarType getInstance() {
-        return INSTANCE;
     }
 }

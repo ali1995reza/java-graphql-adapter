@@ -16,6 +16,7 @@
 
 package grphaqladapter.adaptedschema.utils;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -27,37 +28,19 @@ import java.util.stream.Stream;
 
 public class CollectionUtils {
 
-    private static <K, V, E> BiConsumer<Map<K, V>, E> nullSkipperAccumulator(Function<E, ? extends K> keyMapper, Function<E, ? extends V> valueMapper) {
-        return (map, element) -> {
-            K key = keyMapper.apply(element);
-            V value = valueMapper.apply(element);
-            if (key != null && value != null) {
-                map.put(key, value);
+    public static <T> void checkDuplicates(Consumer<T> handleDuplicateValue, Collection<T>... collections) {
+        List<T> list = new ArrayList<>();
+        for (Collection<T> collection : collections) {
+            if (collection != null) {
+                list.addAll(collection);
             }
-        };
-    }
-
-    private static <K, V, M extends Map<K, V>> BinaryOperator<M> uniqKeysMapMerger() {
-        return (m1, m2) -> {
-            for (Map.Entry<K, V> e : m2.entrySet()) {
-                K k = e.getKey();
-                V v = Objects.requireNonNull(e.getValue());
-                V u = m1.putIfAbsent(k, v);
-                if (u != null) throw new IllegalStateException("duplicate key :" + k + "values [" + u + "," + v + "]");
+        }
+        list.forEach(x -> {
+            if (list.stream().filter(other -> Objects.equals(other, x)).count() > 1) {
+                handleDuplicateValue.accept(x);
             }
-            return m1;
-        };
+        });
     }
-
-    public static <T, K, V> Collector<T, ?, Map<K, V>> nullSkipperMapCollector(Function<T, ? extends K> keyMapper, Function<T, ? extends V> valueMapper) {
-        return Collector.of(HashMap::new, nullSkipperAccumulator(keyMapper, valueMapper), uniqKeysMapMerger(), Collector.Characteristics.IDENTITY_FINISH);
-    }
-
-    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(Function<T, ? extends K> keyMapper, Function<T, ? extends V> valueMapper, boolean skipNullValues) {
-        return skipNullValues ? Collector.of(HashMap::new, nullSkipperAccumulator(keyMapper, valueMapper), uniqKeysMapMerger(), Collector.Characteristics.IDENTITY_FINISH) :
-                Collectors.toMap(keyMapper, valueMapper);
-    }
-
 
     public static <T> List<T> combineToImmutableList(Collection<? extends T>... collections) {
         return Collections.unmodifiableList(combineToList(collections));
@@ -71,9 +54,96 @@ public class CollectionUtils {
         return list;
     }
 
-    public static <T, V extends T> Stream<V> separateToStream(Collection<T> collection, Class<V> valueClass) {
-        return collection.stream().filter(object -> valueClass.isAssignableFrom(object.getClass()))
-                .map(object -> (V) object);
+    public static <T> void forEach(Collection<T> collection, Consumer<T> forEach, Consumer<T> forLast) {
+        if (isEmpty(collection)) {
+            return;
+        }
+
+        final int lastIndex = collection.size() - 1;
+        int i = 0;
+
+        for (T t : collection) {
+            if (i++ == lastIndex) {
+                forLast.accept(t);
+            } else {
+                forEach.accept(t);
+            }
+        }
+    }
+
+    public static <T> void forEach(T[] array, Consumer<T> forEach, Consumer<T> forLast) {
+        if (isEmpty(array)) {
+            return;
+        }
+
+        final int lastIndex = array.length - 1;
+        int i = 0;
+
+        for (T t : array) {
+            if (i++ == lastIndex) {
+                forLast.accept(t);
+            } else {
+                forEach.accept(t);
+            }
+        }
+    }
+
+    public static <T> void forEachUnknownArray(Object unknownArray, Consumer<T> forEach, Consumer<T> forLast) {
+        if (unknownArray == null || !unknownArray.getClass().isArray() || Array.getLength(unknownArray) == 0) {
+            return;
+        }
+
+        final int length = Array.getLength(unknownArray);
+        final int lastIndex = Array.getLength(unknownArray) - 1;
+
+        for (int i = 0; i < length; i++) {
+            if (i == lastIndex) {
+                forLast.accept((T) Array.get(unknownArray, i));
+            } else {
+                forEach.accept((T) Array.get(unknownArray, i));
+            }
+        }
+    }
+
+    public static <T> void forEachUnknownArray(Object unknownArray, Consumer<T> forEach) {
+        forEachUnknownArray(unknownArray, forEach, forEach);
+    }
+
+    public static <T> List<T> getOrEmptyList(List<T> list) {
+        if (isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list;
+    }
+
+    public static <K, V> Map<K, V> getOrEmptyMap(Map<K, V> map) {
+        if (isEmpty(map)) {
+            return Collections.emptyMap();
+        }
+        return map;
+    }
+
+    public static <T> Set<T> getOrEmptySet(Set<T> set) {
+        if (isEmpty(set)) {
+            return Collections.emptySet();
+        }
+        return set;
+    }
+
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Map<?, ?> map) {
+        return map == null || map.isEmpty();
+    }
+
+    public static <T> boolean isEmpty(T[] array) {
+        return array == null || array.length == 0;
+    }
+
+    public static <T, K, V> Collector<T, ?, Map<K, V>> nullSkipperMapCollector(Function<T, ? extends K> keyMapper, Function<T, ? extends V> valueMapper) {
+        return Collector.of(HashMap::new, nullSkipperAccumulator(keyMapper, valueMapper), uniqKeysMapMerger(), Collector.Characteristics.IDENTITY_FINISH);
     }
 
     public static <T, V extends T> List<V> separateToImmutableList(Collection<T> collection, Class<V> valueClass) {
@@ -120,59 +190,35 @@ public class CollectionUtils {
         return separateToMap(collection, valueClass, keyMapper, valueMapper, false);
     }
 
-    public static boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.isEmpty();
+    public static <T, V extends T> Stream<V> separateToStream(Collection<T> collection, Class<V> valueClass) {
+        return collection.stream().filter(object -> valueClass.isAssignableFrom(object.getClass()))
+                .map(object -> (V) object);
     }
 
-    public static <T> boolean isEmpty(T[] array) {
-        return array == null || array.length == 0;
+    public static <T, K, V> Collector<T, ?, Map<K, V>> toMap(Function<T, ? extends K> keyMapper, Function<T, ? extends V> valueMapper, boolean skipNullValues) {
+        return skipNullValues ? Collector.of(HashMap::new, nullSkipperAccumulator(keyMapper, valueMapper), uniqKeysMapMerger(), Collector.Characteristics.IDENTITY_FINISH) :
+                Collectors.toMap(keyMapper, valueMapper);
     }
 
-    public static <T> void forEach(Collection<T> collection, Consumer<T> forEach, Consumer<T> forLast) {
-        if (isEmpty(collection)) {
-            return;
-        }
-
-        final int lastIndex = collection.size() - 1;
-        int i = 0;
-
-        for (T t : collection) {
-            if (i++ == lastIndex) {
-                forLast.accept(t);
-            } else {
-                forEach.accept(t);
+    private static <K, V, E> BiConsumer<Map<K, V>, E> nullSkipperAccumulator(Function<E, ? extends K> keyMapper, Function<E, ? extends V> valueMapper) {
+        return (map, element) -> {
+            K key = keyMapper.apply(element);
+            V value = valueMapper.apply(element);
+            if (key != null && value != null) {
+                map.put(key, value);
             }
-        }
+        };
     }
 
-    public static <T> void forEach(T[] array, Consumer<T> forEach, Consumer<T> forLast) {
-        if (isEmpty(array)) {
-            return;
-        }
-
-        final int lastIndex = array.length - 1;
-        int i = 0;
-
-        for (T t : array) {
-            if (i++ == lastIndex) {
-                forLast.accept(t);
-            } else {
-                forEach.accept(t);
+    private static <K, V, M extends Map<K, V>> BinaryOperator<M> uniqKeysMapMerger() {
+        return (m1, m2) -> {
+            for (Map.Entry<K, V> e : m2.entrySet()) {
+                K k = e.getKey();
+                V v = Objects.requireNonNull(e.getValue());
+                V u = m1.putIfAbsent(k, v);
+                if (u != null) throw new IllegalStateException("duplicate key :" + k + "values [" + u + "," + v + "]");
             }
-        }
-    }
-
-    public static <T> void checkDuplicates(Consumer<T> handleDuplicateValue, Collection<T>... collections) {
-        List<T> list = new ArrayList<>();
-        for (Collection<T> collection : collections) {
-            if (collection != null) {
-                list.addAll(collection);
-            }
-        }
-        list.forEach(x -> {
-            if (list.stream().filter(other -> Objects.equals(other, x)).count() > 1) {
-                handleDuplicateValue.accept(x);
-            }
-        });
+            return m1;
+        };
     }
 }

@@ -24,7 +24,24 @@ public class GraphqlArgumentDescriptionBuilder extends DefaultValueContainerElem
         return new GraphqlArgumentDescriptionBuilder();
     }
 
-    private boolean systemParameter;
+    private boolean systemParameter = false;
+
+    @Override
+    public GraphqlArgumentDescription build() {
+        return new GraphqlArgumentDescriptionImpl(name(), description(), isNullable(), defaultValue(), isSystemParameter());
+    }
+
+    @Override
+    public GraphqlArgumentDescriptionBuilder copy(GraphqlArgumentDescription graphqlArgumentDescription) {
+        return super.copy(graphqlArgumentDescription)
+                .systemParameter(graphqlArgumentDescription.isSystemParameter());
+    }
+
+    @Override
+    public GraphqlArgumentDescriptionBuilder refresh() {
+        this.systemParameter = false;
+        return super.refresh();
+    }
 
     public boolean isSystemParameter() {
         return systemParameter;
@@ -33,9 +50,5 @@ public class GraphqlArgumentDescriptionBuilder extends DefaultValueContainerElem
     public GraphqlArgumentDescriptionBuilder systemParameter(boolean systemParameter) {
         this.systemParameter = systemParameter;
         return this;
-    }
-
-    public GraphqlArgumentDescription build() {
-        return new GraphqlArgumentDescriptionImpl(name(), description(), isNullable(), defaultValue(), isSystemParameter());
     }
 }

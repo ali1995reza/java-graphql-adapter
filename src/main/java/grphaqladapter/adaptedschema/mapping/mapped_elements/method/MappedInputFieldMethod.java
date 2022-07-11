@@ -22,5 +22,9 @@ import java.lang.reflect.Method;
 
 public interface MappedInputFieldMethod extends MappedMethod, DefaultValueContainerMappedElement {
 
+    static MappedInputFieldMethodBuilder newInputFieldMethod() {
+        return MappedInputFieldMethodBuilder.newBuilder();
+    }
+
     Method setter();
 }

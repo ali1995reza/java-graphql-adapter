@@ -44,6 +44,24 @@ public class GraphqlDirectiveArgumentDescriptionBuilder extends DefaultValueCont
         );
     }
 
+    @Override
+    public GraphqlDirectiveArgumentDescriptionBuilder copy(GraphqlDirectiveArgumentDescription graphqlDirectiveArgumentDescription) {
+        return super.copy(graphqlDirectiveArgumentDescription)
+                .type(graphqlDirectiveArgumentDescription.type())
+                .dimensions(graphqlDirectiveArgumentDescription.dimensions())
+                .dimensionModel(graphqlDirectiveArgumentDescription.dimensionModel())
+                .valueParser(graphqlDirectiveArgumentDescription.valueParser());
+    }
+
+    public GraphqlDirectiveArgumentDescriptionBuilder dimensionModel(DimensionModel dimensionModel) {
+        this.dimensionModel = dimensionModel;
+        return this;
+    }
+
+    public DimensionModel dimensionModel() {
+        return dimensionModel;
+    }
+
     public GraphqlDirectiveArgumentDescriptionBuilder dimensions(int dimensions) {
         this.dimensions = dimensions;
         return this;
@@ -69,14 +87,5 @@ public class GraphqlDirectiveArgumentDescriptionBuilder extends DefaultValueCont
 
     public Class<? extends ValueParser> valueParser() {
         return valueParser;
-    }
-
-    public GraphqlDirectiveArgumentDescriptionBuilder dimensionModel(DimensionModel dimensionModel) {
-        this.dimensionModel = dimensionModel;
-        return this;
-    }
-
-    public DimensionModel dimensionModel() {
-        return dimensionModel;
     }
 }

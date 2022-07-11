@@ -16,22 +16,22 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedTypeClassBuilder;
+import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 import grphaqladapter.adaptedschema.mapping.mapper.ElementMapperWithMethodMapper;
-import grphaqladapter.adaptedschema.mapping.mapper.MappingStatics;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNameDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import grphaqladapter.adaptedschema.utils.ClassUtils;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.validator.TypeValidator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.lang.reflect.Method;
@@ -50,21 +50,23 @@ public class ObjectTypeClassMapper extends ElementMapperWithMethodMapper {
             return null;
         }
 
-        MappedTypeClassBuilder mappedTypeClassBuilder = MappedTypeClassBuilder.newBuilder(elementType)
+        MappedObjectTypeClassBuilder mappedObjectTypeClassBuilder = MappedObjectTypeClass.newObjectTypeClass(elementType)
                 .name(description.name())
                 .baseClass(clazz)
                 .description(description.description());
 
-        for (Method method : MappingStatics.getAllMethods(clazz)) {
+        for (Method method : ClassUtils.getAllMethods(clazz)) {
             MappedFieldMethod mappedMethod = methodMapper().mapFieldMethod(clazz, method, annotations, constructor, builder);
 
             if (mappedMethod == null) continue;
 
-            mappedTypeClassBuilder.addFieldMethod(mappedMethod);
+            mappedObjectTypeClassBuilder.addFieldMethod(mappedMethod);
         }
 
-        MappedObjectTypeClass mappedObjectTypeClass = addAppliedAnnotations(() -> MappedTypeClassBuilder.newBuilder(elementType), mappedTypeClassBuilder.build(), annotations, constructor, builder);
-        TypeValidator.validate(mappedObjectTypeClass, clazz);
+        MappedObjectTypeClass mappedObjectTypeClass = addAppliedAnnotations(() -> MappedObjectTypeClass.newObjectTypeClass(elementType), mappedObjectTypeClassBuilder.build(), annotations, constructor, builder);
+
+        ClassValidator.validaObjectTypeClass(mappedObjectTypeClass, clazz);
+
         return mappedObjectTypeClass;
     }
 

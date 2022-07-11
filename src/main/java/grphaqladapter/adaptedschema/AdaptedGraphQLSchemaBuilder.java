@@ -17,7 +17,7 @@
 package grphaqladapter.adaptedschema;
 
 import graphql.schema.*;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.builtinscalars.BuiltInScalarEntries;
 import grphaqladapter.adaptedschema.discovered.DiscoveredElement;
 import grphaqladapter.adaptedschema.discovered.DiscoveredInterfaceType;
@@ -39,15 +39,14 @@ import grphaqladapter.adaptedschema.mapping.mapper.ClassMapper;
 import grphaqladapter.adaptedschema.scalar.ScalarEntry;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.Reference;
-import grphaqladapter.adaptedschema.validator.TypeValidator;
+import grphaqladapter.adaptedschema.utils.class_resolver.ClassResolver;
+import grphaqladapter.adaptedschema.utils.class_resolver.filter.ClassFilter;
 import grphaqladapter.codegenerator.DataFetcherGenerator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 import grphaqladapter.codegenerator.TypeResolverGenerator;
 import grphaqladapter.codegenerator.impl.ReflectionDataFetcherGenerator;
 import grphaqladapter.codegenerator.impl.ReflectionObjectConstructor;
 import grphaqladapter.codegenerator.impl.SimpleTypeResolverGenerator;
-import grphaqladapter.package_parser.PackageParser;
-import grphaqladapter.package_parser.filter.ClassFilter;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -98,27 +97,26 @@ public final class AdaptedGraphQLSchemaBuilder {
         return this;
     }
 
-    public synchronized AdaptedGraphQLSchemaBuilder addPackage(String packageName, ClassFilter filter) {
-        return addAll(PackageParser.getClasses(packageName, filter));
-    }
-
-    public synchronized AdaptedGraphQLSchemaBuilder addPackage(String packageName) {
-        return addPackage(packageName, ClassFilter.ACCEPT_ALL);
-    }
-
     public synchronized AdaptedGraphQLSchemaBuilder addGraphqlAnnotatedClassesFormPackage(String packageName, ClassFilter filter) {
-        return addAll(PackageParser.getAllGraphqlAnnotatedClasses(packageName, filter));
+        return addAll(ClassResolver.getAllGraphqlAnnotatedClasses(packageName, filter));
     }
 
     public synchronized AdaptedGraphQLSchemaBuilder addGraphqlAnnotatedClassesFormPackage(String packageName) {
         return addGraphqlAnnotatedClassesFormPackage(packageName, ClassFilter.ACCEPT_ALL);
     }
 
+    public synchronized AdaptedGraphQLSchemaBuilder addPackage(String packageName, ClassFilter filter) {
+        return addAll(ClassResolver.getClasses(packageName, filter));
+    }
+
+    public synchronized AdaptedGraphQLSchemaBuilder addPackage(String packageName) {
+        return addPackage(packageName, ClassFilter.ACCEPT_ALL);
+    }
+
     public synchronized AdaptedGraphQLSchemaBuilder addScalar(ScalarEntry entry) {
         if (entry.type() == String.class || entry.type() == Boolean.class) {
             throw new IllegalStateException("can not remove String and Boolean class - these types always exists");
         }
-        TypeValidator.validate(entry);
         scalarEntries.put(entry.type(), entry);
         return this;
     }
@@ -380,7 +378,7 @@ public final class AdaptedGraphQLSchemaBuilder {
         }
 
         if (mappedElement.mappedType().isDirective()) {
-            GraphQLDirective type = StaticMethods.buildDirective((MappedAnnotation) mappedElement, context);
+            GraphQLDirective type = GraphQLElementBuilder.buildDirective((MappedAnnotation) mappedElement, context);
             context.setDirective((MappedAnnotation) mappedElement, type);
             return type;
         }
@@ -389,19 +387,19 @@ public final class AdaptedGraphQLSchemaBuilder {
         MappedClass mappedClass = (MappedClass) mappedElement;
 
         if (mappedClass.mappedType().isTopLevelType() || mappedClass.mappedType().isObjectType()) {
-            type = StaticMethods.buildOutputObjectType((MappedObjectTypeClass) mappedClass, context);
+            type = GraphQLElementBuilder.buildOutputObjectType((MappedObjectTypeClass) mappedClass, context);
             context.setGraphQLTypeFor(mappedClass, type);
         } else if (mappedClass.mappedType().isInterface()) {
-            type = StaticMethods.buildInterface((MappedInterface) mappedClass, context);
+            type = GraphQLElementBuilder.buildInterface((MappedInterface) mappedClass, context);
             context.setGraphQLTypeFor(mappedClass, type);
         } else if (mappedClass.mappedType().isInputType()) {
-            type = StaticMethods.buildInputObjectType((MappedInputTypeClass) mappedClass, context);
+            type = GraphQLElementBuilder.buildInputObjectType((MappedInputTypeClass) mappedClass, context);
             context.setGraphQLTypeFor(mappedClass, type);
         } else if (mappedClass.mappedType().isEnum()) {
-            type = StaticMethods.buildEnumType((MappedEnum) mappedClass, context);
+            type = GraphQLElementBuilder.buildEnumType((MappedEnum) mappedClass, context);
             context.setGraphQLTypeFor(mappedClass, type);
         } else if (mappedClass.mappedType().isScalar()) {
-            type = StaticMethods.buildScalarType((MappedScalarClass) mappedClass, context);
+            type = GraphQLElementBuilder.buildScalarType((MappedScalarClass) mappedClass, context);
             context.setGraphQLTypeFor(mappedClass, type);
         }
 
@@ -436,7 +434,7 @@ public final class AdaptedGraphQLSchemaBuilder {
 
     private GraphQLType discoverUnion(MappedUnionInterface unionClass, List<MappedClass> possibles, BuildingContextImpl context) {
         GraphQLUnionType unionType =
-                StaticMethods.buildUnionType(unionClass, possibles, context);
+                GraphQLElementBuilder.buildUnionType(unionClass, possibles, context);
 
         context.setGraphQLTypeFor(unionClass, unionType);
 

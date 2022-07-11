@@ -18,11 +18,10 @@ package grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter;
 
 import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschema.assertutil.StringUtils;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescription;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescriptionBuilder;
-import grphaqladapter.adaptedschema.mapping.strategy.descriptors.DescriptorUtils;
+import grphaqladapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
+import grphaqladapter.adaptedschema.utils.StringUtils;
 import grphaqladapter.annotations.GraphqlArgument;
 
 import java.lang.reflect.Method;
@@ -37,7 +36,7 @@ public class AnnotationBaseParameterDescriptor implements ParameterDescriptor {
 
         if (argument == null) {
             if (isSystemParameter(parameter)) {
-                return GraphqlArgumentDescriptionBuilder.newBuilder()
+                return GraphqlArgumentDescription.newArgumentDescription()
                         .systemParameter(true)
                         .build();
             }
@@ -46,7 +45,7 @@ public class AnnotationBaseParameterDescriptor implements ParameterDescriptor {
 
         String name = StringUtils.isNullString(argument.name()) ? parameter.getName() : argument.name();
 
-        return GraphqlArgumentDescriptionBuilder.newBuilder()
+        return GraphqlArgumentDescription.newArgumentDescription()
                 .name(name)
                 .nullable(argument.nullable())
                 .defaultValue(DescriptorUtils.getDefaultValue(parameter))
@@ -54,14 +53,14 @@ public class AnnotationBaseParameterDescriptor implements ParameterDescriptor {
                 .build();
     }
 
+    @Override
+    public boolean skipFieldArgument(Method method, Parameter parameter, int parameterIndex) {
+        return DescriptorUtils.isSkipElementAnnotationPresent(parameter);
+    }
+
     private boolean isSystemParameter(Parameter parameter) {
         return parameter.getType() == DataFetchingEnvironment.class ||
                 parameter.getType() == GraphqlDirectivesHolder.class ||
                 parameter.getType() == AdaptedGraphQLSchema.class;
-    }
-
-    @Override
-    public boolean skipFieldArgument(Method method, Parameter parameter, int parameterIndex) {
-        return DescriptorUtils.isSkipElementAnnotationPresent(parameter);
     }
 }

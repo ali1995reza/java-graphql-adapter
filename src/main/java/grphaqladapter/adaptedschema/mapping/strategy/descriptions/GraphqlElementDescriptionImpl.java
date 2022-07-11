@@ -27,12 +27,12 @@ public class GraphqlElementDescriptionImpl implements GraphqlElementDescription 
     }
 
     @Override
-    public String name() {
-        return name;
+    public String description() {
+        return description;
     }
 
     @Override
-    public String description() {
-        return description;
+    public String name() {
+        return name;
     }
 }

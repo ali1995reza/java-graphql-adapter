@@ -16,21 +16,21 @@
 
 package grphaqladapter.adaptedschema.mapping.mapper.classes;
 
-import grphaqladapter.adaptedschema.ObjectBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedInputTypeClass;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedInputTypeClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedInputFieldMethod;
 import grphaqladapter.adaptedschema.mapping.mapper.ElementMapperWithMethodMapper;
-import grphaqladapter.adaptedschema.mapping.mapper.MappingStatics;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptions.type.GraphqlInputTypeDescription;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import grphaqladapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import grphaqladapter.adaptedschema.mapping.validator.ClassValidator;
+import grphaqladapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import grphaqladapter.adaptedschema.utils.ClassUtils;
 import grphaqladapter.adaptedschema.utils.CollectionUtils;
 import grphaqladapter.adaptedschema.utils.chain.Chain;
-import grphaqladapter.adaptedschema.validator.TypeValidator;
 import grphaqladapter.codegenerator.ObjectConstructor;
 
 import java.lang.reflect.Method;
@@ -50,12 +50,12 @@ public class InputTypeClassMapper extends ElementMapperWithMethodMapper {
             return null;
         }
 
-        MappedInputTypeClassBuilder mappedInputTypeClassBuilder = MappedInputTypeClassBuilder.newBuilder()
+        MappedInputTypeClassBuilder mappedInputTypeClassBuilder = MappedInputTypeClass.newInputTypeClass()
                 .name(inputTypeDescription.name())
                 .baseClass(clazz)
                 .description(inputTypeDescription.description());
 
-        for (Method method : MappingStatics.getAllMethods(clazz)) {
+        for (Method method : ClassUtils.getAllMethods(clazz)) {
 
             MappedInputFieldMethod mappedMethod = methodMapper().mapInputFieldMethod(clazz, method, annotations, constructor, builder);
 
@@ -67,8 +67,9 @@ public class InputTypeClassMapper extends ElementMapperWithMethodMapper {
         }
 
         MappedInputTypeClass mappedInputTypeClass = mappedInputTypeClassBuilder.build();
-        mappedInputTypeClass = addAppliedAnnotations(MappedInputTypeClassBuilder::newBuilder, mappedInputTypeClass, annotations, constructor, builder);
-        TypeValidator.validate(mappedInputTypeClass, clazz);
+        mappedInputTypeClass = addAppliedAnnotations(MappedInputTypeClass::newInputTypeClass, mappedInputTypeClass, annotations, constructor, builder);
+
+        ClassValidator.validateInputTypeClass(mappedInputTypeClass, clazz);
 
         return mappedInputTypeClass;
     }

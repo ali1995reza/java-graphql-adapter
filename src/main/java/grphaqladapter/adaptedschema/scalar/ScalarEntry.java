@@ -17,8 +17,13 @@
 package grphaqladapter.adaptedschema.scalar;
 
 import graphql.schema.Coercing;
+import grphaqladapter.adaptedschema.scalar.impl.ScalarEntryBuilder;
 
 public interface ScalarEntry {
+
+    static ScalarEntryBuilder newScalarEntry() {
+        return ScalarEntryBuilder.newBuilder();
+    }
 
     Coercing coercing();
 

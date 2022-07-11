@@ -26,6 +26,10 @@ import java.util.Set;
 
 public interface MappedAnnotation extends MappedClass {
 
+    static MappedAnnotationBuilder newAnnotation() {
+        return MappedAnnotationBuilder.newBuilder();
+    }
+
     Class<? extends GraphqlDirectiveFunction> functionality();
 
     Set<Introspection.DirectiveLocation> locations();

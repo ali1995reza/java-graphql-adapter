@@ -16,22 +16,25 @@
 
 package grphaqladapter.adaptedschema.utils.chain;
 
+import grphaqladapter.adaptedschema.utils.builder.IBuilder;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class ChainBuilder<T> {
+public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
 
 
-    public final static <T> ChainBuilder<T> newBuilder() {
+    public static <T> ChainBuilder<T> newBuilder() {
         return new ChainBuilder<>();
     }
+
     private final List<T> chainList = new ArrayList<>();
 
     private ChainBuilder() {
     }
 
-    public synchronized ChainBuilder addAfter(T t, T after) {
+    public ChainBuilder<T> addAfter(T t, T after) {
         int index = chainList.indexOf(after);
         if (index == -1)
             throw new IllegalStateException("element not found");
@@ -46,7 +49,7 @@ public class ChainBuilder<T> {
 
     }
 
-    public synchronized ChainBuilder addBefore(T t, T before) {
+    public ChainBuilder<T> addBefore(T t, T before) {
         int index = chainList.indexOf(before);
         if (index == -1)
             throw new IllegalStateException("element not found");
@@ -61,12 +64,12 @@ public class ChainBuilder<T> {
 
     }
 
-    public synchronized ChainBuilder addToLast(T t) {
+    public ChainBuilder<T> addToLast(T t) {
         chainList.add(t);
         return this;
     }
 
-    public synchronized ChainBuilder addToTop(T t) {
+    public ChainBuilder<T> addToTop(T t) {
         if (chainList.size() > 0) {
             chainList.set(0, t);
         } else {
@@ -76,10 +79,35 @@ public class ChainBuilder<T> {
         return this;
     }
 
-    public synchronized Chain<T> build() {
-        List<T> copy = Collections.unmodifiableList(new ArrayList<>(chainList));
+    public ChainBuilder<T> clear() {
+        this.chainList.clear();
+        return this;
+    }
 
+    public ChainBuilder<T> remove(T t) {
+        this.chainList.remove(t);
+        return this;
+    }
+
+    public T get(int index) {
+        return chainList.get(index);
+    }
+
+    @Override
+    public Chain build() {
+        List<T> copy = Collections.unmodifiableList(new ArrayList<>(chainList));
         return new ChainImpl<>(copy);
+    }
+
+    @Override
+    public ChainBuilder<T> refresh() {
+        return this.clear();
+    }
+
+    @Override
+    public ChainBuilder<T> copy(Chain<T> chain) {
+        chain.forEach(this::addToLast);
+        return this;
     }
 
 }

@@ -25,7 +25,8 @@ import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObject
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.parameter.MappedParameter;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
-import grphaqladapter.codegenerator.AdaptedDataFetcher;
+import grphaqladapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
+import grphaqladapter.codegenerator.AdaptedGraphQLDataFetcher;
 import grphaqladapter.codegenerator.DataFetcherGenerator;
 
 import java.lang.reflect.Parameter;
@@ -34,7 +35,7 @@ import java.util.List;
 public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
 
     @Override
-    public AdaptedDataFetcher generate(MappedObjectTypeClass cls, MappedFieldMethod method) {
+    public AdaptedGraphQLDataFetcher generate(MappedObjectTypeClass cls, MappedFieldMethod method) {
         return new ReflectionDataFetcher(cls, method);
     }
 
@@ -42,7 +43,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
     public synchronized void init(List<DiscoveredElement> elements) {
     }
 
-    private final static class ReflectionDataFetcher implements AdaptedDataFetcher {
+    private final static class ReflectionDataFetcher implements AdaptedGraphQLDataFetcher {
 
         private final MappedObjectTypeClass mappedClass;
         private final MappedFieldMethod mappedFieldMethod;
@@ -75,7 +76,7 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                     } else {
                         Object paramValue = environment.getArgument(parameter.name());
                         if (paramValue != null) {
-                            args[i] = schema.objectBuilder().buildFromObject(parameter.type(), environment.getArgument(parameter.name()), false);
+                            args[i] = schema.objectBuilder().buildFromObject(environment.getArgument(parameter.name()), parameter.type(), BuildingObjectConfig.ONLY_USE_EXACT_LIST);
                         } else if (isNotSetToNull(environment.getField().getArguments(), parameter.name())) {
                             args[i] = parameter.defaultValue();
                         }
@@ -87,16 +88,6 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             }
 
             return result;
-        }
-
-        private static boolean isNotSetToNull(List<Argument> arguments, String name) {
-            for (int i = 0; i < arguments.size(); i++) {
-                Argument argument = arguments.get(i);
-                if (argument.getName().equals(name)) {
-                    return !(argument.getValue() instanceof NullValue);
-                }
-            }
-            return true;
         }
 
         private static Object getSkippedValue(Parameter parameter) {
@@ -126,6 +117,16 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
             }
 
             return (char) 0;
+        }
+
+        private static boolean isNotSetToNull(List<Argument> arguments, String name) {
+            for (int i = 0; i < arguments.size(); i++) {
+                Argument argument = arguments.get(i);
+                if (argument.getName().equals(name)) {
+                    return !(argument.getValue() instanceof NullValue);
+                }
+            }
+            return true;
         }
 
     }

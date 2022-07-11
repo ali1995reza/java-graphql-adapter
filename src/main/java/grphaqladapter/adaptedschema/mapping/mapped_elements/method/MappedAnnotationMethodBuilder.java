@@ -60,15 +60,6 @@ public class MappedAnnotationMethodBuilder extends MappedMethodBuilder<MappedAnn
         return super.refresh();
     }
 
-    public MappedAnnotationMethodBuilder valueParser(Class<? extends ValueParser> valueParser) {
-        this.valueParser = valueParser;
-        return this;
-    }
-
-    public Class<? extends ValueParser> valueParser() {
-        return valueParser;
-    }
-
     public MappedAnnotationMethodBuilder defaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
         return this;
@@ -76,5 +67,14 @@ public class MappedAnnotationMethodBuilder extends MappedMethodBuilder<MappedAnn
 
     public Object defaultValue() {
         return defaultValue;
+    }
+
+    public MappedAnnotationMethodBuilder valueParser(Class<? extends ValueParser> valueParser) {
+        this.valueParser = valueParser;
+        return this;
+    }
+
+    public Class<? extends ValueParser> valueParser() {
+        return valueParser;
     }
 }

@@ -16,19 +16,24 @@
 
 package grphaqladapter.adaptedschema.mapping.strategy.descriptions;
 
-public abstract class GraphqlElementDescriptionBuilder<T extends GraphqlElementDescriptionBuilder<T, E>, E extends GraphqlElementDescription> {
+import grphaqladapter.adaptedschema.utils.builder.IBuilder;
+
+public abstract class GraphqlElementDescriptionBuilder<T extends GraphqlElementDescriptionBuilder<T, E>, E extends GraphqlElementDescription> implements IBuilder<T, E> {
 
     private String name;
     private String description;
 
-    public abstract E build();
-
-    public String name() {
-        return name;
+    @Override
+    public T copy(E e) {
+        this.refresh();
+        return name(e.name())
+                .description(e.description());
     }
 
-    public T name(String name) {
-        this.name = name;
+    @Override
+    public T refresh() {
+        this.name = null;
+        this.description = null;
         return (T) this;
     }
 
@@ -38,6 +43,15 @@ public abstract class GraphqlElementDescriptionBuilder<T extends GraphqlElementD
 
     public T description(String description) {
         this.description = description;
+        return (T) this;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public T name(String name) {
+        this.name = name;
         return (T) this;
     }
 }

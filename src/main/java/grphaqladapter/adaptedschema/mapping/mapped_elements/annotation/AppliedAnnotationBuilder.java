@@ -16,21 +16,43 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.annotation;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
+import grphaqladapter.adaptedschema.utils.builder.IBuilder;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AppliedAnnotationBuilder {
+public class AppliedAnnotationBuilder implements IBuilder<AppliedAnnotationBuilder, AppliedAnnotation> {
 
     public static AppliedAnnotationBuilder newBuilder() {
         return new AppliedAnnotationBuilder();
     }
+
     private final Map<String, Object> arguments = new HashMap<>();
     private String name;
     private Class<? extends Annotation> annotationClass;
+
+    @Override
+    public AppliedAnnotation build() {
+        return new AppliedAnnotationImpl(name(), annotationClass(), arguments());
+    }
+
+    @Override
+    public AppliedAnnotationBuilder copy(AppliedAnnotation appliedAnnotation) {
+        this.refresh();
+        appliedAnnotation.arguments().forEach(this::addArgument);
+        return name(appliedAnnotation.name())
+                .annotationClass(appliedAnnotation.annotationClass());
+    }
+
+    @Override
+    public AppliedAnnotationBuilder refresh() {
+        this.clearArguments();
+        this.name = null;
+        this.annotationClass = null;
+        return this;
+    }
 
     public AppliedAnnotationBuilder addArgument(String name, Object value) {
         this.arguments.put(name, value);
@@ -50,10 +72,6 @@ public class AppliedAnnotationBuilder {
         return Collections.unmodifiableMap(new HashMap<>(this.arguments));
     }
 
-    public AppliedAnnotation build() {
-        return new AppliedAnnotationImpl(name(), annotationClass(), arguments());
-    }
-
     public AppliedAnnotationBuilder clearArguments() {
         this.arguments.clear();
         return this;
@@ -65,13 +83,6 @@ public class AppliedAnnotationBuilder {
 
     public AppliedAnnotationBuilder name(String name) {
         this.name = name;
-        return this;
-    }
-
-    public AppliedAnnotationBuilder refresh() {
-        this.clearArguments();
-        this.name = null;
-        this.annotationClass = null;
         return this;
     }
 

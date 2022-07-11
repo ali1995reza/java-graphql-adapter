@@ -26,17 +26,11 @@ import java.util.Base64;
 public class AdminUser implements UserInterface {
 
 
-    private String name;
-
     public static AdminUser create(String name) {
         return new AdminUser()
                 .setName(name);
     }
-
-    public AdminUser setName(String name) {
-        this.name = name;
-        return this;
-    }
+    private String name;
 
     @Override
     public String name() {
@@ -46,6 +40,11 @@ public class AdminUser implements UserInterface {
     @Override
     public UserType type() {
         return UserType.ADMIN;
+    }
+
+    public AdminUser setName(String name) {
+        this.name = name;
+        return this;
     }
 
     @GraphqlField

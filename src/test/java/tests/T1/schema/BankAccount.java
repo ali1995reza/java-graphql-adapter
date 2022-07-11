@@ -33,16 +33,16 @@ public class BankAccount {
         this.balance = balance;
     }
 
+    @GraphqlDescription("Balance as dollar")
+    public Double getBalance() {
+        return balance;
+    }
+
     public String getId() {
         return id;
     }
 
     public String getUsername() {
         return username;
-    }
-
-    @GraphqlDescription("Balance as dollar")
-    public Double getBalance() {
-        return balance;
     }
 }

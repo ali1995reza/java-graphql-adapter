@@ -17,14 +17,14 @@
 package grphaqladapter.adaptedschema;
 
 import graphql.schema.TypeResolver;
-import grphaqladapter.adaptedschema.assertutil.Assert;
-import grphaqladapter.adaptedschema.assertutil.StringUtils;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElement;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces.MappedInterface;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.interfaces.MappedUnionInterface;
-import grphaqladapter.codegenerator.AdaptedDataFetcher;
+import grphaqladapter.adaptedschema.utils.StringUtils;
+import grphaqladapter.codegenerator.AdaptedGraphQLDataFetcher;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-final class  DirectiveHandlingContextImpl implements SchemaDirectiveHandlingContext {
+final class DirectiveHandlingContextImpl implements SchemaDirectiveHandlingContext {
 
     private final Map<String, MappedElement> elements;
-    private final Map<String, List<Function<AdaptedDataFetcher, AdaptedDataFetcher>>> dataFetchersBehavior = new HashMap<>();
+    private final Map<String, List<Function<AdaptedGraphQLDataFetcher, AdaptedGraphQLDataFetcher>>> dataFetchersBehavior = new HashMap<>();
     private final Map<String, List<Function<TypeResolver, TypeResolver>>> typeResolversBehavior = new HashMap<>();
 
     public DirectiveHandlingContextImpl(Map<String, MappedElement> elements) {
@@ -43,7 +43,7 @@ final class  DirectiveHandlingContextImpl implements SchemaDirectiveHandlingCont
     }
 
     @Override
-    public synchronized <T> SchemaDirectiveHandlingContext changeDataFetcherBehavior(String parent, String field, Function<AdaptedDataFetcher<T>, AdaptedDataFetcher<T>> function) {
+    public synchronized <T> SchemaDirectiveHandlingContext changeDataFetcherBehavior(String parent, String field, Function<AdaptedGraphQLDataFetcher<T>, AdaptedGraphQLDataFetcher<T>> function) {
         Assert.isNotNull(function, new IllegalStateException("function is null"));
         MappedObjectTypeClass typeClass = getMappedTypeClass(parent);
         Assert.isTrue(typeClass.fieldMethods().containsKey(field), new IllegalStateException("can not find field [" + field + "] in type [" + parent + "]"));
@@ -70,12 +70,12 @@ final class  DirectiveHandlingContextImpl implements SchemaDirectiveHandlingCont
         return (T) elements.get(name);
     }
 
-    AdaptedDataFetcher<?> applyChanges(String parent, String field, AdaptedDataFetcher<?> dataFetcher) {
-        List<Function<AdaptedDataFetcher, AdaptedDataFetcher>> list = dataFetchersBehavior.get(key(parent, field));
+    AdaptedGraphQLDataFetcher<?> applyChanges(String parent, String field, AdaptedGraphQLDataFetcher<?> dataFetcher) {
+        List<Function<AdaptedGraphQLDataFetcher, AdaptedGraphQLDataFetcher>> list = dataFetchersBehavior.get(key(parent, field));
         if (list == null) {
             return dataFetcher;
         }
-        for (Function<AdaptedDataFetcher, AdaptedDataFetcher> function : list) {
+        for (Function<AdaptedGraphQLDataFetcher, AdaptedGraphQLDataFetcher> function : list) {
             dataFetcher = function.apply(dataFetcher);
         }
         Assert.isNotNull(dataFetcher, new NullPointerException("data fetcher is null [field:" + field + ", parent:" + parent + "]"));
@@ -103,8 +103,8 @@ final class  DirectiveHandlingContextImpl implements SchemaDirectiveHandlingCont
     }
 
     private static String key(String parent, String field) {
-        Assert.isTrue(StringUtils.isNoNullString(parent), new IllegalStateException("parent name is empty or null"));
-        Assert.isTrue(StringUtils.isNoNullString(field), new IllegalStateException("field name is empty or null"));
+        Assert.isTrue(StringUtils.isNonNullString(parent), new IllegalStateException("parent name is empty or null"));
+        Assert.isTrue(StringUtils.isNonNullString(field), new IllegalStateException("field name is empty or null"));
         return parent + "_" + field;
 
     }

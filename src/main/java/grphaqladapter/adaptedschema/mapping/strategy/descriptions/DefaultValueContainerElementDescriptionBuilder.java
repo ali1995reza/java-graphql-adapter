@@ -22,6 +22,18 @@ public abstract class DefaultValueContainerElementDescriptionBuilder<T extends D
 
     private DefaultValueDetails defaultValue;
 
+    @Override
+    public T copy(E e) {
+        return super.copy(e)
+                .defaultValue(e.defaultValue());
+    }
+
+    @Override
+    public T refresh() {
+        this.defaultValue = null;
+        return super.refresh();
+    }
+
     public T defaultValue(DefaultValueDetails defaultValue) {
         this.defaultValue = defaultValue;
         return (T) this;

@@ -20,5 +20,9 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefault
 
 public interface GraphqlArgumentDescription extends GraphqlDefaultValueContainerElementDescription {
 
+    static GraphqlArgumentDescriptionBuilder newArgumentDescription() {
+        return GraphqlArgumentDescriptionBuilder.newBuilder();
+    }
+
     boolean isSystemParameter();
 }

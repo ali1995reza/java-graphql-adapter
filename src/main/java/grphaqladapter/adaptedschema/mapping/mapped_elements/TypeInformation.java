@@ -18,11 +18,12 @@ package grphaqladapter.adaptedschema.mapping.mapped_elements;
 
 import graphql.schema.DataFetchingEnvironment;
 import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.exceptions.MappingGraphqlArgumentException;
-import grphaqladapter.adaptedschema.mapping.mapper.MappingStatics;
+import grphaqladapter.adaptedschema.mapping.mapper.utils.MappingUtils;
+import grphaqladapter.adaptedschema.mapping.mapper.utils.TypeDetails;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
-import grphaqladapter.adaptedschema.utils.Utils;
+import grphaqladapter.adaptedschema.utils.NullifyUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -36,82 +37,10 @@ public final class TypeInformation<T> {
     private final static TypeInformation DIRECTIVES = new TypeInformation(GraphqlDirectivesHolder.class, true, 0, null);
     private final static TypeInformation ADAPTED_SCHEMA = new TypeInformation(AdaptedGraphQLSchema.class, true, 0, null);
 
-    public static TypeInformation of(MappingStatics.TypeDetails typeDetails, boolean nullable) {
-        return new TypeInformation(
-                typeDetails.type(),
-                nullable,
-                typeDetails.dimension(),
-                typeDetails.dimension() > 0 ? (typeDetails.isArray() ? DimensionModel.ARRAY :
-                        DimensionModel.LIST) : DimensionModel.NOT_SET
-        );
-    }
-
-    public static TypeInformation of(Parameter parameter, boolean nullable) {
-        MappingStatics.TypeDetails details = MappingStatics.findTypeDetails(parameter);
-        return of(details, nullable);
-    }
-
-    public static TypeInformation of(Parameter parameter) {
-        MappingStatics.TypeDetails details = MappingStatics.findTypeDetails(parameter);
-        return of(details, details.dimension() > 0 || !details.type().isPrimitive());
-    }
-
-    public static TypeInformation of(Method method, boolean nullable) {
-        MappingStatics.TypeDetails details = MappingStatics.findTypeDetails(method);
-        return of(details, nullable);
-    }
-
-    private final Class<T> type;
-    private final boolean nullable;
-    private final int dimensions;
-    private final DimensionModel dimensionModel;
-
-    public TypeInformation(Class<T> type, boolean nullable, int dimensions, DimensionModel dimensionModel) {
-        this.type = type;
-        this.nullable = nullable;
-        this.dimensions = dimensions;
-        this.dimensionModel = Utils.getOrDefault(dimensionModel, DimensionModel.NOT_SET);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TypeInformation that = (TypeInformation) o;
-        return nullable == that.nullable && dimensions == that.dimensions && Objects.equals(type, that.type) && dimensionModel == that.dimensionModel;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(type, nullable, dimensions, dimensionModel);
-    }
-
-    @Override
-    public String toString() {
-        return "TypeDescriptor{" +
-                "type=" + type +
-                ", nullable=" + nullable +
-                ", dimensions=" + dimensions +
-                ", dimensionModel=" + dimensionModel +
-                '}';
-    }
-
-    public boolean hasDimensions() {
-        return dimensions > 0;
-    }
-
     public static TypeInformation adaptedSchema(Parameter parameter) {
         TypeInformation typeInformation = TypeInformation.of(parameter);
         Assert.isEquals(typeInformation, ADAPTED_SCHEMA, exception(MappingGraphqlArgumentException.class, "can not map parameter to ADAPTED_SCHEMA argument model", null, null, parameter));
         return ADAPTED_SCHEMA;
-    }
-
-    public DimensionModel dimensionModel() {
-        return dimensionModel;
-    }
-
-    public int dimensions() {
-        return dimensions;
     }
 
     public static TypeInformation directives(Parameter parameter) {
@@ -124,10 +53,6 @@ public final class TypeInformation<T> {
         TypeInformation typeInformation = TypeInformation.of(parameter);
         Assert.isEquals(typeInformation, ENVIRONMENT, exception(MappingGraphqlArgumentException.class, "can not map parameter to DATA_FETCHING_ENVIRONMENT argument model", null, null, parameter));
         return ENVIRONMENT;
-    }
-
-    public boolean isNullable() {
-        return nullable;
     }
 
     public static <T> TypeInformation<T> nonNullable(Class<T> clazz) {
@@ -170,12 +95,90 @@ public final class TypeInformation<T> {
         return nullableList(clazz, 1);
     }
 
+    public static TypeInformation of(TypeDetails typeDetails, boolean nullable) {
+        return new TypeInformation(
+                typeDetails.type(),
+                nullable,
+                typeDetails.dimensions(),
+                typeDetails.dimensionModel()
+        );
+    }
+
+    public static TypeInformation of(Parameter parameter, boolean nullable) {
+        TypeDetails details = MappingUtils.findTypeDetails(parameter);
+        return of(details, nullable);
+    }
+
+    public static TypeInformation of(Parameter parameter) {
+        TypeDetails details = MappingUtils.findTypeDetails(parameter);
+        return of(details, details.dimensions() > 0 || !details.type().isPrimitive());
+    }
+
+    public static TypeInformation of(Method method, boolean nullable) {
+        TypeDetails details = MappingUtils.findTypeDetails(method);
+        return of(details, nullable);
+    }
+
+    public static TypeInformation of(Method method) {
+        return of(method, !method.getReturnType().isPrimitive());
+    }
+
     public static <T> TypeInformation<T> toNonNullable(TypeInformation<T> nullable) {
         return new TypeInformation<>(nullable.type, false, nullable.dimensions, nullable.dimensionModel);
     }
 
     public static <T> TypeInformation<T> toNullable(TypeInformation<T> nonNullable) {
         return new TypeInformation<>(nonNullable.type, true, nonNullable.dimensions, nonNullable.dimensionModel);
+    }
+    private final Class<T> type;
+    private final boolean nullable;
+    private final int dimensions;
+    private final DimensionModel dimensionModel;
+
+    public TypeInformation(Class<T> type, boolean nullable, int dimensions, DimensionModel dimensionModel) {
+        this.type = type;
+        this.nullable = nullable;
+        this.dimensions = dimensions;
+        this.dimensionModel = NullifyUtils.getOrDefault(dimensionModel, DimensionModel.SINGLE);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeInformation that = (TypeInformation) o;
+        return nullable == that.nullable && dimensions == that.dimensions && Objects.equals(type, that.type) && dimensionModel == that.dimensionModel;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, nullable, dimensions, dimensionModel);
+    }
+
+    @Override
+    public String toString() {
+        return "TypeDescriptor{" +
+                "type=" + type +
+                ", nullable=" + nullable +
+                ", dimensions=" + dimensions +
+                ", dimensionModel=" + dimensionModel +
+                '}';
+    }
+
+    public DimensionModel dimensionModel() {
+        return dimensionModel;
+    }
+
+    public int dimensions() {
+        return dimensions;
+    }
+
+    public boolean hasDimensions() {
+        return dimensions > 0;
+    }
+
+    public boolean isNullable() {
+        return nullable;
     }
 
     public Class<T> type() {

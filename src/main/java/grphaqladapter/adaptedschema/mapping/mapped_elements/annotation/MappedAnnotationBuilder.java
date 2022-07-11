@@ -17,9 +17,8 @@
 package grphaqladapter.adaptedschema.mapping.mapped_elements.annotation;
 
 import graphql.introspection.Introspection;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedClassBuilder;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedAnnotationMethod;
@@ -88,6 +87,11 @@ public class MappedAnnotationBuilder extends MappedClassBuilder<MappedAnnotation
         for (Introspection.DirectiveLocation location : locations) {
             addLocation(location);
         }
+        return this;
+    }
+
+    public MappedAnnotationBuilder addLocations(Collection<Introspection.DirectiveLocation> locations) {
+        this.locations.addAll(locations);
         return this;
     }
 

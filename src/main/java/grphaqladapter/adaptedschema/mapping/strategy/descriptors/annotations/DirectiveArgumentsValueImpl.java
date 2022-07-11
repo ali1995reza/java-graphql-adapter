@@ -22,8 +22,12 @@ import java.util.Map;
 final class DirectiveArgumentsValueImpl implements DirectiveArgumentsValue {
 
 
+    public static DirectiveArgumentsValue empty(Class annotationClass) {
+        return new DirectiveArgumentsValueImpl(annotationClass);
+    }
     private final Map<String, Object> values;
     private final Class annotationClass;
+
     DirectiveArgumentsValueImpl(Map<String, Object> values, Class annotationClass) {
         this.values = values;
         this.annotationClass = annotationClass;
@@ -49,9 +53,5 @@ final class DirectiveArgumentsValueImpl implements DirectiveArgumentsValue {
                 "values=" + values +
                 ", annotationClass=" + annotationClass +
                 '}';
-    }
-
-    public static DirectiveArgumentsValue empty(Class annotationClass) {
-        return new DirectiveArgumentsValueImpl(annotationClass);
     }
 }

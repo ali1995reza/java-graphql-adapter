@@ -39,7 +39,7 @@ public class AnnotationBaseDirectiveDescriptor implements AppliedDirectiveDescri
         } else if (element instanceof MappedClass) {
             MappedClass mappedClass = (MappedClass) element;
             return detectDirectives(mappedClass.baseClass().getAnnotations(), annotationsMap);
-        } else if (element instanceof  MappedEnumConstant) {
+        } else if (element instanceof MappedEnumConstant) {
             MappedEnumConstant constant = (MappedEnumConstant) element;
             Field field = getField(constant);
             return detectDirectives(field.getAnnotations(), annotationsMap);

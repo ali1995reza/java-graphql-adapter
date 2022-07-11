@@ -17,18 +17,10 @@
 package grphaqladapter.adaptedschema.mapping.mapped_elements;
 
 public enum DimensionModel {
-    ARRAY, LIST, NOT_SET;
+    ARRAY, LIST, SINGLE;
 
     public boolean is(DimensionModel other) {
         return this == other;
-    }
-
-    public boolean isNotSet() {
-        return is(NOT_SET);
-    }
-
-    public boolean isSet() {
-        return !isNotSet();
     }
 
     public boolean isArray() {
@@ -37,5 +29,9 @@ public enum DimensionModel {
 
     public boolean isList() {
         return is(LIST);
+    }
+
+    public boolean isSingle() {
+        return is(SINGLE);
     }
 }

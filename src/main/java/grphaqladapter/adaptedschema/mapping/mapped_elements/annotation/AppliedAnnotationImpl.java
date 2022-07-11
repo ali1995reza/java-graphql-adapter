@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.mapped_elements.annotation;
 
-import grphaqladapter.adaptedschema.mapping.mapped_elements.AppliedAnnotation;
+import grphaqladapter.adaptedschema.utils.CollectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -30,7 +30,7 @@ final class AppliedAnnotationImpl implements AppliedAnnotation {
     AppliedAnnotationImpl(String name, Class<? extends Annotation> annotationClass, Map<String, Object> arguments) {
         this.name = name;
         this.annotationClass = annotationClass;
-        this.arguments = arguments;
+        this.arguments = CollectionUtils.getOrEmptyMap(arguments);
     }
 
     @Override

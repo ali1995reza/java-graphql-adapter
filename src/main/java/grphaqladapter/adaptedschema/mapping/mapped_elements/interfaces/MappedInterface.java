@@ -20,4 +20,8 @@ import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObject
 
 public interface MappedInterface extends MappedObjectTypeClass {
 
+    static MappedInterfaceBuilder newInterface() {
+        return MappedInterfaceBuilder.newBuilder();
+    }
+
 }

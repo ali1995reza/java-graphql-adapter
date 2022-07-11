@@ -18,13 +18,13 @@ package tests.T1.schema.directives;
 
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
-import grphaqladapter.adaptedschema.assertutil.StringUtils;
 import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
 import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
 import grphaqladapter.adaptedschema.utils.DataFetcherAdapter;
+import grphaqladapter.adaptedschema.utils.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -35,14 +35,6 @@ import java.util.concurrent.CompletableFuture;
 public class HashDirectiveFunction implements GraphqlDirectiveFunction {
 
     private MessageDigest digest;
-
-    private MessageDigest messageDigest(String algorithm) {
-        try {
-            return MessageDigest.getInstance(algorithm);
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
-    }
 
     @Override
     public Object handleFieldDirective(GraphqlDirectiveDetails directive, Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
@@ -77,9 +69,17 @@ public class HashDirectiveFunction implements GraphqlDirectiveFunction {
         MessageDigest messageDigest = messageDigest(directive.getArgument("algorithm"));
         messageDigest.update(input.getBytes(StandardCharsets.UTF_8));
         String salt = directive.getArgument("salt");
-        if (StringUtils.isNoNullString(salt)) {
+        if (StringUtils.isNonNullString(salt)) {
             messageDigest.update(salt.getBytes(StandardCharsets.UTF_8));
         }
         return Base64.getEncoder().encodeToString(messageDigest.digest());
+    }
+
+    private MessageDigest messageDigest(String algorithm) {
+        try {
+            return MessageDigest.getInstance(algorithm);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

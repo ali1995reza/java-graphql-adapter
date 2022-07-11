@@ -20,4 +20,8 @@ import grphaqladapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNam
 
 public interface GraphqlUnionDescription extends GraphqlTypeNameDescription {
 
+    static TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, GraphqlUnionDescription>, GraphqlUnionDescription> newUnionDescription() {
+        return TypesDescriptionBuilder.newBuilder(GraphqlUnionDescriptionImpl::new);
+    }
+
 }

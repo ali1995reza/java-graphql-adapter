@@ -36,17 +36,6 @@ public class TestSchemaInterfaceTypes {
     }
 
     @Test
-    public void testUserInterfaceInterfaceType() {
-        DiscoveredInterfaceType interfaceType = StaticTests.findAndTestInterfaceType(UserInterface.class, "UserInterface", 1, 2, NormalUser.class, AdminUser.class);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", interfaceType, "version", "1.0.4");
-
-        MappedFieldMethod nameField = StaticTests.findFieldAndTest("name", interfaceType, 0, 1, TypeInformation.nonNullable(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", nameField, "version", "1.0.11");
-
-        StaticTests.findFieldAndTest("type", interfaceType, 0, 0, TypeInformation.nonNullable(UserType.class));
-    }
-
-    @Test
     public void testMutationInterfaceType() {
         DiscoveredInterfaceType interfaceType = StaticTests.findAndTestInterfaceType(MutationInterface.class, "MutationInterface", 0, 2, TestMutation.class);
 
@@ -60,5 +49,16 @@ public class TestSchemaInterfaceTypes {
         MappedParameter splitorParameter = StaticTests.findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
         StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
 
+    }
+
+    @Test
+    public void testUserInterfaceInterfaceType() {
+        DiscoveredInterfaceType interfaceType = StaticTests.findAndTestInterfaceType(UserInterface.class, "UserInterface", 1, 2, NormalUser.class, AdminUser.class);
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", interfaceType, "version", "1.0.4");
+
+        MappedFieldMethod nameField = StaticTests.findFieldAndTest("name", interfaceType, 0, 1, TypeInformation.nonNullable(String.class));
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", nameField, "version", "1.0.11");
+
+        StaticTests.findFieldAndTest("type", interfaceType, 0, 0, TypeInformation.nonNullable(UserType.class));
     }
 }

@@ -21,6 +21,8 @@ import grphaqladapter.annotations.GraphqlInputField;
 import grphaqladapter.annotations.GraphqlInputType;
 import tests.T1.schema.directives.Since;
 
+import java.util.Objects;
+
 @GraphqlInputType
 @Since("1.0.7")
 public class InputUser {
@@ -28,6 +30,13 @@ public class InputUser {
     private String name;
     private UserType type;
 
+    @Override
+    public String toString() {
+        return "InputUser{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                '}';
+    }
 
     @DefaultValue("Anonymous")
     @GraphqlInputField(name = "name", setter = "setName", nullable = false)
@@ -39,6 +48,10 @@ public class InputUser {
         this.name = name;
     }
 
+    public void setType(UserType type) {
+        this.type = type;
+    }
+
     @DefaultValue("NORMAL")
     @Since("1.0.8")
     @GraphqlInputField(setter = "setType")
@@ -46,15 +59,17 @@ public class InputUser {
         return type;
     }
 
-    public void setType(UserType type) {
-        this.type = type;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InputUser user = (InputUser) o;
+        return Objects.equals(name, user.name) && type == user.type;
     }
 
     @Override
-    public String toString() {
-        return "InputUser{" +
-                "name='" + name + '\'' +
-                ", type=" + type +
-                '}';
+    public int hashCode() {
+        return Objects.hash(name, type);
     }
 }

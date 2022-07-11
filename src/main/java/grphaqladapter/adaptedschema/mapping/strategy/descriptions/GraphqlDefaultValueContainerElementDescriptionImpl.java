@@ -16,7 +16,7 @@
 
 package grphaqladapter.adaptedschema.mapping.strategy.descriptions;
 
-public class GraphqlDefaultValueContainerElementDescriptionImpl extends GraphqlNullableElementDescriptionImpl implements GraphqlDefaultValueContainerElementDescription{
+public class GraphqlDefaultValueContainerElementDescriptionImpl extends GraphqlNullableElementDescriptionImpl implements GraphqlDefaultValueContainerElementDescription {
 
     private final DefaultValueDetails defaultValue;
 

@@ -18,14 +18,9 @@ package grphaqladapter.adaptedschema.system_objects.directive;
 
 import graphql.language.OperationDefinition;
 
-import java.util.Collections;
 import java.util.List;
 
 public class OperationDirectives extends GraphqlDirectivesList {
-
-    public static OperationDirectives empty(OperationDefinition operation) {
-        return new OperationDirectives(Collections.emptyList(), operation);
-    }
 
     private final OperationDefinition operation;
 

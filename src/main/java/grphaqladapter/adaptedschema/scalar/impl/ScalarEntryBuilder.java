@@ -18,26 +18,48 @@ package grphaqladapter.adaptedschema.scalar.impl;
 
 import graphql.schema.Coercing;
 import grphaqladapter.adaptedschema.scalar.ScalarEntry;
+import grphaqladapter.adaptedschema.utils.builder.IBuilder;
 
-public final class ScalarEntryBuilder {
+public final class ScalarEntryBuilder implements IBuilder<ScalarEntryBuilder, ScalarEntry> {
 
     public static ScalarEntryBuilder newBuilder() {
         return new ScalarEntryBuilder();
     }
+
     private Class type;
     private String name;
     private String description;
     private Coercing coercing;
 
     private ScalarEntryBuilder() {
+
     }
 
+    @Override
     public ScalarEntry build() {
         return new ScalaEntryImpl(type(),
                 name(),
                 description(),
                 coercing()
         );
+    }
+
+    @Override
+    public ScalarEntryBuilder refresh() {
+        this.type = null;
+        this.name = null;
+        this.description = null;
+        this.coercing = null;
+        return this;
+    }
+
+    @Override
+    public ScalarEntryBuilder copy(ScalarEntry scalarEntry) {
+        return refresh()
+                .name(scalarEntry.name())
+                .description(scalarEntry.description())
+                .coercing(scalarEntry.coercing())
+                .type(scalarEntry.type());
     }
 
     public Coercing coercing() {

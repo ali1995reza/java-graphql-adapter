@@ -29,9 +29,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface GraphqlDirectiveArgument {
 
-    int dimensions() default -1;
+    DimensionModel dimensionModel() default DimensionModel.SINGLE;
 
-    DimensionModel dimensionModel() default DimensionModel.NOT_SET;
+    int dimensions() default 0;
 
     String name() default "";
 

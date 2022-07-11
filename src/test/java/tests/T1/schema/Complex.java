@@ -43,44 +43,6 @@ public class Complex {
         this.priority = priority;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Complex setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public Complex setValue(String value) {
-        this.value = value;
-        return this;
-    }
-
-    @DefaultValue("{name:'dn', value:'dv', priority:100, inner:{name:'idn', value:'idv', priority:101}}")
-    public Complex getInner() {
-        return inner;
-    }
-
-    public Complex setInner(Complex inner) {
-        this.inner = inner;
-        return this;
-    }
-
-    @Since("1.0.21")
-    public int getPriority() {
-        return priority;
-    }
-
-    public Complex setPriority(int priority) {
-        this.priority = priority;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -96,11 +58,49 @@ public class Complex {
 
     @Override
     public String toString() {
-        return "ComplexInput{" +
+        return "Complex {" +
                 "name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 ", priority=" + priority +
                 ", inner=" + inner +
                 '}';
+    }
+
+    @DefaultValue("{name:'dn', value:'dv', priority:100, inner:{name:'idn', value:'idv', priority:101}}")
+    public Complex getInner() {
+        return inner;
+    }
+
+    public Complex setInner(Complex inner) {
+        this.inner = inner;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Complex setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    @Since("1.0.21")
+    public int getPriority() {
+        return priority;
+    }
+
+    public Complex setPriority(int priority) {
+        this.priority = priority;
+        return this;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public Complex setValue(String value) {
+        this.value = value;
+        return this;
     }
 }

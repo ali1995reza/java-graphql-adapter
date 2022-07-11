@@ -18,7 +18,7 @@ package grphaqladapter.adaptedschema;
 
 
 import graphql.schema.GraphQLType;
-import grphaqladapter.adaptedschema.assertutil.Assert;
+import grphaqladapter.adaptedschema.assertion.Assert;
 import grphaqladapter.adaptedschema.discovered.DiscoveredType;
 import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
 

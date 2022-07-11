@@ -25,68 +25,6 @@ import java.util.Collections;
 
 public final class MappedParameterBuilder extends MappedElementBuilder<MappedParameterBuilder, MappedParameter> {
 
-    public static MappedParameterBuilder newBuilder() {
-        return new MappedParameterBuilder();
-    }
-
-    private Parameter parameter;
-    private TypeInformation type;
-    private Object defaultValue;
-    private int index = -1;
-
-    public MappedParameterBuilder() {
-        super(MappedElementType.ARGUMENT);
-    }
-
-    @Override
-    public MappedParameter build() {
-        return new MappedParameterImpl(
-                name(),
-                elementType(),
-                description(),
-                appliedAnnotations(),
-                defaultValue(),
-                parameter(),
-                index, type(),
-                ParameterModel.SCHEMA_ARGUMENT);
-    }
-
-    @Override
-    public MappedParameterBuilder copy(MappedParameter element) {
-        return super.copy(element)
-                .parameter(element.parameter())
-                .index(element.index())
-                .type(element.type())
-                .defaultValue(element.defaultValue());
-    }
-
-    @Override
-    public MappedParameterBuilder refresh() {
-        this.parameter = null;
-        this.type = null;
-        this.defaultValue = null;
-        this.index = -1;
-        return super.refresh();
-    }
-
-    public MappedParameterBuilder defaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
-        return this;
-    }
-
-    public Object defaultValue() {
-        return defaultValue;
-    }
-
-    public MappedParameterBuilder index(int index) {
-        this.index = index;
-        return this;
-    }
-
-    public int index() {
-        return index;
-    }
-
     public static MappedParameter newAdaptedSchemaParameter(Parameter parameter, int index) {
         return new MappedParameterImpl(
                 null,
@@ -98,6 +36,10 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 index, TypeInformation.adaptedSchema(parameter),
                 ParameterModel.ADAPTED_SCHEMA
         );
+    }
+
+    public static MappedParameterBuilder newBuilder() {
+        return new MappedParameterBuilder();
     }
 
     public static MappedParameter newDirectiveParameter(Parameter parameter, int index) {
@@ -141,6 +83,64 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 TypeInformation.of(parameter),
                 ParameterModel.SKIPPED
         );
+    }
+    private Parameter parameter;
+    private TypeInformation type;
+    private Object defaultValue;
+    private int index = -1;
+
+    public MappedParameterBuilder() {
+        super(MappedElementType.ARGUMENT);
+    }
+
+    @Override
+    public MappedParameter build() {
+        return new MappedParameterImpl(
+                name(),
+                elementType(),
+                description(),
+                appliedAnnotations(),
+                defaultValue(),
+                parameter(),
+                index(),
+                type(),
+                ParameterModel.SCHEMA_ARGUMENT);
+    }
+
+    @Override
+    public MappedParameterBuilder copy(MappedParameter element) {
+        return super.copy(element)
+                .parameter(element.parameter())
+                .index(element.index())
+                .type(element.type())
+                .defaultValue(element.defaultValue());
+    }
+
+    @Override
+    public MappedParameterBuilder refresh() {
+        this.parameter = null;
+        this.type = null;
+        this.defaultValue = null;
+        this.index = -1;
+        return super.refresh();
+    }
+
+    public MappedParameterBuilder defaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
+        return this;
+    }
+
+    public Object defaultValue() {
+        return defaultValue;
+    }
+
+    public MappedParameterBuilder index(int index) {
+        this.index = index;
+        return this;
+    }
+
+    public int index() {
+        return index;
     }
 
     public MappedParameterBuilder parameter(Parameter parameter) {

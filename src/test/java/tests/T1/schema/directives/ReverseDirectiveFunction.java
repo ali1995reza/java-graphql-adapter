@@ -34,14 +34,14 @@ public class ReverseDirectiveFunction implements GraphqlDirectiveFunction {
 
 
     @Override
-    public GraphQLFieldDefinition onField(GraphqlDirectiveDetails directive, GraphQLFieldDefinition fieldDefinition, MappedObjectTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
-        context.changeDataFetcherBehavior(typeClass.name(), field.name(), dataFetcher -> DataFetcherAdapter.of(dataFetcher, value -> reverse(field, value)));
-        return GraphqlDirectiveFunction.super.onField(directive, fieldDefinition, typeClass, field, context);
+    public Object handleFieldDirective(GraphqlDirectiveDetails directive, Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
+        return reverse(field, value);
     }
 
     @Override
-    public Object handleFieldDirective(GraphqlDirectiveDetails directive, Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {
-        return reverse(field, value);
+    public GraphQLFieldDefinition onField(GraphqlDirectiveDetails directive, GraphQLFieldDefinition fieldDefinition, MappedObjectTypeClass typeClass, MappedFieldMethod field, SchemaDirectiveHandlingContext context) {
+        context.changeDataFetcherBehavior(typeClass.name(), field.name(), dataFetcher -> DataFetcherAdapter.of(dataFetcher, value -> reverse(field, value)));
+        return GraphqlDirectiveFunction.super.onField(directive, fieldDefinition, typeClass, field, context);
     }
 
     private static Object reverse(MappedFieldMethod field, Object value) {

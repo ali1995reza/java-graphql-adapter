@@ -18,6 +18,10 @@ package grphaqladapter.adaptedschema.utils.chain;
 
 public interface Chain<T> extends Iterable<T> {
 
+    static <T> ChainBuilder<T> newChain() {
+        return ChainBuilder.newBuilder();
+    }
+
     static <T> Chain<T> empty() {
         return EmptyChain.empty();
     }

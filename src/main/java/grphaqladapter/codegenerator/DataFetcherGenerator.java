@@ -25,7 +25,7 @@ import java.util.List;
 public interface DataFetcherGenerator {
 
 
-    AdaptedDataFetcher generate(MappedObjectTypeClass cls, MappedFieldMethod method);
+    AdaptedGraphQLDataFetcher generate(MappedObjectTypeClass cls, MappedFieldMethod method);
 
     void init(List<DiscoveredElement> discoveredElements);
 }

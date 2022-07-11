@@ -28,7 +28,7 @@ public class TestSchemaScalarTypes {
 
     @Test
     public void overallTest() {
-        assertEquals(13, TestSchemaProvider.schema().discoveredScalarTypes().size());
+        assertEquals(12, TestSchemaProvider.schema().discoveredScalarTypes().size());
     }
 
     @Test
