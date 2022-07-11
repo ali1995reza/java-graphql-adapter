@@ -4,6 +4,7 @@ Purpose of this library is to create `GraphQLSchema` by consuming your java clas
 of [GraphQL-Java](https://www.graphql-java.com/) library.
 
 ##Getting Started
+
 To add library in your project you can simply add this dependency:
 ```xml
 <dependency>
