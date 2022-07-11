@@ -1,10 +1,10 @@
 # [GraphQL](https://graphql.org/) Java Adapter
 
-Purpose of this library is to create `GraphQLSchema` by consuming your java classes.
-This library developed on top of [GraphQL-Java](https://www.graphql-java.com/) library.
+Purpose of this library is to create `GraphQLSchema` by consuming your java classes. This library developed on top
+of [GraphQL-Java](https://www.graphql-java.com/) library.
 
 To create a Schema you have to use `AdaptedGraphQLSchemaBuilder` class. This class help you to create your schema using
-your classes. To create new builder you should call `AdaptedGraphQLSchema.newBuilder()`.
+your classes. To create new builder you should call `AdaptedGraphQLSchema.newSchema()`.
 
 To add a class you can use :
 
