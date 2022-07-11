@@ -9,21 +9,21 @@ your classes. To create new builder you should call `AdaptedGraphQLSchema.newBui
 To add a class you can use :
 
 ```java
-AdaptedGraphQLSchema.newBuilder()
+AdaptedGraphQLSchema.newSchema()
         .add(MyFirstClass.class,MySecondClass.class);
 ```
 
 Or you can add all classes in a package using below code:
 
 ```java
-AdaptedGraphQLSchema.newBuilder()
+AdaptedGraphQLSchema.newSchema()
         .addPackage("my.awesome.package");
 ```
 
 And to creat the `AdaptedGraphQLSchema` you have to call `build()`.
 
 ```java
-AdaptedGraphQLSchema adaptedSchema=AdaptedGraphQLSchema.newBuilder()
+AdaptedGraphQLSchema adaptedSchema=AdaptedGraphQLSchema.newSchema()
         .add(MyFirstClass.class,MySecondClass.class)
         .addPackage("my.awesome.package")
         .build();
@@ -47,7 +47,7 @@ How this schema will build? Ok let's explain. There is a tool which we call it `
 each `AdaptedGraphQLSchemaBuilder` instance has one.You can access it like this:
 
 ```java
-ClassMapper classMapper=AdaptedGraphQLSchemaBuilder.newBuilder()
+ClassMapper classMapper=AdaptedGraphQLSchema.newSchema()
         .add(MyFirstClass.class,MySecondClass.class)
         .addPackage("my.awesome.package")
         .mapper();
@@ -70,7 +70,7 @@ example if you want to apply a custom `ClassDescriptor`
 you have to do it like this:
 
 ```java
-classMapper.classDescriptorChain(ChainBuilder.newBuilder()
+classMapper.classDescriptorChain(Chain.newChain()
         .addToLast(new MyCustomClassDescriptor())
         .addToLast(new AnnotationBaseClassDescriptor())
         //and more detectors ...
@@ -153,7 +153,7 @@ You can skip a parameter, so it will always be null or (0,false) in primitives. 
 will provide details of fetching which you can set them in any position of parameters. System-parameter types are
 `DataFetchingEnvironment`, `GraphqlDirectivesHolder` and `AdaptedGraphQLSchema`.
 
-#### @GraphqlDirectiveArgument(`name() default "";` `type() default Void.class;` `nullable() default true;` `dimensions() default -1;` `valueParser() default ValueParser.DefaultParser.class;`)
+#### @GraphqlDirectiveArgument(`name() default "";` `type() default Void.class;` `nullable() default true;` `dimensions() default 0;` `dimensionModel() default DimensionModel.SINGLE;` `valueParser() default RawValueParser.class;`)
 
 This annotation will use to set an annotation-method as a GraphQL directive argument. As possible types of an annotation
 method is limited you can set custom type details for the method. If you set custom type you have to set a
@@ -185,12 +185,12 @@ We will create `UpperCaseDirectiveFunction` like this:
 import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
-import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
-import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
-import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
-import grphaqladapter.adaptedschema.utils.DataFetcherAdapter;
+import graphql_adapter.adaptedschema.functions.GraphqlDirectiveFunction;
+import graphql_adapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
+import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
+import graphql_adapter.adaptedschema.utils.DataFetcherAdapter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -252,7 +252,7 @@ And then you have to define directives like this:
 
 ```java
 import graphql.introspection.Introspection;
-import grphaqladapter.annotations.GraphqlDirective;
+import graphql_adapter.annotations.GraphqlDirective;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -266,8 +266,8 @@ public @interface UpperCase {
 With this implementation you add this directive to a field like this:
 
 ```java
-import grphaqladapter.annotations.GraphqlObjectType;
-import grphaqladapter.annotations.GraphqlType;
+import graphql_adapter.annotations.GraphqlObjectType;
+import graphql_adapter.annotations.GraphqlType;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -307,7 +307,7 @@ system-parameter and system will provide it in execution-time automatically.For 
 directive like this:
 
 ```java
-import grphaqladapter.annotations.GraphqlObjectType;
+import graphql_adapter.annotations.GraphqlObjectType;
 
 @GraphqlObjectType
 public class MyType {
@@ -332,8 +332,8 @@ use the public-default constructor which has not any parameters. If you need you
 implement your custom object-constructor and set it in builder. For example, you will define your constructor like this:
 
 ```java
-import grphaqladapter.codegenerator.ObjectConstructor;
-import grphaqladapter.codegenerator.impl.ReflectionObjectConstructor;
+import graphql_adapter.codegenerator.ObjectConstructor;
+import graphql_adapter.codegenerator.impl.ReflectionObjectConstructor;
 
 public class MyCustomObjectConstructor implements ObjectConstructor {
 
@@ -352,7 +352,7 @@ public class MyCustomObjectConstructor implements ObjectConstructor {
 And then set it like this:
 
 ```java
-AdaptedGraphQLSchema adaptedSchema=AdaptedGraphQLSchemaBuilder.newBuilder()
+AdaptedGraphQLSchema adaptedSchema=AdaptedGraphQLSchema.newSchema()
         .add(MyFirstClass.class,MySecondClass.class)
         .addPackage("my.awesome.package")
         .objectConstructor(new MyCustomObjectConstructor())
@@ -378,8 +378,8 @@ DiscoveredObjectType discoveredObjectType=adaptedSchema
 This tool will help you create object instances. For example, you can read an argument from DataFetching like this:
 
 ```java
-import grphaqladapter.annotations.GraphqlObjectType;
-import grphaqladapter.annotations.GraphqlType;
+import graphql_adapter.annotations.GraphqlObjectType;
+import graphql_adapter.annotations.GraphqlType;
 
 @GraphqlObjectType
 public class MyType {
@@ -404,7 +404,7 @@ appending strings and some optional functions (Directives) on fields like
 First we need to create our custom input types. In this case we create an input-type for appending strings.
 
 ```java
-import grphaqladapter.annotations.GraphqlInputType;
+import graphql_adapter.annotations.GraphqlInputType;
 
 @GraphqlInputType
 public class AppendStringParam {
@@ -445,12 +445,12 @@ In next step we declare our `UpperCase` directive. We have to define the functio
 import graphql.language.OperationDefinition;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
-import grphaqladapter.adaptedschema.functions.GraphqlDirectiveFunction;
-import grphaqladapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
-import grphaqladapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
-import grphaqladapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
-import grphaqladapter.adaptedschema.utils.DataFetcherAdapter;
+import graphql_adapter.adaptedschema.functions.GraphqlDirectiveFunction;
+import graphql_adapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedObjectTypeClass;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
+import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
+import graphql_adapter.adaptedschema.utils.DataFetcherAdapter;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -512,7 +512,7 @@ Now we are able to define the annotation for this directive:
 
 ```java
 import graphql.introspection.Introspection;
-import grphaqladapter.annotations.GraphqlDirective;
+import graphql_adapter.annotations.GraphqlDirective;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -526,9 +526,9 @@ public @interface UpperCase {
 And now we have to create our Query type.
 
 ```java
-import grphaqladapter.annotations.GraphqlArgument;
-import grphaqladapter.annotations.GraphqlField;
-import grphaqladapter.annotations.GraphqlQuery;
+import graphql_adapter.annotations.GraphqlArgument;
+import graphql_adapter.annotations.GraphqlField;
+import graphql_adapter.annotations.GraphqlQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -581,7 +581,7 @@ After this we have to create schema from objects:
 
 ```java
 AdaptedGraphQLSchema schema=AdaptedGraphQLSchema
-        .newBuilder()
+        .newSchema()
         .add(AppendStringParam.class)
         .add(Query.class)
         .add(UpperCase.class)
@@ -595,9 +595,9 @@ Now we can execute our queries like this:
 ```java
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import grphaqladapter.adaptedschema.AdaptedGraphQLSchema;
-import grphaqladapter.adaptedschema.AdaptedGraphQLSchemaBuilder;
-import tests.T1.schema.directives.UpperCase;
+import graphql_adapter.adaptedschema.AdaptedGraphQLSchema;
+import graphql_adapter.adaptedschema.AdaptedGraphQLSchemaBuilder;
+import graphql_adapter.schema.directives.UpperCase;
 
 import java.util.Map;
 
