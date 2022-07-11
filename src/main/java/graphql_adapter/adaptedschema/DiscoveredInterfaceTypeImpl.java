@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
 
 import graphql.schema.GraphQLInterfaceType;
@@ -28,7 +27,6 @@ final class DiscoveredInterfaceTypeImpl extends DiscoveredTypeImpl<GraphQLInterf
     private List<DiscoveredObjectType> implementors = new ArrayList<>();
     private Map<Class<?>, DiscoveredObjectType> implementorsByClass = new HashMap<>();
     private Map<String, DiscoveredObjectType> implementorsByName = new HashMap<>();
-
 
     public DiscoveredInterfaceTypeImpl(MappedInterface mappedInterface, String name, GraphQLInterfaceType graphQLType) {
         super(mappedInterface, name, graphQLType);

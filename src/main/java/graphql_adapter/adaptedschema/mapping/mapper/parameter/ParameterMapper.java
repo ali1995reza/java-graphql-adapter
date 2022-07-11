@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.parameter;
 
 import graphql.schema.DataFetchingEnvironment;
@@ -79,5 +78,4 @@ public class ParameterMapper extends AbstractElementMapper {
         }
         return MappedParameterBuilder.newDirectiveParameter(parameter, index);
     }
-
 }

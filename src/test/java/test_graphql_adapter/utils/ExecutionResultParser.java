@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.utils;
 
 import graphql.ExecutionResult;
@@ -51,11 +50,11 @@ public class ExecutionResultParser {
         return cast(objectMap.get(routes[routes.length - 1]));
     }
 
-    public boolean hasError() {
-        return result.getErrors() != null && !result.getErrors().isEmpty();
-    }
-
     public ExecutionResult getResult() {
         return result;
+    }
+
+    public boolean hasError() {
+        return result.getErrors() != null && !result.getErrors().isEmpty();
     }
 }

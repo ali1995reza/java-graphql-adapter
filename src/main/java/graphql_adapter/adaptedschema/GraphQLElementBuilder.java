@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
-
 
 import graphql.introspection.Introspection;
 import graphql.language.*;
@@ -125,7 +123,6 @@ public class GraphQLElementBuilder {
             directiveType.validLocation(location);
         }
 
-
         for (MappedAnnotationMethod method : mappedAnnotation.mappedMethods().values()) {
             directiveType.argument(buildArgument(mappedAnnotation, method, context));
         }
@@ -133,7 +130,6 @@ public class GraphQLElementBuilder {
         directiveType.description(mappedAnnotation.description());
 
         return directiveType.build();
-
     }
 
     public static GraphQLEnumType buildEnumType(MappedEnum mappedClass, BuildingContext context) {
@@ -184,7 +180,6 @@ public class GraphQLElementBuilder {
 
         Assert.isNotNull(outputType, exception(MappingGraphqlFieldException.class, "provided output type for [" + method.type() + "] is null", mappedClass.baseClass(), method.method()));
 
-
         fieldDefinitionBuilder.type(
                 method.type().isNullable() ?
                         (method.type().dimensions() > 0 ?
@@ -193,7 +188,6 @@ public class GraphQLElementBuilder {
                         new GraphQLNonNull((method.type().dimensions() > 0 ?
                                 (createList(outputType, method.type().dimensions())) : outputType))
         );
-
 
         for (MappedParameter parameter : method.parameters()) {
             if (parameter.model().isSchemaArgument()) {
@@ -282,10 +276,8 @@ public class GraphQLElementBuilder {
 
         interfaceTypeBuilder.name(mappedClass.name());
 
-
         for (MappedFieldMethod method : mappedClass.fieldMethods().values()) {
             interfaceTypeBuilder.field(buildField(mappedClass, method, context));
-
         }
 
         interfaceTypeBuilder.description(mappedClass.description());
@@ -308,7 +300,6 @@ public class GraphQLElementBuilder {
                 GraphQLObjectType.newObject();
 
         objectTypeBuilder.name(mappedClass.name());
-
 
         for (MappedFieldMethod method : mappedClass.fieldMethods().values()) {
             objectTypeBuilder.field(buildField(mappedClass, method, context));
@@ -388,7 +379,6 @@ public class GraphQLElementBuilder {
         }
 
         return unionType;
-
     }
 
     public static Value<?> getValueFromEnum(Object o, BuildingContext context) {
@@ -518,7 +508,6 @@ public class GraphQLElementBuilder {
             list = new GraphQLList(list);
         }
 
-
         return list;
     }
 
@@ -542,5 +531,4 @@ public class GraphQLElementBuilder {
         MappedScalarClass scalarClass = context.getMappedClassFor(o.getClass(), MappedElementType.SCALAR);
         return scalarClass.coercing().valueToLiteral(o);
     }
-
 }

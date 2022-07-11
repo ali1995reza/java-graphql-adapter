@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql.language.NullValue;
@@ -38,14 +37,6 @@ public class Splitor {
         this.str = str;
     }
 
-    public List<String> split(String s) {
-        return Arrays.asList(s.split(str));
-    }
-
-    public String getSplitorString() {
-        return str;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -66,6 +57,14 @@ public class Splitor {
                 '}';
     }
 
+    public String getSplitorString() {
+        return str;
+    }
+
+    public List<String> split(String s) {
+        return Arrays.asList(s.split(str));
+    }
+
     public final static class CoercingImpl implements Coercing<Object, Object> {
 
         @Override
@@ -78,7 +77,6 @@ public class Splitor {
             }
 
             throw new CoercingParseLiteralException("Expect String but found [" + o.getClass() + "]");
-
         }
 
         @Override
@@ -93,7 +91,6 @@ public class Splitor {
             }
 
             throw new CoercingParseValueException("Expect String but found [" + o.getClass() + "]");
-
         }
 
         @Override
@@ -103,7 +100,6 @@ public class Splitor {
             }
 
             throw new CoercingSerializeException("Expect Splitor but found [" + o.getClass() + "]");
-
         }
 
         @Override
@@ -115,5 +111,4 @@ public class Splitor {
             throw new CoercingSerializeException("Expect Splitor but found [" + input.getClass() + "]");
         }
     }
-
 }

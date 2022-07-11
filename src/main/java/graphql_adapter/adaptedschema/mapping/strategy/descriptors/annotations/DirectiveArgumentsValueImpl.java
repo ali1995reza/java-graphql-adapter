@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations;
 
 import java.util.Collections;
@@ -22,7 +21,6 @@ import java.util.Map;
 import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 final class DirectiveArgumentsValueImpl implements DirectiveArgumentsValue {
-
 
     public static DirectiveArgumentsValue empty(Class<?> annotationClass) {
         return new DirectiveArgumentsValueImpl(annotationClass);

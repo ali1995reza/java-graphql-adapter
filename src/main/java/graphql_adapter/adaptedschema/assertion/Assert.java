@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.assertion;
 
 import java.util.Objects;
 
 public class Assert {
+
+    public static <T extends Throwable, E> void allNotNull(T exception, E... objects) throws T {
+        if (objects == null) {
+            return;
+        }
+        for (E o : objects) {
+            if (o == null) {
+                throw exception;
+            }
+        }
+    }
+
+    public static <E> void allNotNull(E... objects) {
+        allNotNull(new NullPointerException("on of provided objects is null"), objects);
+    }
 
     public static <T extends Throwable> void isAllFalse(T exception, boolean... conditions) throws T {
         Assert.isNotNull(exception, new NullPointerException("conditions is null"));
@@ -108,21 +122,6 @@ public class Assert {
 
     public static void isNotNull(Object o) {
         isNotNull(o, new NullPointerException("object is null"));
-    }
-
-    public static <T extends Throwable, E> void allNotNull(T exception, E... objects) throws T {
-        if (objects == null) {
-            return;
-        }
-        for (E o : objects) {
-            if (o == null) {
-                throw exception;
-            }
-        }
-    }
-
-    public static <E> void allNotNull(E... objects) {
-        allNotNull(new NullPointerException("on of provided objects is null"), objects);
     }
 
     public static <T extends Throwable> void isNotPositive(int i, T exception) throws T {

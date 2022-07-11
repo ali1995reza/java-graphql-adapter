@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions.directive;
 
 import graphql.introspection.Introspection;
@@ -31,5 +30,4 @@ public interface GraphqlDirectiveDescription extends GraphqlElementDescription {
     Class<? extends GraphqlDirectiveFunction<?>> functionality();
 
     Set<Introspection.DirectiveLocation> locations();
-
 }

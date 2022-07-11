@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.discovered;
 
 import graphql.schema.GraphQLInterfaceType;
@@ -29,5 +28,4 @@ public interface DiscoveredInterfaceType extends DiscoveredType<GraphQLInterface
     Map<Class<?>, DiscoveredObjectType> implementorsByClass();
 
     Map<String, DiscoveredObjectType> implementorsByName();
-
 }

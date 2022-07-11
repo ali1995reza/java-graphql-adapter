@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
-
 
 import graphql.schema.GraphQLType;
 import graphql_adapter.adaptedschema.assertion.Assert;
 import graphql_adapter.adaptedschema.discovered.DiscoveredType;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
-
 
 abstract class DiscoveredTypeImpl<T extends GraphQLType, E extends MappedClass> implements DiscoveredType<T, E> {
 

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.utils.chain;
 
 import java.util.Collections;
@@ -26,7 +25,6 @@ public class EmptyChain<T> implements Chain<T> {
     public static <T> Chain<T> empty() {
         return EMPTY_CHAIN;
     }
-
 
     private EmptyChain() {
 

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.tools.object_builder;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -107,7 +106,6 @@ public class ObjectBuilder {
         this.enums = enums;
         this.inputTypes = inputTypes;
         this.objectConstructor = objectConstructor;
-
     }
 
     public Object buildFromObject(Object object, Class<?> type, int dimensions, DimensionModel dimensionModel, BuildingObjectConfig config) {
@@ -312,7 +310,6 @@ public class ObjectBuilder {
             return list;
         }
 
-
         --dimensions;
         List<Object> buildingList = new ArrayList<>();
 
@@ -333,7 +330,6 @@ public class ObjectBuilder {
         if (CollectionUtils.isEmpty(valuesList)) {
             return Collections.emptyList();
         }
-
 
         --dimensions;
 

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.utils;
 
 import java.security.SecureRandom;
@@ -34,12 +33,11 @@ public class Randomer {
         return list[RANDOM.nextInt(list.length)];
     }
 
-    public static <T> T random(Collection<T> collection)
-    {
+    public static <T> T random(Collection<T> collection) {
         int len = collection.size();
         int where = RANDOM.nextInt(len);
-        for(T t: collection) {
-            if(--where < 0) {
+        for (T t : collection) {
+            if (--where < 0) {
                 return t;
             }
         }
@@ -50,5 +48,4 @@ public class Randomer {
     public static boolean randomBoolean() {
         return RANDOM.nextBoolean();
     }
-
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptors.field;
 
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.enum_value.GraphqlEnumValueDescription;
@@ -24,7 +23,6 @@ import graphql_adapter.annotations.GraphqlEnumValue;
 import java.lang.reflect.Field;
 
 public class AnnotationBaseEnumConstantDescriptor implements EnumConstantDescriptor {
-
 
     @Override
     public GraphqlEnumValueDescription describeEnumValue(Enum<?> value, Field field, Class<? extends Enum<?>> clazz) {

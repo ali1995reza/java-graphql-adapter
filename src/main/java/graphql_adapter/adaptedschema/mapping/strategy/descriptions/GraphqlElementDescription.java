@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions;
 
 public interface GraphqlElementDescription {
@@ -21,5 +20,4 @@ public interface GraphqlElementDescription {
     String description();
 
     String name();
-
 }

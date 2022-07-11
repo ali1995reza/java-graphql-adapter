@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import graphql_adapter.adaptedschema.discovered.DiscoveredDirective;
@@ -56,6 +55,20 @@ public class TestSchemaDirectives {
     }
 
     @Test
+    public void testFooProviderDirective() {
+        DiscoveredDirective directive = StaticTests.findAndTestDirective(FooProvider.class, "FooProvider", 3);
+
+        StaticTests.findAnnotationMethodAndTest("value", directive, 0, TypeInformation.nonNullable(Foo.class),
+                new Foo().setIntValue(-101).setIntValue2(-102).setIntArray(new int[]{1, 2, 3, 4, 5, 6}));
+
+        StaticTests.findAnnotationMethodAndTest("arrayValues", directive, 0, TypeInformation.nullableArray(Foo.class, 1),
+                new Foo[]{new Foo().setIntValue(-25), new Foo().setIntValue(-26), new Foo().setIntValue(-27)});
+
+        StaticTests.findAnnotationMethodAndTest("listValues", directive, 0, TypeInformation.nonNullableList(Foo.class, 1),
+                Arrays.asList(new Foo().setIntValue(-28), new Foo().setIntValue(-29), new Foo().setIntValue(-30)));
+    }
+
+    @Test
     public void testHashDirective() {
         DiscoveredDirective directive = StaticTests.findAndTestDirective(Hash.class, "Hash", 2);
 
@@ -93,19 +106,5 @@ public class TestSchemaDirectives {
     @Test
     public void testUpperCaseDirective() {
         StaticTests.findAndTestDirective(UpperCase.class, "UpperCase", 0);
-    }
-
-    @Test
-    public void testFooProviderDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(FooProvider.class, "FooProvider", 3);
-
-        StaticTests.findAnnotationMethodAndTest("value", directive, 0, TypeInformation.nonNullable(Foo.class),
-                new Foo().setIntValue(-101).setIntValue2(-102).setIntArray(new int[]{1, 2, 3, 4, 5, 6}));
-
-        StaticTests.findAnnotationMethodAndTest("arrayValues", directive, 0, TypeInformation.nullableArray(Foo.class, 1),
-                new Foo[]{new Foo().setIntValue(-25), new Foo().setIntValue(-26), new Foo().setIntValue(-27)});
-
-        StaticTests.findAnnotationMethodAndTest("listValues", directive, 0, TypeInformation.nonNullableList(Foo.class, 1),
-                Arrays.asList(new Foo().setIntValue(-28), new Foo().setIntValue(-29), new Foo().setIntValue(-30)));
     }
 }

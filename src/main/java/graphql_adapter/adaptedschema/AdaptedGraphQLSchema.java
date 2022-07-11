@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
 
 import graphql.schema.GraphQLSchema;
@@ -45,7 +44,6 @@ public final class AdaptedGraphQLSchema {
     private final ObjectConstructor objectConstructor;
     private final ObjectBuilder objectBuilder;
     private final TypeFinder typeFinder;
-
 
     AdaptedGraphQLSchema(GraphQLSchema schema, List<DiscoveredElement<?, ?>> discoveredElements, ObjectConstructor objectConstructor, boolean usePariTypesForEachOther) {
         this.schema = schema;

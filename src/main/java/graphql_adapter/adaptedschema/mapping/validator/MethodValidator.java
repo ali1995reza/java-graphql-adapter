@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.validator;
 
 import graphql_adapter.adaptedschema.assertion.Assert;
@@ -53,7 +52,6 @@ public class MethodValidator {
     public static void validateMappedAnnotationMethod(MappedAnnotationMethod mappedAnnotationMethod, Class<?> clazz, Method method) {
         validateMethod(mappedAnnotationMethod, clazz, method, false);
         Assert.isNotNull(mappedAnnotationMethod.valueParser(), exception(MappingGraphqlArgumentException.class, "provided value-parser class for annotation method is null", clazz, method));
-
     }
 
     public static void validateMethod(MappedMethod mappedMethod, Class<?> clazz, Method method, boolean validateType) {

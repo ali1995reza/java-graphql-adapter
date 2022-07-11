@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.field;
 
 import graphql_adapter.adaptedschema.assertion.Assert;
@@ -61,5 +60,4 @@ public class EnumConstantMapper extends AbstractElementMapper {
 
         return constant;
     }
-
 }

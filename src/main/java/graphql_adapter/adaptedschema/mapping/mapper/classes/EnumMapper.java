@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.classes;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
@@ -83,7 +82,6 @@ public class EnumMapper extends AbstractElementMapper {
         ClassValidator.validateEnum(mappedEnum, clazz);
 
         return mappedEnum;
-
     }
 
     public Map<Class<?>, MappedEnum> mapEnums(Collection<Class<?>> classes) {

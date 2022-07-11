@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.GraphqlArgument;
@@ -34,5 +33,4 @@ public interface MutationInterface {
     default List<String> split(@GraphqlArgument(name = "input") String input, @Since("1.0.13") @GraphqlArgument(name = "splitor", nullable = false) Splitor splitor) {
         return splitor.split(input);
     }
-
 }

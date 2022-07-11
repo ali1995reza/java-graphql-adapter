@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.directives;
 
 import graphql.schema.DataFetchingEnvironment;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ReverseDirectiveFunction implements GraphqlDirectiveFunction<Object> {
-
 
     @Override
     public Object handleFieldDirective(GraphqlDirectiveDetails directive, Object value, Object source, MappedFieldMethod field, DataFetchingEnvironment env) {

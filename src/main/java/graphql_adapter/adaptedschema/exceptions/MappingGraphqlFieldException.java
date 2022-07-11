@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.exceptions;
 
 public class MappingGraphqlFieldException extends MappingSchemaElementException {
@@ -29,5 +28,4 @@ public class MappingGraphqlFieldException extends MappingSchemaElementException 
     public MappingGraphqlFieldException(String e) {
         super(e);
     }
-
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import graphql.schema.DataFetchingEnvironment;
@@ -115,7 +114,6 @@ public class TestSchemaObjectTypes {
         DiscoveredObjectType type = StaticTests.findAndTestObjectType(Complex.class, "ComplexOutput", 4, 1);
         StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.25");
 
-
         StaticTests.findFieldAndTest("name", type, TypeInformation.nullable(String.class));
 
         StaticTests.findFieldAndTest("value", type, TypeInformation.nullable(String.class));
@@ -124,7 +122,35 @@ public class TestSchemaObjectTypes {
         StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
 
         StaticTests.findFieldAndTest("inner", type, TypeInformation.nullable(Complex.class));
+    }
 
+    @Test
+    public void testFooOutputType() {
+        DiscoveredObjectType objectType = StaticTests.findAndTestObjectType(Foo.class, "FooOutput", 12);
+
+        StaticTests.findFieldAndTest("stringValue", objectType, 0, TypeInformation.nullable(String.class));
+
+        StaticTests.findFieldAndTest("longValue", objectType, 0, TypeInformation.nonNullable(long.class));
+
+        StaticTests.findFieldAndTest("intValue", objectType, 0, TypeInformation.nonNullable(int.class));
+
+        StaticTests.findFieldAndTest("intValue2", objectType, 0, TypeInformation.nonNullable(int.class));
+
+        StaticTests.findFieldAndTest("doubleValue", objectType, 0, TypeInformation.nonNullable(double.class));
+
+        StaticTests.findFieldAndTest("floatValue", objectType, 0, TypeInformation.nonNullable(float.class));
+
+        StaticTests.findFieldAndTest("byteValue", objectType, 0, TypeInformation.nonNullable(byte.class));
+
+        StaticTests.findFieldAndTest("shortValue", objectType, 0, TypeInformation.nonNullable(short.class));
+
+        StaticTests.findFieldAndTest("charValue", objectType, 0, TypeInformation.nonNullable(char.class));
+
+        StaticTests.findFieldAndTest("booleanValue", objectType, 0, TypeInformation.nonNullable(boolean.class));
+
+        StaticTests.findFieldAndTest("booleanValue2", objectType, 0, TypeInformation.nonNullable(boolean.class));
+
+        StaticTests.findFieldAndTest("intArray", objectType, 0, TypeInformation.nullableArray(int.class));
     }
 
     @Test
@@ -175,12 +201,10 @@ public class TestSchemaObjectTypes {
         MappedFieldMethod inputToOutputFromDirectiveField = StaticTests.findFieldAndTest("inputToOutputFromDirective", type, 2, 0, TypeInformation.nullable(Foo.class));
         StaticTests.findParameterAndTest("index", inputToOutputFromDirectiveField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), -1);
 
-
         StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
         StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
 
         StaticTests.findInterfaceTypeAndTest(MutationInterface.class, "MutationInterface", type);
-
     }
 
     @Test
@@ -195,36 +219,6 @@ public class TestSchemaObjectTypes {
         StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
 
         StaticTests.findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
-    }
-
-    @Test
-    public void testFooOutputType() {
-        DiscoveredObjectType objectType = StaticTests.findAndTestObjectType(Foo.class, "FooOutput", 12);
-
-        StaticTests.findFieldAndTest("stringValue", objectType, 0, TypeInformation.nullable(String.class));
-
-        StaticTests.findFieldAndTest("longValue", objectType, 0, TypeInformation.nonNullable(long.class));
-
-        StaticTests.findFieldAndTest("intValue", objectType, 0, TypeInformation.nonNullable(int.class));
-
-        StaticTests.findFieldAndTest("intValue2", objectType, 0, TypeInformation.nonNullable(int.class));
-
-        StaticTests.findFieldAndTest("doubleValue", objectType, 0, TypeInformation.nonNullable(double.class));
-
-        StaticTests.findFieldAndTest("floatValue", objectType, 0, TypeInformation.nonNullable(float.class));
-
-        StaticTests.findFieldAndTest("byteValue", objectType, 0, TypeInformation.nonNullable(byte.class));
-
-        StaticTests.findFieldAndTest("shortValue", objectType, 0, TypeInformation.nonNullable(short.class));
-
-        StaticTests.findFieldAndTest("charValue", objectType, 0, TypeInformation.nonNullable(char.class));
-
-        StaticTests.findFieldAndTest("booleanValue", objectType, 0, TypeInformation.nonNullable(boolean.class));
-
-        StaticTests.findFieldAndTest("booleanValue2", objectType, 0, TypeInformation.nonNullable(boolean.class));
-
-        StaticTests.findFieldAndTest("intArray", objectType, 0, TypeInformation.nullableArray(int.class));
-
     }
 
     @Test
@@ -289,9 +283,7 @@ public class TestSchemaObjectTypes {
         StaticTests.findParameterAndTest("separator", serializeToStringFromDirective, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(char.class), ',');
         StaticTests.findParameterAndTest(null, serializeToStringFromDirective, ParameterModel.DIRECTIVES, 1, TypeInformation.nullable(GraphqlDirectivesHolder.class));
 
-
         StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
         StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
-
     }
 }

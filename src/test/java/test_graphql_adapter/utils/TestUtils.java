@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.utils;
 
 import org.junit.jupiter.api.Assertions;
@@ -28,29 +27,6 @@ import java.util.List;
 public class TestUtils {
 
     private static Boolean isParameterNamePresent = null;
-
-    public static String base64Hash(String input, String algorithm) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
-            digest.update(input.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(digest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    public static boolean isParameterNamePresent() {
-        if (isParameterNamePresent == null) {
-            try {
-                isParameterNamePresent = String.class.getMethod("valueOf", char.class)
-                        .getParameters()[0]
-                        .isNamePresent();
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            }
-        }
-        return isParameterNamePresent;
-    }
 
     public static void assertEquals(Object first, Object second) {
         if (first == null || second == null) {
@@ -73,5 +49,28 @@ public class TestUtils {
         } else {
             Assertions.assertEquals(first, second);
         }
+    }
+
+    public static String base64Hash(String input, String algorithm) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance(algorithm);
+            digest.update(input.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static boolean isParameterNamePresent() {
+        if (isParameterNamePresent == null) {
+            try {
+                isParameterNamePresent = String.class.getMethod("valueOf", char.class)
+                        .getParameters()[0]
+                        .isNamePresent();
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return isParameterNamePresent;
     }
 }

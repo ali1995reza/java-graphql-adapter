@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements.method;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
@@ -26,5 +25,4 @@ public interface MappedMethod extends MappedElement {
     Method method();
 
     TypeInformation<?> type();
-
 }

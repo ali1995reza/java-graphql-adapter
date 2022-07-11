@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.utils;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.DimensionModel;
@@ -40,7 +39,6 @@ public class MappingUtils {
                 TypeDetails details = findTypeDetails(inner);
 
                 return new TypeDetails(details.type(), details.dimensions(), details.dimensionModel());
-
             } else {
                 return new TypeDetails(Object.class, 0, DimensionModel.SINGLE);
             }
@@ -74,7 +72,6 @@ public class MappingUtils {
         }
 
         throw new IllegalStateException("unknown type class");
-
     }
 
     private static TypeDetails detectDimensionsDetails(Type type, int dims) {
@@ -94,7 +91,6 @@ public class MappingUtils {
         }
 
         throw new IllegalStateException("unknown type class");
-
     }
 
     private static TypeDetails forArray(Class<?> clazz) {
@@ -105,5 +101,4 @@ public class MappingUtils {
         }
         return new TypeDetails(clazz, dims, DimensionModel.ARRAY);
     }
-
 }

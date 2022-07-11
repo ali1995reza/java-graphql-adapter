@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper;
-
 
 import graphql_adapter.adaptedschema.assertion.Assert;
 import graphql_adapter.adaptedschema.exceptions.MappingGraphqlTypeException;
@@ -141,7 +139,6 @@ public final class ClassMapper {
         }
 
         return allMappedClasses;
-
     }
 
     public List<MappedClass> mapClass(Class<?> clazz, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
@@ -202,7 +199,6 @@ public final class ClassMapper {
         }
 
         return null;
-
     }
 
     public ClassMapper methodDescriptorChain(Chain<MethodDescriptor> methodDescriptorChain) {

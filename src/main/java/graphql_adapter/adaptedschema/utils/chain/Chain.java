@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.utils.chain;
 
 public interface Chain<T> extends Iterable<T> {
 
-    static <T> ChainBuilder<T> newChain() {
-        return ChainBuilder.newBuilder();
+    static <T> Chain<T> empty() {
+        return EmptyChain.empty();
     }
 
     static <T> ChainBuilder<T> newChain(Class<T> chainType) {
         return ChainBuilder.newBuilder();
     }
 
-    static <T> Chain<T> empty() {
-        return EmptyChain.empty();
+    static <T> ChainBuilder<T> newChain() {
+        return ChainBuilder.newBuilder();
     }
 
     int size();
-
 }

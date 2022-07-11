@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedMethod;
@@ -34,7 +33,6 @@ public abstract class MappedMethodBuilder<T extends MappedMethodBuilder<T, E>, E
         return super.copy(element)
                 .method(element.method())
                 .type(element.type());
-
     }
 
     @Override

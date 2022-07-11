@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.directives;
 
 import graphql.introspection.Introspection;
@@ -35,13 +34,13 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FooProvider {
 
-    @DefaultValue("{intValue:-101, intValue2:-102, intArray:[1,2,3,4,5,6]}")
-    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooValueParser.class, type = Foo.class, nullable = false)
-    int[] value();
-
     @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooArrayValueParser.class, type = Foo.class, dimensions = 1, dimensionModel = DimensionModel.ARRAY)
     int[] arrayValues() default {-25, -26, -27};
 
     @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooListValueParser.class, type = Foo.class, dimensions = 1, dimensionModel = DimensionModel.LIST, nullable = false)
     int[] listValues() default {-28, -29, -30};
+
+    @DefaultValue("{intValue:-101, intValue2:-102, intArray:[1,2,3,4,5,6]}")
+    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooValueParser.class, type = Foo.class, nullable = false)
+    int[] value();
 }

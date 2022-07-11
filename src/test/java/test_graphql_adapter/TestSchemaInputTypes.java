@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import graphql_adapter.adaptedschema.discovered.DiscoveredInputType;
@@ -48,29 +47,6 @@ public class TestSchemaInputTypes {
 
         StaticTests.findInputFieldAndTest("inner", inputType, 0, TypeInformation.nullable(Complex.class),
                 new Complex().setName("dn").setValue("dv").setPriority(100).setInner(new Complex().setName("idn").setValue("idv").setPriority(101)));
-
-    }
-
-    @Test
-    public void testInputUserType() {
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(InputUser.class, "InputUser", 2, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.7");
-
-        StaticTests.findInputFieldAndTest("name", inputType, 0, TypeInformation.nonNullable(String.class), "Anonymous");
-
-        MappedInputFieldMethod typeInputField = StaticTests.findInputFieldAndTest("type", inputType, 1, TypeInformation.nullable(UserType.class), UserType.Normal);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", typeInputField, "version", "1.0.8");
-
-    }
-
-    @Test
-    public void testPageParametersType() {
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(PageParameters.class, "PageParameters", 2);
-
-        StaticTests.findInputFieldAndTest("page", inputType, TypeInformation.nonNullable(int.class));
-
-        StaticTests.findInputFieldAndTest("size", inputType, TypeInformation.nonNullable(int.class));
-
     }
 
     @Test
@@ -100,7 +76,25 @@ public class TestSchemaInputTypes {
         StaticTests.findInputFieldAndTest("booleanValue2", inputType, 0, TypeInformation.nonNullable(boolean.class), false);
 
         StaticTests.findInputFieldAndTest("intArray", inputType, 0, TypeInformation.nullableArray(int.class), new int[]{1, 2, 3});
-
     }
 
+    @Test
+    public void testInputUserType() {
+        DiscoveredInputType inputType = StaticTests.findAndTestInputType(InputUser.class, "InputUser", 2, 1);
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.7");
+
+        StaticTests.findInputFieldAndTest("name", inputType, 0, TypeInformation.nonNullable(String.class), "Anonymous");
+
+        MappedInputFieldMethod typeInputField = StaticTests.findInputFieldAndTest("type", inputType, 1, TypeInformation.nullable(UserType.class), UserType.Normal);
+        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", typeInputField, "version", "1.0.8");
+    }
+
+    @Test
+    public void testPageParametersType() {
+        DiscoveredInputType inputType = StaticTests.findAndTestInputType(PageParameters.class, "PageParameters", 2);
+
+        StaticTests.findInputFieldAndTest("page", inputType, TypeInformation.nonNullable(int.class));
+
+        StaticTests.findInputFieldAndTest("size", inputType, TypeInformation.nonNullable(int.class));
+    }
 }

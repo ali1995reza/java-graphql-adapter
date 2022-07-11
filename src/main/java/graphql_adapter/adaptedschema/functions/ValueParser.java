@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.functions;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
@@ -21,5 +20,4 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 public interface ValueParser<I, O> {
 
     O parse(I input, TypeInformation<?> descriptor, ValueParsingContext context);
-
 }

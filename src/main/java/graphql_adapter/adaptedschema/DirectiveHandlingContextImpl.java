@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
 
 import graphql.schema.TypeResolver;
@@ -108,6 +107,5 @@ final class DirectiveHandlingContextImpl implements SchemaDirectiveHandlingConte
         Assert.isTrue(StringUtils.isNonNullString(parent), new IllegalStateException("parent name is empty or null"));
         Assert.isTrue(StringUtils.isNonNullString(field), new IllegalStateException("field name is empty or null"));
         return parent + "_" + field;
-
     }
 }

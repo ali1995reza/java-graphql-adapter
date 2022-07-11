@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.DefaultValue;
@@ -42,127 +41,6 @@ public class Foo {
     private boolean booleanValue;
     private boolean booleanValue2;
     private int[] intArray;
-
-
-    @DefaultValue("9223372036854775807")
-    public long getLongValue() {
-        return longValue;
-    }
-
-    public Foo setLongValue(long longValue) {
-        this.longValue = longValue;
-        return this;
-    }
-
-    @DefaultValue(value = "anything", valueParser = CustomStringValueParser.class)
-    public String getStringValue() {
-        return stringValue;
-    }
-
-    public Foo setStringValue(String stringValue) {
-        this.stringValue = stringValue;
-        return this;
-    }
-
-    @DefaultValue("1")
-    public int getIntValue() {
-        return intValue;
-    }
-
-    public Foo setIntValue(int intValue) {
-        this.intValue = intValue;
-        return this;
-    }
-
-    @DefaultValue(value = "100", valueParser = CustomIntValueParser.class)
-    public int getIntValue2() {
-        return intValue2;
-    }
-
-    public Foo setIntValue2(int intValue2) {
-        this.intValue2 = intValue2;
-        return this;
-    }
-
-    @DefaultValue("2123455500000.21")
-    public double getDoubleValue() {
-        return doubleValue;
-    }
-
-    public Foo setDoubleValue(double doubleValue) {
-        this.doubleValue = doubleValue;
-        return this;
-    }
-
-    @DefaultValue("15477542.236")
-    public float getFloatValue() {
-        return floatValue;
-    }
-
-    public Foo setFloatValue(float floatValue) {
-        this.floatValue = floatValue;
-        return this;
-    }
-
-    @DefaultValue("120")
-    public byte getByteValue() {
-        return byteValue;
-    }
-
-    public Foo setByteValue(byte byteValue) {
-        this.byteValue = byteValue;
-        return this;
-    }
-
-    @DefaultValue("20000")
-    public short getShortValue() {
-        return shortValue;
-    }
-
-    public Foo setShortValue(short shortValue) {
-        this.shortValue = shortValue;
-        return this;
-    }
-
-    @DefaultValue("c")
-    public char getCharValue() {
-        return charValue;
-    }
-
-    public Foo setCharValue(char charValue) {
-        this.charValue = charValue;
-        return this;
-    }
-
-    @DefaultValue("true")
-    public boolean isBooleanValue() {
-        return booleanValue;
-    }
-
-    public Foo setBooleanValue(boolean booleanValue) {
-        this.booleanValue = booleanValue;
-        return this;
-    }
-
-    @DefaultValue(value = "true", valueParser = CustomBooleanValueParser.class)
-    public boolean isBooleanValue2() {
-        return booleanValue2;
-    }
-
-    public Foo setBooleanValue2(boolean booleanValue2) {
-        this.booleanValue2 = booleanValue2;
-        return this;
-    }
-
-    @DefaultValue("[1,2,3]")
-    public int[] getIntArray() {
-        return intArray;
-    }
-
-    public Foo setIntArray(int[] intArray) {
-        this.intArray = intArray;
-        return this;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -195,5 +73,125 @@ public class Foo {
                 ", booleanValue2=" + booleanValue2 +
                 ", intArray=" + Arrays.toString(intArray) +
                 '}';
+    }
+
+    @DefaultValue("120")
+    public byte getByteValue() {
+        return byteValue;
+    }
+
+    public Foo setByteValue(byte byteValue) {
+        this.byteValue = byteValue;
+        return this;
+    }
+
+    @DefaultValue("c")
+    public char getCharValue() {
+        return charValue;
+    }
+
+    public Foo setCharValue(char charValue) {
+        this.charValue = charValue;
+        return this;
+    }
+
+    @DefaultValue("2123455500000.21")
+    public double getDoubleValue() {
+        return doubleValue;
+    }
+
+    public Foo setDoubleValue(double doubleValue) {
+        this.doubleValue = doubleValue;
+        return this;
+    }
+
+    @DefaultValue("15477542.236")
+    public float getFloatValue() {
+        return floatValue;
+    }
+
+    public Foo setFloatValue(float floatValue) {
+        this.floatValue = floatValue;
+        return this;
+    }
+
+    @DefaultValue("[1,2,3]")
+    public int[] getIntArray() {
+        return intArray;
+    }
+
+    public Foo setIntArray(int[] intArray) {
+        this.intArray = intArray;
+        return this;
+    }
+
+    @DefaultValue("1")
+    public int getIntValue() {
+        return intValue;
+    }
+
+    public Foo setIntValue(int intValue) {
+        this.intValue = intValue;
+        return this;
+    }
+
+    @DefaultValue(value = "100", valueParser = CustomIntValueParser.class)
+    public int getIntValue2() {
+        return intValue2;
+    }
+
+    public Foo setIntValue2(int intValue2) {
+        this.intValue2 = intValue2;
+        return this;
+    }
+
+    @DefaultValue("9223372036854775807")
+    public long getLongValue() {
+        return longValue;
+    }
+
+    public Foo setLongValue(long longValue) {
+        this.longValue = longValue;
+        return this;
+    }
+
+    @DefaultValue("20000")
+    public short getShortValue() {
+        return shortValue;
+    }
+
+    public Foo setShortValue(short shortValue) {
+        this.shortValue = shortValue;
+        return this;
+    }
+
+    @DefaultValue(value = "anything", valueParser = CustomStringValueParser.class)
+    public String getStringValue() {
+        return stringValue;
+    }
+
+    public Foo setStringValue(String stringValue) {
+        this.stringValue = stringValue;
+        return this;
+    }
+
+    @DefaultValue("true")
+    public boolean isBooleanValue() {
+        return booleanValue;
+    }
+
+    public Foo setBooleanValue(boolean booleanValue) {
+        this.booleanValue = booleanValue;
+        return this;
+    }
+
+    @DefaultValue(value = "true", valueParser = CustomBooleanValueParser.class)
+    public boolean isBooleanValue2() {
+        return booleanValue2;
+    }
+
+    public Foo setBooleanValue2(boolean booleanValue2) {
+        this.booleanValue2 = booleanValue2;
+        return this;
     }
 }

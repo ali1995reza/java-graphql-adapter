@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.utils;
 
 import graphql_adapter.adaptedschema.assertion.Assert;
@@ -42,12 +41,12 @@ public final class TypeDetails {
                 '}';
     }
 
-    public int dimensions() {
-        return dimensions;
-    }
-
     public DimensionModel dimensionModel() {
         return dimensionModel;
+    }
+
+    public int dimensions() {
+        return dimensions;
     }
 
     public Class<?> type() {

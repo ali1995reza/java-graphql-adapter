@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.utils.builder;
 
 import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
@@ -22,11 +21,11 @@ public interface IBuilder<T extends IBuilder<T, E>, E> {
 
     E build();
 
-    T copy(E e);
-
     default T castThis() {
         return cast(this);
     }
+
+    T copy(E e);
 
     default T refresh() {
         return castThis();

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.DefaultValue;
@@ -29,6 +28,19 @@ public class InputUser {
 
     private String name;
     private UserType type;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InputUser user = (InputUser) o;
+        return Objects.equals(name, user.name) && type == user.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type);
+    }
 
     @Override
     public String toString() {
@@ -57,19 +69,5 @@ public class InputUser {
     @GraphqlInputField(setter = "setType")
     public UserType type() {
         return type;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        InputUser user = (InputUser) o;
-        return Objects.equals(name, user.name) && type == user.type;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, type);
     }
 }

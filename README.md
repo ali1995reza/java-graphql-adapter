@@ -3,6 +3,16 @@
 Purpose of this library is to create `GraphQLSchema` by consuming your java classes. This library developed on top
 of [GraphQL-Java](https://www.graphql-java.com/) library.
 
+##Getting Started
+To add library in your project you can simply add this dependency:
+```xml
+<dependency>
+    <groupId>io.github.ali1995reza</groupId>
+    <artifactId>graphql-adapter</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
 To create a Schema you have to use `AdaptedGraphQLSchemaBuilder` class. This class help you to create your schema using
 your classes. To create new builder you should call `AdaptedGraphQLSchema.newSchema()`.
 
@@ -228,7 +238,6 @@ public class UpperCaseDirectiveFunction implements GraphqlDirectiveFunction<Obje
         } else {
             return upperSync(object);
         }
-
     }
 
     private Object upperSync(Object object) {
@@ -285,7 +294,6 @@ public class DeveloperInfo {
     public CompletableFuture<String> lastname() {
         return CompletableFuture.completedFuture("Akhoundi"); //will return AKHOUNDI
     }
-
 }
 ```
 
@@ -488,7 +496,6 @@ public class UpperCaseDirectiveFunction implements GraphqlDirectiveFunction<Obje
         } else {
             return upperSync(object);
         }
-
     }
 
     private Object upperSync(Object object) {
@@ -573,7 +580,6 @@ public class Query {
     public String appendStrings(@GraphqlArgument(name = "param") AppendStringParam param) {
         return param.getFirst() + param.getAppendingChar() + param.getSecond();
     }
-
 }
 ```
 
@@ -645,3 +651,17 @@ After run output will something like this:
 Alireza@Akhoundi
 ALIREZA@AKHOUNDI
 ```
+
+
+#License
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
-
 
 import graphql_adapter.adaptedschema.discovered.DiscoveredInterfaceType;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
@@ -49,7 +47,6 @@ public class TestSchemaInterfaceTypes {
         StaticTests.findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
         MappedParameter splitorParameter = StaticTests.findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
         StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
-
     }
 
     @Test

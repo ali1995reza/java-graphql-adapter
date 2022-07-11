@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import graphql_adapter.adaptedschema.discovered.DiscoveredEnumType;
@@ -41,6 +40,5 @@ public class TestSchemaEnumTypes {
         StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", adminConstant, "version", "1.0.10");
 
         StaticTests.findEnumValueAndTest("NORMAL", UserType.Normal, enumType, 0);
-
     }
 }

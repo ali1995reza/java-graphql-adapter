@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.method;
 
 import graphql_adapter.adaptedschema.exceptions.MappingGraphqlFieldException;
@@ -141,5 +140,4 @@ public class MethodMapper extends AbstractElementMapper {
             throw exception(MappingGraphqlFieldException.class, "can not find setter method", clazz, method);
         }
     }
-
 }

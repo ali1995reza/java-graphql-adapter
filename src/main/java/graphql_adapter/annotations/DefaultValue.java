@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.annotations;
 
 import graphql_adapter.adaptedschema.functions.ValueParser;
@@ -31,5 +30,4 @@ public @interface DefaultValue {
     String value();
 
     Class<? extends ValueParser<?, ?>> valueParser() default AutomaticDefaultValuerParser.class;
-
 }

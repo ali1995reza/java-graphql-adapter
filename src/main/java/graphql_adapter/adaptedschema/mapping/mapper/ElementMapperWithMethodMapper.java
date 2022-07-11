@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper;
 
 import graphql_adapter.adaptedschema.mapping.mapper.method.MethodMapper;
@@ -32,7 +31,6 @@ public class ElementMapperWithMethodMapper extends AbstractElementMapper {
         super(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, enumValueDescriptorChain, appliedDirectiveDescriptorChain);
         this.methodMapper = new MethodMapper(methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain);
     }
-
 
     public MethodMapper methodMapper() {
         return methodMapper;

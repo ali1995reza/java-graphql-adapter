@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions.directive;
 
 import graphql.introspection.Introspection;
@@ -68,11 +67,6 @@ public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptio
         return this;
     }
 
-    public GraphqlDirectiveDescriptionBuilder removeLocation(Introspection.DirectiveLocation location) {
-        this.locations.remove(location);
-        return this;
-    }
-
     public GraphqlDirectiveDescriptionBuilder clearLocations() {
         this.locations.clear();
         return this;
@@ -89,5 +83,10 @@ public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptio
 
     public Set<Introspection.DirectiveLocation> locations() {
         return new HashSet<>(locations);
+    }
+
+    public GraphqlDirectiveDescriptionBuilder removeLocation(Introspection.DirectiveLocation location) {
+        this.locations.remove(location);
+        return this;
     }
 }

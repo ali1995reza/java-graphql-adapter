@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import graphql.GraphQL;
@@ -33,20 +32,16 @@ import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class TestSchemaOperationsExecution {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TestSchemaOperationsExecution.class);
 
-
     private final GraphQL graphQL;
-
 
     public TestSchemaOperationsExecution() {
 
         graphQL = GraphQL.newGraphQL(TestSchemaProvider.schema().getSchema()).build();
         LOGGER.info(TestSchemaProvider.schema().asSchemaDefinitionLanguage());
-
     }
 
     @Test
@@ -57,6 +52,23 @@ public class TestSchemaOperationsExecution {
                         Arrays.asList(Arrays.asList(13, 14, 15), Arrays.asList(16, 17, 18), Arrays.asList(19, 20, 21), Arrays.asList(22, 23, 24)))
                 , parser.getData("combineInto3DMatrix")
         );
+    }
+
+    @Test
+    public void testArgumentCustomDefaultValueParser() {
+        ExecutionResultParser parser = execute("Mutation-5");
+
+        assertEquals((String) null, parser.getData("inputToOutput.stringValue"));
+        assertEquals(0L, (Long) parser.getData("inputToOutput.longValue"));
+        assertEquals(Integer.valueOf(-1), parser.getData("inputToOutput.intValue"));
+        assertEquals(Integer.valueOf(-2), parser.getData("inputToOutput.intValue2"));
+        assertEquals(0D, parser.getData("inputToOutput.doubleValue"));
+        assertEquals(0F, (Float) parser.getData("inputToOutput.floatValue"));
+        assertEquals((short) 0, (Short) parser.getData("inputToOutput.shortValue"));
+        assertEquals((char) 0, (Character) parser.getData("inputToOutput.charValue"));
+        assertEquals(false, parser.getData("inputToOutput.booleanValue"));
+        assertEquals(false, parser.getData("inputToOutput.booleanValue2"));
+        assertEquals(Arrays.asList(1, 2, 3, 4), parser.getData("inputToOutput.intArray"));
     }
 
     @Test
@@ -76,6 +88,59 @@ public class TestSchemaOperationsExecution {
     public void testDefaultInputFieldValue() {
         ExecutionResultParser parser = execute("Query-15");
         assertEquals("mn,mv,99,dn,dv,100,idn,idv,101", parser.getData("serializeToString"));
+    }
+
+    @Test
+    public void testDirectiveArgumentCustomArrayValueParser() {
+        ExecutionResultParser parser = execute("Mutation-7");
+        System.out.println(parser);
+
+        assertEquals((String) null, parser.getData("a.stringValue"));
+        assertEquals(0L, (Long) parser.getData("a.longValue"));
+        assertEquals(Integer.valueOf(-26), parser.getData("a.intValue"));
+        assertEquals(Integer.valueOf(0), parser.getData("a.intValue2"));
+        assertEquals(0D, parser.getData("a.doubleValue"));
+        assertEquals(0F, (Float) parser.getData("a.floatValue"));
+        assertEquals((short) 0, (Short) parser.getData("a.shortValue"));
+        assertEquals((char) 0, (Character) parser.getData("a.charValue"));
+        assertFalse((boolean) parser.getData("a.booleanValue"));
+        assertFalse((boolean) parser.getData("a.booleanValue2"));
+        assertNull(parser.getData("a.intArray"));
+    }
+
+    @Test
+    public void testDirectiveArgumentCustomListValueParser() {
+        ExecutionResultParser parser = execute("Mutation-8");
+        System.out.println(parser);
+
+        assertEquals((String) null, parser.getData("a.stringValue"));
+        assertEquals(0L, (Long) parser.getData("a.longValue"));
+        assertEquals(Integer.valueOf(-30), parser.getData("a.intValue"));
+        assertEquals(Integer.valueOf(0), parser.getData("a.intValue2"));
+        assertEquals(0D, parser.getData("a.doubleValue"));
+        assertEquals(0F, (Float) parser.getData("a.floatValue"));
+        assertEquals((short) 0, (Short) parser.getData("a.shortValue"));
+        assertEquals((char) 0, (Character) parser.getData("a.charValue"));
+        assertFalse((boolean) parser.getData("a.booleanValue"));
+        assertFalse((boolean) parser.getData("a.booleanValue2"));
+        assertNull(parser.getData("a.intArray"));
+    }
+
+    @Test
+    public void testDirectiveArgumentCustomValueParser() {
+        ExecutionResultParser parser = execute("Mutation-6");
+
+        assertEquals((String) null, parser.getData("a.stringValue"));
+        assertEquals(0L, (Long) parser.getData("a.longValue"));
+        assertEquals(Integer.valueOf(-101), parser.getData("a.intValue"));
+        assertEquals(Integer.valueOf(-102), parser.getData("a.intValue2"));
+        assertEquals(0D, parser.getData("a.doubleValue"));
+        assertEquals(0F, (Float) parser.getData("a.floatValue"));
+        assertEquals((short) 0, (Short) parser.getData("a.shortValue"));
+        assertEquals((char) 0, (Character) parser.getData("a.charValue"));
+        assertEquals(false, parser.getData("a.booleanValue"));
+        assertEquals(false, parser.getData("a.booleanValue2"));
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), parser.getData("a.intArray"));
     }
 
     @Test
@@ -156,54 +221,6 @@ public class TestSchemaOperationsExecution {
     }
 
     @Test
-    public void testDirectiveArgumentCustomArrayValueParser() {
-        ExecutionResultParser parser = execute("Mutation-7");
-        System.out.println(parser);
-
-        assertEquals((String) null, parser.getData("a.stringValue"));
-        assertEquals(0L, (Long) parser.getData("a.longValue"));
-        assertEquals(Integer.valueOf(-26), parser.getData("a.intValue"));
-        assertEquals(Integer.valueOf(0), parser.getData("a.intValue2"));
-        assertEquals(0D, parser.getData("a.doubleValue"));
-        assertEquals(0F, (Float) parser.getData("a.floatValue"));
-        assertEquals((short) 0, (Short) parser.getData("a.shortValue"));
-        assertEquals((char) 0, (Character) parser.getData("a.charValue"));
-        assertFalse((boolean) parser.getData("a.booleanValue"));
-        assertFalse((boolean) parser.getData("a.booleanValue2"));
-        assertNull(parser.getData("a.intArray"));
-    }
-
-    @Test
-    public void testMultiDimensionArrays() {
-        ExecutionResultParser parser = execute("Query-4");
-        assertEquals(Arrays.asList(Arrays.asList(8, 8), Arrays.asList(8, 8)), parser.getData("multiplyMatrices"));
-    }
-
-    @Test
-    public void testMultiDimensionArraysWithDefaultValue() {
-        ExecutionResultParser parser = execute("Query-25");
-        assertEquals(Arrays.asList(Arrays.asList(30, 36, 42), Arrays.asList(66, 81, 96), Arrays.asList(102, 126, 150)), parser.getData("multiplyMatrices"));
-    }
-
-    @Test
-    public void testDirectiveArgumentCustomListValueParser() {
-        ExecutionResultParser parser = execute("Mutation-8");
-        System.out.println(parser);
-
-        assertEquals((String) null, parser.getData("a.stringValue"));
-        assertEquals(0L, (Long) parser.getData("a.longValue"));
-        assertEquals(Integer.valueOf(-30), parser.getData("a.intValue"));
-        assertEquals(Integer.valueOf(0), parser.getData("a.intValue2"));
-        assertEquals(0D, parser.getData("a.doubleValue"));
-        assertEquals(0F, (Float) parser.getData("a.floatValue"));
-        assertEquals((short) 0, (Short) parser.getData("a.shortValue"));
-        assertEquals((char) 0, (Character) parser.getData("a.charValue"));
-        assertFalse((boolean) parser.getData("a.booleanValue"));
-        assertFalse((boolean) parser.getData("a.booleanValue2"));
-        assertNull(parser.getData("a.intArray"));
-    }
-
-    @Test
     public void testInputFieldCustomDefaultValueParsers() {
         ExecutionResultParser parser = execute("Mutation-4");
 
@@ -221,43 +238,21 @@ public class TestSchemaOperationsExecution {
     }
 
     @Test
-    public void testArgumentCustomDefaultValueParser() {
-        ExecutionResultParser parser = execute("Mutation-5");
-
-        assertEquals((String) null, parser.getData("inputToOutput.stringValue"));
-        assertEquals(0L, (Long) parser.getData("inputToOutput.longValue"));
-        assertEquals(Integer.valueOf(-1), parser.getData("inputToOutput.intValue"));
-        assertEquals(Integer.valueOf(-2), parser.getData("inputToOutput.intValue2"));
-        assertEquals(0D, parser.getData("inputToOutput.doubleValue"));
-        assertEquals(0F, (Float) parser.getData("inputToOutput.floatValue"));
-        assertEquals((short) 0, (Short) parser.getData("inputToOutput.shortValue"));
-        assertEquals((char) 0, (Character) parser.getData("inputToOutput.charValue"));
-        assertEquals(false, parser.getData("inputToOutput.booleanValue"));
-        assertEquals(false, parser.getData("inputToOutput.booleanValue2"));
-        assertEquals(Arrays.asList(1, 2, 3, 4), parser.getData("inputToOutput.intArray"));
-    }
-
-    @Test
-    public void testDirectiveArgumentCustomValueParser() {
-        ExecutionResultParser parser = execute("Mutation-6");
-
-        assertEquals((String) null, parser.getData("a.stringValue"));
-        assertEquals(0L, (Long) parser.getData("a.longValue"));
-        assertEquals(Integer.valueOf(-101), parser.getData("a.intValue"));
-        assertEquals(Integer.valueOf(-102), parser.getData("a.intValue2"));
-        assertEquals(0D, parser.getData("a.doubleValue"));
-        assertEquals(0F, (Float) parser.getData("a.floatValue"));
-        assertEquals((short) 0, (Short) parser.getData("a.shortValue"));
-        assertEquals((char) 0, (Character) parser.getData("a.charValue"));
-        assertEquals(false, parser.getData("a.booleanValue"));
-        assertEquals(false, parser.getData("a.booleanValue2"));
-        assertEquals(Arrays.asList(1, 2, 3, 4, 5, 6), parser.getData("a.intArray"));
-    }
-
-    @Test
     public void testListAndArray() {
         ExecutionResultParser parser = execute(TestUtils.isParameterNamePresent() ? "Mutation-1-2" : "Mutation-1-1");
         assertEquals(Arrays.asList(6, 5, 4, 3, 2, 1), parser.getData("listToArray"));
+    }
+
+    @Test
+    public void testMultiDimensionArrays() {
+        ExecutionResultParser parser = execute("Query-4");
+        assertEquals(Arrays.asList(Arrays.asList(8, 8), Arrays.asList(8, 8)), parser.getData("multiplyMatrices"));
+    }
+
+    @Test
+    public void testMultiDimensionArraysWithDefaultValue() {
+        ExecutionResultParser parser = execute("Query-25");
+        assertEquals(Arrays.asList(Arrays.asList(30, 36, 42), Arrays.asList(66, 81, 96), Arrays.asList(102, 126, 150)), parser.getData("multiplyMatrices"));
     }
 
     @Test

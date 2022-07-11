@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
-
 
 import graphql.schema.GraphQLDirective;
 import graphql.schema.GraphQLTypeReference;
@@ -23,7 +21,6 @@ import graphql_adapter.adaptedschema.functions.SchemaDirectiveHandlingContext;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
 import graphql_adapter.codegenerator.ObjectConstructor;
-
 
 interface BuildingContext {
 
@@ -72,5 +69,4 @@ interface BuildingContext {
     }
 
     ObjectConstructor objectConstructor();
-
 }

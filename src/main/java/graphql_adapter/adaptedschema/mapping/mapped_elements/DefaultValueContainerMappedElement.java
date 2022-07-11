@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements;
 
 public interface DefaultValueContainerMappedElement extends MappedElement {
@@ -23,5 +22,4 @@ public interface DefaultValueContainerMappedElement extends MappedElement {
     default boolean hasDefaultValue() {
         return defaultValue() != null;
     }
-
 }

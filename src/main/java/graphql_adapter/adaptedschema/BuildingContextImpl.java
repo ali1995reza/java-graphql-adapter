@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
 
 import graphql.schema.GraphQLDirective;
@@ -34,7 +33,6 @@ import java.util.*;
 import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 final class BuildingContextImpl implements BuildingContext {
-
 
     private final Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses;
     private final Map<MappedClass, GraphQLNamedType> rawTypes = new HashMap<>();
@@ -119,7 +117,6 @@ final class BuildingContextImpl implements BuildingContext {
         MappedClass mappedClass =
                 getMappedClassFor(c, MappedElementType.INTERFACE);
 
-
         return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
     }
 
@@ -166,7 +163,6 @@ final class BuildingContextImpl implements BuildingContext {
     public GraphQLTypeReference getScalarTypeFor(Class<?> c) {
         MappedClass mappedClass =
                 getMappedClassFor(c, MappedElementType.SCALAR);
-
 
         return mappedClass == null ? null : new GraphQLTypeReference(mappedClass.name());
     }
@@ -227,5 +223,4 @@ final class BuildingContextImpl implements BuildingContext {
         }));
         return Collections.unmodifiableMap(elementMap);
     }
-
 }

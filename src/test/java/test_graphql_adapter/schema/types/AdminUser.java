@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.GraphqlField;
@@ -25,11 +24,11 @@ import java.util.Base64;
 @GraphqlObjectType(name = "Admin")
 public class AdminUser implements UserInterface {
 
-
     public static AdminUser create(String name) {
         return new AdminUser()
                 .setName(name);
     }
+
     private String name;
 
     @Override

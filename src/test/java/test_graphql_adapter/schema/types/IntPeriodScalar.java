@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql.language.IntValue;
@@ -52,7 +51,6 @@ public class IntPeriodScalar {
             );
         }
 
-
         throw new IllegalStateException("invalid format");
     }
 
@@ -64,12 +62,23 @@ public class IntPeriodScalar {
         this.lowBound = from;
         this.upBound = to;
 
-
         if (from.compareTo(to) > 0)
             throw new IllegalStateException("lower bound bigger than upper bound");
 
-
         asString = lowBound.asLowerBound() + ":" + upBound.asUpperBound();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IntPeriodScalar that = (IntPeriodScalar) o;
+        return Objects.equals(lowBound, that.lowBound) && Objects.equals(upBound, that.upBound) && Objects.equals(asString, that.asString);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lowBound, upBound, asString);
     }
 
     @Override
@@ -94,19 +103,6 @@ public class IntPeriodScalar {
         return upBound;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        IntPeriodScalar that = (IntPeriodScalar) o;
-        return Objects.equals(lowBound, that.lowBound) && Objects.equals(upBound, that.upBound) && Objects.equals(asString, that.asString);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(lowBound, upBound, asString);
-    }
-
     public final static class CoercingImpl implements Coercing<Object, Object> {
 
         @Override
@@ -120,7 +116,6 @@ public class IntPeriodScalar {
             }
 
             throw new CoercingParseLiteralException("Expect String but found [" + o.getClass() + "]");
-
         }
 
         @Override
@@ -138,7 +133,6 @@ public class IntPeriodScalar {
             }
 
             throw new CoercingParseValueException("Expect String or IntPeriodScalar but found [" + o.getClass() + "]");
-
         }
 
         @Override
@@ -148,7 +142,6 @@ public class IntPeriodScalar {
             }
 
             throw new CoercingSerializeException("Expect IntPeriodScalar but found [" + o.getClass() + "]");
-
         }
 
         @Override
@@ -158,7 +151,6 @@ public class IntPeriodScalar {
             }
 
             throw new CoercingSerializeException("Expect IntPeriodScalar but found [" + input.getClass() + "]");
-
         }
     }
 }

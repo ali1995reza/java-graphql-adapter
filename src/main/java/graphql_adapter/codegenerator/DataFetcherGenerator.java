@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.codegenerator;
 
 import graphql_adapter.adaptedschema.discovered.DiscoveredElement;
@@ -23,7 +22,6 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedFieldM
 import java.util.List;
 
 public interface DataFetcherGenerator {
-
 
     AdaptedGraphQLDataFetcher<?> generate(MappedObjectTypeClass cls, MappedFieldMethod method);
 

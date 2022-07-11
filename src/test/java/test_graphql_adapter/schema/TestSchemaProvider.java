@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema;
 
 import graphql_adapter.adaptedschema.AdaptedGraphQLSchema;
@@ -50,7 +49,6 @@ public class TestSchemaProvider {
                     .build();
 
             LOGGER.info("Result schema is : \r\n\r\n" + SCHEMA.asSchemaDefinitionLanguage());
-
         }
         return SCHEMA;
     }

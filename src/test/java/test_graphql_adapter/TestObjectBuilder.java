@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -162,7 +161,6 @@ public class TestObjectBuilder {
             list.add(doBuildRandomObject(clazz, dims, DimensionModel.LIST, chanceCalculator, depth));
         }
         return list;
-
     }
 
     private static Object buildRandomObject(Class<?> clazz, Function<Integer, Boolean> chanceCalculator) {
@@ -383,7 +381,6 @@ public class TestObjectBuilder {
             return BigDecimal.valueOf(RANDOM.nextDouble());
         }
         throw new IllegalStateException("unknown scalar type [" + clazz + "]");
-
     }
 
     private static void test(Class<?> clazz, int rounds) {
@@ -402,5 +399,4 @@ public class TestObjectBuilder {
         TestUtils.assertEquals(randomObject, builder().buildFromObject(describeObjectAsString, clazz, dimensions, dimensionModel, BuildingObjectConfig.DISABLE_BOTH));
         TestUtils.assertEquals(randomObject, builder().buildFromValue(describeObjectAsValue, clazz, dimensions, dimensionModel, BuildingObjectConfig.DISABLE_BOTH));
     }
-
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.validator;
 
 import graphql_adapter.adaptedschema.assertion.Assert;
@@ -53,5 +52,4 @@ public class ElementValidator {
     public static <T extends AdaptedGraphqlSchemaException> void validateElement(MappedElement element, Class<?> clazz, boolean validateName, Class<T> e) {
         validateElement(element, clazz, null, null, validateName, e);
     }
-
 }

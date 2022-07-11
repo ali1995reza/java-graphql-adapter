@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.tools.type_finder;
 
 import graphql_adapter.adaptedschema.discovered.*;
@@ -53,7 +52,6 @@ public class TypeFinder {
 
     private final Map<Class<?>, DiscoveredDirective> directivesByClass;
     private final Map<String, DiscoveredDirective> directivesByName;
-
 
     public TypeFinder(List<DiscoveredElement<?, ?>> elements, boolean usePairTypesForEachOther) {
 

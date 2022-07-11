@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.directives;
 
 import graphql.language.OperationDefinition;
@@ -51,7 +50,6 @@ public class DelayDirectiveFunction implements GraphqlDirectiveFunction<Object> 
     private static Executor execute(long seconds) {
         return r -> SERVICE.schedule(r, seconds, TimeUnit.SECONDS);
     }
-
 
     private CompletableFuture<?> execute(Object o, int seconds) {
         return CompletableFuture.supplyAsync(() -> o, execute(seconds));

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema;
 
 import graphql.schema.*;
@@ -204,7 +203,6 @@ public final class AdaptedGraphQLSchemaBuilder {
         return schemaReference.set(new AdaptedGraphQLSchema(schema.build(), allElements, objectConstructor, usePairTypesAsEachOther))
                 .lock()
                 .get();
-
     }
 
     public DiscoveredElement<?, ?> buildDiscoveredElement(MappedElement element, GraphQLNamedSchemaElement schemaElement) {
@@ -513,7 +511,6 @@ public final class AdaptedGraphQLSchemaBuilder {
                 code.typeResolver(unionType.name(),
                         directiveContext.applyChanges(unionType.name(), typeResolverGenerator.generate(unionType)));
             }
-
         });
     }
 }

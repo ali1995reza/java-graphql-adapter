@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements;
 
 public enum MappedElementType {
@@ -41,7 +40,6 @@ public enum MappedElementType {
     MappedElementType() {
         this(false);
     }
-
 
     public boolean is(MappedElementType other) {
         return this == other;

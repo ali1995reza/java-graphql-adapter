@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
@@ -53,24 +52,11 @@ public class TestMutation implements MutationInterface {
         return combined;
     }
 
-    @GraphqlField
-    public int[] listToArray(List<Integer> list) {
-        if (list == null) {
-            return null;
-        }
-        int[] array = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i);
-        }
-        return array;
-    }
-
-    @FooProvider(value = {-100,-200}, listValues = {-1000, -2000, -3000})
+    @FooProvider(value = {-100, -200}, listValues = {-1000, -2000, -3000})
     @GraphqlField
     public Foo inputToOutput(@DefaultValue(value = "", valueParser = CustomFooValueParser.class) @GraphqlArgument(name = "input") Foo input) {
         return input;
     }
-
 
     @GraphqlField
     public Foo inputToOutputFromDirective(@DefaultValue("-1") @GraphqlArgument(name = "index", nullable = false) int index, GraphqlDirectivesHolder holder) {
@@ -86,5 +72,17 @@ public class TestMutation implements MutationInterface {
             List<Foo> foos = details.getArgument("listValues");
             return foos.get(index);
         }
+    }
+
+    @GraphqlField
+    public int[] listToArray(List<Integer> list) {
+        if (list == null) {
+            return null;
+        }
+        int[] array = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            array[i] = list.get(i);
+        }
+        return array;
     }
 }

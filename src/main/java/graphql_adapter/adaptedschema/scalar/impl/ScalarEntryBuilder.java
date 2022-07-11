@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.scalar.impl;
 
 import graphql.schema.Coercing;
@@ -45,21 +44,21 @@ public final class ScalarEntryBuilder implements IBuilder<ScalarEntryBuilder, Sc
     }
 
     @Override
-    public ScalarEntryBuilder refresh() {
-        this.type = null;
-        this.name = null;
-        this.description = null;
-        this.coercing = null;
-        return this;
-    }
-
-    @Override
     public ScalarEntryBuilder copy(ScalarEntry scalarEntry) {
         return refresh()
                 .name(scalarEntry.name())
                 .description(scalarEntry.description())
                 .coercing(scalarEntry.coercing())
                 .type(scalarEntry.type());
+    }
+
+    @Override
+    public ScalarEntryBuilder refresh() {
+        this.type = null;
+        this.name = null;
+        this.description = null;
+        this.coercing = null;
+        return this;
     }
 
     public Coercing<?, ?> coercing() {

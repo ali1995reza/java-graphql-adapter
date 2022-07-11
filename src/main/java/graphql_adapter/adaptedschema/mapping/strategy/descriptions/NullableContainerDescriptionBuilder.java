@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions;
 
 public abstract class NullableContainerDescriptionBuilder<T extends NullableContainerDescriptionBuilder<T, E>, E extends GraphqlNullableContainerElementDescription> extends GraphqlElementDescriptionBuilder<T, E> {

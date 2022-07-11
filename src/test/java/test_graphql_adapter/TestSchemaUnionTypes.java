@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter;
 
 import org.junit.jupiter.api.Assertions;
@@ -35,6 +34,5 @@ public class TestSchemaUnionTypes {
     public void testVehicleUnionType() {
 
         StaticTests.findAndTestUnionType(Vehicle.class, "Vehicle", 1, Bus.class, Car.class);
-
     }
 }

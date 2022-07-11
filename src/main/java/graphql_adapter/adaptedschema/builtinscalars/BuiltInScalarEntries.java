@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.builtinscalars;
 
 import graphql.language.*;
@@ -31,7 +30,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLDouble = GraphQLScalarType.newScalar().name("Double").description("java.lang.Double").coercing(new Coercing<Object, Double>() {
         @Override
         public Double parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -83,7 +82,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLFloat = GraphQLScalarType.newScalar().name("Float").description("java.lang.Float").coercing(new Coercing<Object, Float>() {
         @Override
         public Float parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -135,7 +134,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLLong = GraphQLScalarType.newScalar().name("Long").description("java.lang.Long").coercing(new Coercing<Object, Long>() {
         @Override
         public Long parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -185,7 +184,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLInt = GraphQLScalarType.newScalar().name("Int").description("java.lang.Integer").coercing(new Coercing<Object, Integer>() {
         @Override
         public Integer parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -210,7 +209,7 @@ public class BuiltInScalarEntries {
         @Override
         public Value<?> valueToLiteral(Object input) {
             Integer converted = convert(input);
-            if(converted == null) {
+            if (converted == null) {
                 return NullValue.of();
             }
             return IntValue.newIntValue(BigInteger.valueOf(converted)).build();
@@ -235,7 +234,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLShort = GraphQLScalarType.newScalar().name("Short").description("java.lang.Short").coercing(new Coercing<Object, Short>() {
         @Override
         public Short parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -260,7 +259,7 @@ public class BuiltInScalarEntries {
         @Override
         public Value<?> valueToLiteral(Object input) {
             Short converted = convert(input);
-            if(converted == null) {
+            if (converted == null) {
                 return NullValue.of();
             }
             return IntValue.newIntValue(BigInteger.valueOf(converted)).build();
@@ -285,7 +284,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLChar = GraphQLScalarType.newScalar().name("Char").description("java.lang.Char").coercing(new Coercing<Object, Character>() {
         @Override
         public Character parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -339,7 +338,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLByte = GraphQLScalarType.newScalar().name("Byte").description("java.lang.Byte").coercing(new Coercing<Object, Byte>() {
         @Override
         public Byte parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -389,7 +388,7 @@ public class BuiltInScalarEntries {
     private final static GraphQLScalarType GraphQLBigDecimal = GraphQLScalarType.newScalar().name("BigDecimal").description("java.math.BigDecimal").coercing(new Coercing<Object, BigDecimal>() {
         @Override
         public BigDecimal parseLiteral(Object input) {
-            if(input instanceof NullValue || input == null) {
+            if (input instanceof NullValue || input == null) {
                 return null;
             }
             if (input instanceof StringValue) {
@@ -471,7 +470,5 @@ public class BuiltInScalarEntries {
                 .coercing(type.getCoercing())
                 .description(type.getDescription())
                 .build();
-
     }
-
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions.type;
 
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNameDescription;
@@ -23,5 +22,4 @@ public interface GraphqlUnionDescription extends GraphqlTypeNameDescription {
     static TypesDescriptionBuilder<? extends TypesDescriptionBuilder<?, GraphqlUnionDescription>, GraphqlUnionDescription> newUnionDescription() {
         return TypesDescriptionBuilder.newBuilder(GraphqlUnionDescriptionImpl::new);
     }
-
 }

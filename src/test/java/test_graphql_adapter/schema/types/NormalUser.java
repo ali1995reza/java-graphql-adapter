@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.GraphqlObjectType;
@@ -25,6 +24,7 @@ public class NormalUser implements UserInterface {
         return new NormalUser()
                 .setName(name);
     }
+
     private String name;
 
     @Override

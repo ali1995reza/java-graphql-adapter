@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapper.classes;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
@@ -85,5 +84,4 @@ public class AnnotationMapper extends ElementMapperWithMethodMapper {
     public Map<Class<?>, MappedAnnotation> mapAnnotations(Collection<Class<?>> classes) {
         return mapAnnotations(classes, Collections.emptyMap(), null, null);
     }
-
 }

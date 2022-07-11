@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.utils;
 
 import graphql_adapter.adaptedschema.discovered.*;
@@ -126,7 +125,6 @@ public class StaticTests {
 
     public static DiscoveredObjectType findAndTestObjectType(Class<?> clazz, String name, int expectedNumberOfFields) {
         return findAndTestObjectType(clazz, name, expectedNumberOfFields, 0);
-
     }
 
     public static DiscoveredScalarType findAndTestScalarType(Class<?> clazz, String name) {

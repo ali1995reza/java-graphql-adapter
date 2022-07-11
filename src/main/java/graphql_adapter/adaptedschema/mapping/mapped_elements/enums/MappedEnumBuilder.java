@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements.enums;
 
 import graphql_adapter.adaptedschema.assertion.Assert;
@@ -37,6 +36,12 @@ public class MappedEnumBuilder extends MappedClassBuilder<MappedEnumBuilder, Map
     }
 
     @Override
+    public MappedEnumBuilder baseClass(Class<?> baseClass) {
+        Assert.isTrue(baseClass.isEnum(), new IllegalStateException("just enum-class can be base class of an enum"));
+        return super.baseClass(baseClass);
+    }
+
+    @Override
     public MappedEnum build() {
         return new MappedEnumImpl(
                 name(),
@@ -52,12 +57,6 @@ public class MappedEnumBuilder extends MappedClassBuilder<MappedEnumBuilder, Map
         super.copy(element);
         element.constantsByName().values().forEach(this::addEnumConstant);
         return this;
-    }
-
-    @Override
-    public MappedEnumBuilder baseClass(Class<?> baseClass) {
-        Assert.isTrue(baseClass.isEnum(), new IllegalStateException("just enum-class can be base class of an enum"));
-        return super.baseClass(baseClass);
     }
 
     @Override

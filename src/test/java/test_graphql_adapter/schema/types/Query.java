@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql.schema.DataFetchingEnvironment;
@@ -61,7 +60,6 @@ public class Query {
         periodScalar.forEach(list::add);
 
         return IntList.of(list);
-
     }
 
     @AddPageParameters
@@ -174,7 +172,6 @@ public class Query {
 
         return serialize(null, separator);
     }
-
 
     private String serialize(Complex input, char separator) {
         StringBuilder stringBuilder = new StringBuilder();

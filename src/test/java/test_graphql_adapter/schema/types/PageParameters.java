@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.GraphqlInputType;
@@ -25,6 +24,19 @@ public class PageParameters {
 
     private int page;
     private int size;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PageParameters that = (PageParameters) o;
+        return page == that.page && size == that.size;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(page, size);
+    }
 
     @Override
     public String toString() {
@@ -48,18 +60,5 @@ public class PageParameters {
 
     public void setSize(int size) {
         this.size = size;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PageParameters that = (PageParameters) o;
-        return page == that.page && size == that.size;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(page, size);
     }
 }

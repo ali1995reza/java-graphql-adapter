@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements.interfaces;
-
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedClassImpl;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;

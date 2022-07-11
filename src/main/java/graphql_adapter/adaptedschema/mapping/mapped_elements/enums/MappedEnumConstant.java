@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements.enums;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
@@ -29,5 +28,4 @@ public interface MappedEnumConstant extends MappedElement {
     Enum<?> constant();
 
     Field field();
-
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions.type;
 
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.GraphqlTypeNameDescription;
@@ -38,6 +37,18 @@ public class TypesDescriptionBuilder<B extends TypesDescriptionBuilder<B, E>, E 
     }
 
     @Override
+    public E build() {
+        return builder.apply(name(), description());
+    }
+
+    @Override
+    public B copy(E e) {
+        return refresh()
+                .description(e.description())
+                .name(e.name());
+    }
+
+    @Override
     public B refresh() {
         this.name = null;
         this.description = null;
@@ -55,18 +66,6 @@ public class TypesDescriptionBuilder<B extends TypesDescriptionBuilder<B, E>, E 
 
     public String name() {
         return name;
-    }
-
-    @Override
-    public E build() {
-        return builder.apply(name(), description());
-    }
-
-    @Override
-    public B copy(E e) {
-        return refresh()
-                .description(e.description())
-                .name(e.name());
     }
 
     public B name(String name) {

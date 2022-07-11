@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.codegenerator.impl;
 
 import graphql.TypeResolutionEnvironment;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SimpleTypeResolverGenerator implements TypeResolverGenerator {
-
 
     @Override
     public TypeResolver generate(DiscoveredUnionType unionType) {
@@ -76,5 +74,4 @@ public class SimpleTypeResolverGenerator implements TypeResolverGenerator {
             return null;
         }
     }
-
 }

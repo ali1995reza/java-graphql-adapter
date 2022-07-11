@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptors.method;
 
 import graphql_adapter.adaptedschema.functions.impl.RawValueParser;
@@ -32,7 +31,6 @@ public class PojoMethodDescriptor implements MethodDescriptor {
     private final static String SET_PREFIX = "set";
     private final static String IS_PREFIX = "is";
     private final static String EMPTY = "";
-
 
     private final boolean removePrefix;
 
@@ -147,5 +145,4 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         }
         return name;
     }
-
 }

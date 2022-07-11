@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.utils.chain;
 
 import graphql_adapter.adaptedschema.utils.builder.IBuilder;
@@ -24,7 +23,6 @@ import java.util.List;
 
 public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
 
-
     public static <T> ChainBuilder<T> newBuilder() {
         return new ChainBuilder<>();
     }
@@ -32,6 +30,23 @@ public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
     private final List<T> chainList = new ArrayList<>();
 
     private ChainBuilder() {
+    }
+
+    @Override
+    public Chain build() {
+        List<T> copy = Collections.unmodifiableList(new ArrayList<>(chainList));
+        return new ChainImpl<>(copy);
+    }
+
+    @Override
+    public ChainBuilder<T> copy(Chain<T> chain) {
+        chain.forEach(this::addToLast);
+        return this;
+    }
+
+    @Override
+    public ChainBuilder<T> refresh() {
+        return this.clear();
     }
 
     public ChainBuilder<T> addAfter(T t, T after) {
@@ -46,7 +61,6 @@ public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
         }
 
         return this;
-
     }
 
     public ChainBuilder<T> addBefore(T t, T before) {
@@ -61,7 +75,6 @@ public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
         }
 
         return this;
-
     }
 
     public ChainBuilder<T> addToLast(T t) {
@@ -84,30 +97,12 @@ public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
         return this;
     }
 
-    public ChainBuilder<T> remove(T t) {
-        this.chainList.remove(t);
-        return this;
-    }
-
     public T get(int index) {
         return chainList.get(index);
     }
 
-    @Override
-    public Chain build() {
-        List<T> copy = Collections.unmodifiableList(new ArrayList<>(chainList));
-        return new ChainImpl<>(copy);
-    }
-
-    @Override
-    public ChainBuilder<T> refresh() {
-        return this.clear();
-    }
-
-    @Override
-    public ChainBuilder<T> copy(Chain<T> chain) {
-        chain.forEach(this::addToLast);
+    public ChainBuilder<T> remove(T t) {
+        this.chainList.remove(t);
         return this;
     }
-
 }

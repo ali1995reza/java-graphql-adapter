@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package test_graphql_adapter.schema.types;
 
 import java.util.Objects;
@@ -47,6 +46,19 @@ public class Bound implements Comparable<Bound> {
         return 0;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Bound bound = (Bound) o;
+        return number == bound.number && contains == bound.contains;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(number, contains);
+    }
+
     public String asLowerBound() {
         return String.valueOf(contains ? '[' : '(') + number;
     }
@@ -61,18 +73,5 @@ public class Bound implements Comparable<Bound> {
 
     public int number() {
         return number;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Bound bound = (Bound) o;
-        return number == bound.number && contains == bound.contains;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(number, contains);
     }
 }

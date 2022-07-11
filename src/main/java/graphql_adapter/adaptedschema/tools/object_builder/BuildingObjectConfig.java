@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.tools.object_builder;
 
 import graphql_adapter.adaptedschema.utils.builder.IBuilder;
@@ -40,41 +39,28 @@ public class BuildingObjectConfig {
             .dontUseExactProvidedListForScalarTypes()
             .build();
 
-
     public static BuildingObjectConfig.Builder newConfig() {
         return new Builder();
+    }
+    private final boolean useInputFieldsDefaultValues;
+    private final boolean useExactProvidedListForScalarTypes;
+    public BuildingObjectConfig(boolean useInputFieldsDefaultValues, boolean useExactProvidedListForScalarTypes) {
+        this.useInputFieldsDefaultValues = useInputFieldsDefaultValues;
+        this.useExactProvidedListForScalarTypes = useExactProvidedListForScalarTypes;
+    }
+
+    public boolean useExactProvidedListForScalarTypes() {
+        return useExactProvidedListForScalarTypes;
+    }
+
+    public boolean useInputFieldsDefaultValues() {
+        return useInputFieldsDefaultValues;
     }
 
     public static class Builder implements IBuilder<Builder, BuildingObjectConfig> {
 
         private boolean useInputFieldsDefaultValues = false;
         private boolean useExactProvidedListForScalarTypes = false;
-
-        public Builder useExactProvidedListForScalarTypes(boolean useExactProvidedListForScalarTypes) {
-            this.useExactProvidedListForScalarTypes = useExactProvidedListForScalarTypes;
-            return this;
-        }
-
-        public Builder useInputFieldsDefaultValues(boolean useInputFieldsDefaultValues) {
-            this.useInputFieldsDefaultValues = useInputFieldsDefaultValues;
-            return this;
-        }
-
-        public Builder useExactProvidedListForScalarTypes() {
-            return this.useExactProvidedListForScalarTypes(true);
-        }
-
-        public Builder useInputFieldsDefaultValues() {
-            return this.useInputFieldsDefaultValues(true);
-        }
-
-        public Builder dontUseExactProvidedListForScalarTypes() {
-            return this.useExactProvidedListForScalarTypes(false);
-        }
-
-        public Builder dontUseInputFieldDefaultValues() {
-            return this.useInputFieldsDefaultValues(false);
-        }
 
         @Override
         public BuildingObjectConfig build() {
@@ -86,7 +72,6 @@ public class BuildingObjectConfig {
             return refresh()
                     .useExactProvidedListForScalarTypes(config.useExactProvidedListForScalarTypes())
                     .useInputFieldsDefaultValues(config.useInputFieldsDefaultValues());
-
         }
 
         @Override
@@ -95,21 +80,31 @@ public class BuildingObjectConfig {
             this.useExactProvidedListForScalarTypes = false;
             return this;
         }
-    }
 
-    private final boolean useInputFieldsDefaultValues;
-    private final boolean useExactProvidedListForScalarTypes;
+        public Builder dontUseExactProvidedListForScalarTypes() {
+            return this.useExactProvidedListForScalarTypes(false);
+        }
 
-    public BuildingObjectConfig(boolean useInputFieldsDefaultValues, boolean useExactProvidedListForScalarTypes) {
-        this.useInputFieldsDefaultValues = useInputFieldsDefaultValues;
-        this.useExactProvidedListForScalarTypes = useExactProvidedListForScalarTypes;
-    }
+        public Builder dontUseInputFieldDefaultValues() {
+            return this.useInputFieldsDefaultValues(false);
+        }
 
-    public boolean useInputFieldsDefaultValues() {
-        return useInputFieldsDefaultValues;
-    }
+        public Builder useExactProvidedListForScalarTypes(boolean useExactProvidedListForScalarTypes) {
+            this.useExactProvidedListForScalarTypes = useExactProvidedListForScalarTypes;
+            return this;
+        }
 
-    public boolean useExactProvidedListForScalarTypes() {
-        return useExactProvidedListForScalarTypes;
+        public Builder useExactProvidedListForScalarTypes() {
+            return this.useExactProvidedListForScalarTypes(true);
+        }
+
+        public Builder useInputFieldsDefaultValues(boolean useInputFieldsDefaultValues) {
+            this.useInputFieldsDefaultValues = useInputFieldsDefaultValues;
+            return this;
+        }
+
+        public Builder useInputFieldsDefaultValues() {
+            return this.useInputFieldsDefaultValues(true);
+        }
     }
 }

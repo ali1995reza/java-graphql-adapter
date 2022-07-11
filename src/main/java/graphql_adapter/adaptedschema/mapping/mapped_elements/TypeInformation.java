@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.mapped_elements;
 
 import graphql.schema.DataFetchingEnvironment;
@@ -131,6 +130,7 @@ public final class TypeInformation<T> {
     public static <T> TypeInformation<T> toNullable(TypeInformation<T> nonNullable) {
         return new TypeInformation<>(nonNullable.type, true, nonNullable.dimensions, nonNullable.dimensionModel);
     }
+
     private final Class<T> type;
     private final boolean nullable;
     private final int dimensions;
@@ -185,5 +185,4 @@ public final class TypeInformation<T> {
     public Class<T> type() {
         return type;
     }
-
 }

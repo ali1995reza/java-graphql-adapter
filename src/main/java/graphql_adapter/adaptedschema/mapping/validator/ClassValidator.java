@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.validator;
 
 import graphql_adapter.adaptedschema.assertion.Assert;
@@ -98,5 +97,4 @@ public class ClassValidator {
         ElementValidator.validateElement(mappedClass, clazz, true, e);
         Assert.isNotNull(mappedClass.baseClass(), exception(e, "provided base class for mapped class is null", clazz));
     }
-
 }

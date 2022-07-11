@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions.type;
 
 import graphql.schema.Coercing;
@@ -24,7 +23,6 @@ public class GraphqlScalarDescriptionBuilder extends TypesDescriptionBuilder<Gra
         return new GraphqlScalarDescriptionBuilder();
     }
 
-
     private Class<? extends Coercing<?, ?>> coercing;
 
     GraphqlScalarDescriptionBuilder() {
@@ -32,10 +30,8 @@ public class GraphqlScalarDescriptionBuilder extends TypesDescriptionBuilder<Gra
     }
 
     @Override
-    public GraphqlScalarDescriptionBuilder refresh() {
-        this.coercing = null;
-        super.refresh();
-        return this;
+    public GraphqlScalarDescription build() {
+        return new GraphqlScalarDescriptionImpl(name(), description(), coercing());
     }
 
     @Override
@@ -46,8 +42,10 @@ public class GraphqlScalarDescriptionBuilder extends TypesDescriptionBuilder<Gra
     }
 
     @Override
-    public GraphqlScalarDescription build() {
-        return new GraphqlScalarDescriptionImpl(name(), description(), coercing());
+    public GraphqlScalarDescriptionBuilder refresh() {
+        this.coercing = null;
+        super.refresh();
+        return this;
     }
 
     public GraphqlScalarDescriptionBuilder coercing(Class<? extends Coercing<?, ?>> coercing) {

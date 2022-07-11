@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package graphql_adapter.adaptedschema.utils.sdl;
 
 import graphql.language.*;
@@ -31,7 +30,6 @@ public class SDLUtils {
 
     private final static Set<String> BuiltInTypes = new HashSet<>(Arrays.asList("__Directive", "__DirectiveLocation", "__EnumValue", "__Field",
             "__InputValue", "__Schema", "__Type", "__TypeKind"));
-
 
     private final static char NONE_NULL = '!';
     private final static char START_LIST = '[';
@@ -570,5 +568,4 @@ public class SDLUtils {
                 field -> buffer.append(field.getName()).append(": ").append(toSDL(field.getValue())));
         return buffer.append("}").toString();
     }
-
 }
