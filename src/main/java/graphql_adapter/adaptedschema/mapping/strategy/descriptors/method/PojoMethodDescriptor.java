@@ -116,6 +116,7 @@ public class PojoMethodDescriptor implements MethodDescriptor {
                 .nullable(isNullable(method))
                 .setter(setter)
                 .defaultValue(DescriptorUtils.getDefaultValue(method))
+                .description(DescriptorUtils.getDescription(method))
                 .build();
     }
 
@@ -133,6 +134,7 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         return GraphqlFieldDescription.newFieldDescription()
                 .name(getName(method))
                 .nullable(isNullable(method))
+                .description(DescriptorUtils.getDescription(method))
                 .build();
     }
 
