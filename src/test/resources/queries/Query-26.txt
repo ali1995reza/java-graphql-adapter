@@ -1,0 +1,16 @@
+fragment fr on Bus {
+    model
+    produceYear
+    size
+}
+
+query {
+    getVehicle(isCar: true) {
+        __typename
+        ... on Car {
+            model
+            produceYear
+        }
+        ... fr
+    }
+}

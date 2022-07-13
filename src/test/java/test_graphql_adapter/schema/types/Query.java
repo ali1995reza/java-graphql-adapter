@@ -81,10 +81,8 @@ public class Query {
     @GraphqlField
     public Vehicle getVehicle(@DefaultValue("true") @GraphqlArgument(name = "isCar") Boolean isCar, DataFetchingEnvironment environment) {
         if (isCar) {
-            Car car = new Car();
-            car.setModel(Randomer.random("Ferrari", "Lamborghini", "Bugatti"));
-            car.setProduceYear(Randomer.random(1998, 2001, 2012, 2021));
-            return car;
+            int producedYear = Randomer.random(1998, 2001, 2012, 2021);
+            return Randomer.random(new Ferrari(producedYear), new Bugatti(producedYear), new Lamborghini(producedYear));
         } else {
             Bus bus = new Bus();
             bus.setModel(Randomer.random("Benz", "Volvo", "Nissan"));

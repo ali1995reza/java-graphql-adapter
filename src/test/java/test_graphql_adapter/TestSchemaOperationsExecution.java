@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.types.Bus;
+import test_graphql_adapter.schema.types.Car;
 import test_graphql_adapter.utils.ExecutionResultParser;
 import test_graphql_adapter.utils.QueryResolver;
 import test_graphql_adapter.utils.TestUtils;
@@ -186,12 +187,21 @@ public class TestSchemaOperationsExecution {
     }
 
     @Test
+    public void testExtendedObjectTypes() {
+        ExecutionResultParser parser = execute("Query-26");
+        assertEquals(Car.class.getSimpleName(), parser.getData("getVehicle.__typename"));
+        TestUtils.assertEqualsToOneOf(parser.getData("getVehicle.model"), "Bugatti", "Ferrari", "Lamborghini");
+        TestUtils.assertEqualsToOneOf(parser.getData("getVehicle.produceYear"), "1998", "2001", "2012", "2021");
+        assertNull(parser.getData("getVehicle.size"));
+    }
+
+    @Test
     public void testFragments() {
         ExecutionResultParser parser = execute("Query-6");
         assertEquals(Bus.class.getSimpleName(), parser.getData("getVehicle.__typename"));
-        assertNotNull(parser.getData("getVehicle.model"));
-        assertNotNull(parser.getData("getVehicle.produceYear"));
-        assertNotNull(parser.getData("getVehicle.size"));
+        TestUtils.assertEqualsToOneOf(parser.getData("getVehicle.model"), TestUtils.base64Hash("BENZ" + "some_salt", "SHA-256"), TestUtils.base64Hash("VOLVO" + "some_salt", "SHA-256"), TestUtils.base64Hash("NISSAN" + "some_salt", "SHA-256"));
+        TestUtils.assertEqualsToOneOf(parser.getData("getVehicle.produceYear"), "1998", "2001", "2012", "2021");
+        TestUtils.assertEqualsToOneOf(parser.getData("getVehicle.size"), 10, 20, 30, 40);
     }
 
     @Test

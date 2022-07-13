@@ -16,13 +16,16 @@
 package test_graphql_adapter.utils;
 
 import org.junit.jupiter.api.Assertions;
+import org.opentest4j.AssertionFailedError;
 
 import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 public class TestUtils {
 
@@ -72,5 +75,18 @@ public class TestUtils {
             }
         }
         return isParameterNamePresent;
+    }
+
+    public static <T> void assertEqualsToOneOf(T actual, T... expected) {
+        if (expected == null) {
+            throw new NullPointerException("expected objects not set");
+        }
+        for (T e : expected) {
+            if (Objects.equals(actual, e)) {
+                return;
+            }
+        }
+        List<T> expectedList = Arrays.asList(expected);
+        throw new AssertionFailedError("expected to be one of " + expectedList + ", but actual is : " + actual, expectedList, actual);
     }
 }
