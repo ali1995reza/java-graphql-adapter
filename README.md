@@ -395,7 +395,7 @@ public class MyType {
     @GraphqlField
     public String myField(DataFetchingEnvironment environment, AdaptedGraphQLSchema schema) {
         MyInputType argument = (MyInputType) schema.objectBuilder()
-                .buildFromObject(MyInputType.class, environment.getArgument("argument"));
+                .buildFromObject(environment.getArgument("argument"), MyInputType.class);
         return "some result";
     }
 }
