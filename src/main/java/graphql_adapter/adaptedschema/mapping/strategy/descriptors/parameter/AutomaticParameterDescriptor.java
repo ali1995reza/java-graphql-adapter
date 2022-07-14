@@ -25,7 +25,7 @@ import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectivesH
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-public class ParameterAutomaticDescriptor implements ParameterDescriptor {
+public class AutomaticParameterDescriptor implements ParameterDescriptor {
 
     public static Builder newBuilder() {
         return new Builder();
@@ -33,7 +33,7 @@ public class ParameterAutomaticDescriptor implements ParameterDescriptor {
 
     private final String argNameIfNotPresent;
 
-    private ParameterAutomaticDescriptor(String argNameIfNotPresent) {
+    private AutomaticParameterDescriptor(String argNameIfNotPresent) {
         this.argNameIfNotPresent = argNameIfNotPresent;
     }
 
@@ -82,7 +82,7 @@ public class ParameterAutomaticDescriptor implements ParameterDescriptor {
         }
 
         public ParameterDescriptor build() {
-            return new ParameterAutomaticDescriptor(argNameIfNotPresent);
+            return new AutomaticParameterDescriptor(argNameIfNotPresent);
         }
     }
 }
