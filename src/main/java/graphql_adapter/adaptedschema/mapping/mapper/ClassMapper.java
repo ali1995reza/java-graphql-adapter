@@ -28,7 +28,7 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.enums.MappedEnum;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.interfaces.MappedInterface;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.interfaces.MappedUnionInterface;
 import graphql_adapter.adaptedschema.mapping.mapper.classes.*;
-import graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations.AnnotationBaseDirectiveDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations.AnnotationBaseAppliedDirectiveDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.classes.AnnotationBaseClassDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
@@ -39,7 +39,7 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.Annotat
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.PojoMethodDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.AnnotationBaseParameterDescriptor;
-import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterAutomaticDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.AutomaticParameterDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
 import graphql_adapter.adaptedschema.scalar.ScalarEntry;
 import graphql_adapter.adaptedschema.tools.object_builder.ObjectBuilder;
@@ -69,7 +69,7 @@ public final class ClassMapper {
 
     public final static Chain<ParameterDescriptor> DEFAULT_PARAMETER_DESCRIPTORS = Chain.newChain()
             .addToLast(new AnnotationBaseParameterDescriptor())
-            .addToLast(ParameterAutomaticDescriptor.newBuilder()
+            .addToLast(AutomaticParameterDescriptor.newBuilder()
                     .argNameIfNotPresent("arg")
                     .build())
             .build();
@@ -80,7 +80,7 @@ public final class ClassMapper {
             .build();
 
     public final static Chain<AppliedDirectiveDescriptor> DEFAULT_APPLIED_DIRECTIVE_DESCRIPTORS = Chain.newChain()
-            .addToLast(new AnnotationBaseDirectiveDescriptor())
+            .addToLast(new AnnotationBaseAppliedDirectiveDescriptor())
             .build();
 
     private Chain<ClassDescriptor> classDescriptorChain;

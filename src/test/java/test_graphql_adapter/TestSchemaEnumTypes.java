@@ -22,7 +22,8 @@ import org.junit.jupiter.api.Test;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.Since;
 import test_graphql_adapter.schema.types.UserType;
-import test_graphql_adapter.utils.StaticTests;
+
+import static test_graphql_adapter.utils.StaticTests.*;
 
 public class TestSchemaEnumTypes {
 
@@ -33,12 +34,15 @@ public class TestSchemaEnumTypes {
 
     @Test
     public void testUserTypeEnumType() {
-        DiscoveredEnumType enumType = StaticTests.findAndTestEnumType(UserType.class, "UserType", 2, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", enumType, "version", "1.0.9");
+        DiscoveredEnumType enumType = findAndTestEnumType(UserType.class, "UserType", 2, 1);
+        findAppliedAnnotationAndTest(Since.class, "Since", enumType, "version", "1.0.9");
+        assertDescriptionEquals(enumType, "An ENUM");
 
-        MappedEnumConstant adminConstant = StaticTests.findEnumValueAndTest("ADMIN", UserType.ADMIN, enumType, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", adminConstant, "version", "1.0.10");
+        MappedEnumConstant adminConstant = findEnumValueAndTest("ADMIN", UserType.ADMIN, enumType, 1);
+        findAppliedAnnotationAndTest(Since.class, "Since", adminConstant, "version", "1.0.10");
+        assertDescriptionEquals(adminConstant, "D100");
 
-        StaticTests.findEnumValueAndTest("NORMAL", UserType.Normal, enumType, 0);
+        MappedEnumConstant normalConstant = findEnumValueAndTest("NORMAL", UserType.Normal, enumType, 0);
+        assertDescriptionEquals(normalConstant, "D101");
     }
 }

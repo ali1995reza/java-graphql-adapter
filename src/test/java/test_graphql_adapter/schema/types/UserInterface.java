@@ -15,10 +15,12 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlField;
 import graphql_adapter.annotations.GraphqlInterface;
 import test_graphql_adapter.schema.directives.Since;
 
+@GraphqlDescription("D8999999")
 @GraphqlInterface
 @Since("1.0.4")
 public interface UserInterface {

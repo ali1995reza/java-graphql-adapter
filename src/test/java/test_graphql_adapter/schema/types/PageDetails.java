@@ -15,6 +15,7 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlObjectType;
 
 @GraphqlObjectType
@@ -32,6 +33,7 @@ public class PageDetails {
         return page;
     }
 
+    @GraphqlDescription("D428")
     public int getSize() {
         return size;
     }

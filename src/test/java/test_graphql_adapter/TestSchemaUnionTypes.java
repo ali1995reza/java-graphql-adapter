@@ -15,13 +15,16 @@
  */
 package test_graphql_adapter;
 
+import graphql_adapter.adaptedschema.discovered.DiscoveredUnionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.types.Bus;
 import test_graphql_adapter.schema.types.Car;
 import test_graphql_adapter.schema.types.Vehicle;
-import test_graphql_adapter.utils.StaticTests;
+
+import static test_graphql_adapter.utils.StaticTests.assertDescriptionEquals;
+import static test_graphql_adapter.utils.StaticTests.findAndTestUnionType;
 
 public class TestSchemaUnionTypes {
 
@@ -32,7 +35,7 @@ public class TestSchemaUnionTypes {
 
     @Test
     public void testVehicleUnionType() {
-
-        StaticTests.findAndTestUnionType(Vehicle.class, "Vehicle", 1, Bus.class, Car.class);
+        DiscoveredUnionType vehicleUnion = findAndTestUnionType(Vehicle.class, "Vehicle", 1, Bus.class, Car.class);
+        assertDescriptionEquals(vehicleUnion, "Vehicle Union Description");
     }
 }

@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Delay {
 
+    @GraphqlDescription("D3")
     @GraphqlDirectiveArgument(nullable = false, name = "seconds")
     int value();
 }

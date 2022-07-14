@@ -16,6 +16,7 @@
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.DefaultValue;
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlInputType;
 import graphql_adapter.annotations.GraphqlObjectType;
 import test_graphql_adapter.schema.parsers.CustomBooleanValueParser;
@@ -25,6 +26,7 @@ import test_graphql_adapter.schema.parsers.CustomStringValueParser;
 import java.util.Arrays;
 import java.util.Objects;
 
+@GraphqlDescription("D456")
 @GraphqlInputType(name = "FooInput")
 @GraphqlObjectType(name = "FooOutput")
 public class Foo {
@@ -115,6 +117,7 @@ public class Foo {
         return this;
     }
 
+    @GraphqlDescription("D989")
     @DefaultValue("[1,2,3]")
     public int[] getIntArray() {
         return intArray;

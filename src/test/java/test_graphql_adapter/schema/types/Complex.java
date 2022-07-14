@@ -16,12 +16,14 @@
 package test_graphql_adapter.schema.types;
 
 import graphql_adapter.annotations.DefaultValue;
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlInputType;
 import graphql_adapter.annotations.GraphqlObjectType;
 import test_graphql_adapter.schema.directives.Since;
 
 import java.util.Objects;
 
+@GraphqlDescription("D980")
 @GraphqlInputType(name = "ComplexInput")
 @GraphqlObjectType(name = "ComplexOutput")
 @Since("1.0.25")
@@ -65,6 +67,7 @@ public class Complex {
                 '}';
     }
 
+    @GraphqlDescription("D891")
     @DefaultValue("{name:'dn', value:'dv', priority:100, inner:{name:'idn', value:'idv', priority:101}}")
     public Complex getInner() {
         return inner;
@@ -94,6 +97,7 @@ public class Complex {
         return this;
     }
 
+    @GraphqlDescription("D2900")
     public String getValue() {
         return value;
     }

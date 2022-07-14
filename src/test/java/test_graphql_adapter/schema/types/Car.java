@@ -15,6 +15,7 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlField;
 import graphql_adapter.annotations.GraphqlObjectType;
 import test_graphql_adapter.schema.directives.ToStringDirective;
@@ -34,6 +35,7 @@ public class Car implements Vehicle {
         this.model = model;
     }
 
+    @GraphqlDescription("D76543")
     @ToStringDirective
     @GraphqlField(name = "produceYear")
     public Integer getProduceYear() {

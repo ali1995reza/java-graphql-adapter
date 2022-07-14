@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.*;
 import test_graphql_adapter.schema.types.*;
-import test_graphql_adapter.utils.StaticTests;
 
 import java.util.Arrays;
 
+import static test_graphql_adapter.utils.StaticTests.*;
 import static test_graphql_adapter.utils.TestUtils.isParameterNamePresent;
 
 public class TestSchemaObjectTypes {
@@ -44,246 +44,326 @@ public class TestSchemaObjectTypes {
 
     @Test
     public void testAdminUserType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(AdminUser.class, "Admin", 3);
+        DiscoveredObjectType type = findAndTestObjectType(AdminUser.class, "Admin", 3);
+        assertDescriptionIsNull(type);
 
-        StaticTests.findFieldAndTest("name", type, TypeInformation.nonNullable(String.class));
+        MappedFieldMethod nameField = findFieldAndTest("name", type, TypeInformation.nonNullable(String.class));
+        assertDescriptionIsNull(nameField);
 
-        StaticTests.findFieldAndTest("type", type, TypeInformation.nonNullable(UserType.class));
+        MappedFieldMethod typeField = findFieldAndTest("type", type, TypeInformation.nonNullable(UserType.class));
+        assertDescriptionIsNull(typeField);
 
-        StaticTests.findFieldAndTest("token", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod tokenField = findFieldAndTest("token", type, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(tokenField);
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(1, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
 
-        StaticTests.findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
+        findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
     }
 
     @Test
     public void testBankAccountType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(BankAccount.class, "BankAccount", 3);
+        DiscoveredObjectType type = findAndTestObjectType(BankAccount.class, "BankAccount", 3);
+        assertDescriptionIsNull(type);
 
-        StaticTests.findFieldAndTest("id", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod idField = findFieldAndTest("id", type, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(idField);
 
-        StaticTests.findFieldAndTest("username", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod usernameField = findFieldAndTest("username", type, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(usernameField);
 
-        StaticTests.findFieldAndTest("balance", type, TypeInformation.nullable(Double.class));
+        MappedFieldMethod balanceField = findFieldAndTest("balance", type, TypeInformation.nullable(Double.class));
+        assertDescriptionEquals(balanceField, "Balance as dollar");
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(0, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
     }
 
     @Test
     public void testBusType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(Bus.class, "Bus", 3, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.1");
+        DiscoveredObjectType type = findAndTestObjectType(Bus.class, "Bus", 3, 1);
+        findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.1");
+        assertDescriptionEquals(type, "Bus");
 
-        MappedFieldMethod modelField = StaticTests.findFieldAndTest("model", type, 0, 3, TypeInformation.nullable(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Delay.class, "Delay", modelField, "seconds", 0);
-        StaticTests.findAppliedAnnotationAndTest(UpperCase.class, "UpperCase", modelField);
-        StaticTests.findAppliedAnnotationAndTest(Hash.class, "Hash", modelField, "salt", "some_salt", "algorithm", "SHA-256");
+        MappedFieldMethod modelField = findFieldAndTest("model", type, 0, 3, TypeInformation.nullable(String.class));
+        findAppliedAnnotationAndTest(Delay.class, "Delay", modelField, "seconds", 0);
+        findAppliedAnnotationAndTest(UpperCase.class, "UpperCase", modelField);
+        findAppliedAnnotationAndTest(Hash.class, "Hash", modelField, "salt", "some_salt", "algorithm", "SHA-256");
+        assertDescriptionIsNull(modelField);
 
-        MappedFieldMethod produceYearField = StaticTests.findFieldAndTest("produceYear", type, 0, 1, TypeInformation.nullable(Integer.class));
-        StaticTests.findAppliedAnnotationAndTest(ToStringDirective.class, "ToString", produceYearField);
+        MappedFieldMethod produceYearField = findFieldAndTest("produceYear", type, 0, 1, TypeInformation.nullable(Integer.class));
+        findAppliedAnnotationAndTest(ToStringDirective.class, "ToString", produceYearField);
+        assertDescriptionIsNull(produceYearField);
 
-        StaticTests.findFieldAndTest("size", type, TypeInformation.nullable(Integer.class));
+        MappedFieldMethod sizeField = findFieldAndTest("size", type, TypeInformation.nullable(Integer.class));
+        assertDescriptionIsNull(sizeField);
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(1, type);
+        assertAndTestNumberOfImplementedInterfaces(0, type);
+        assertAndTestNumberOfPossibleUnions(1, type);
 
-        StaticTests.findUnionTypeAndTest(Vehicle.class, "Vehicle", type);
+        findUnionTypeAndTest(Vehicle.class, "Vehicle", type);
     }
 
     @Test
     public void testCarType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(Car.class, "Car", 2);
+        DiscoveredObjectType type = findAndTestObjectType(Car.class, "Car", 2);
+        assertDescriptionIsNull(type);
 
-        StaticTests.findFieldAndTest("model", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod modelField = findFieldAndTest("model", type, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(modelField);
 
-        MappedFieldMethod produceYearField = StaticTests.findFieldAndTest("produceYear", type, 0, 1, TypeInformation.nullable(Integer.class));
-        StaticTests.findAppliedAnnotationAndTest(ToStringDirective.class, "ToString", produceYearField);
+        MappedFieldMethod produceYearField = findFieldAndTest("produceYear", type, 0, 1, TypeInformation.nullable(Integer.class));
+        findAppliedAnnotationAndTest(ToStringDirective.class, "ToString", produceYearField);
+        assertDescriptionEquals(produceYearField, "D76543");
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(1, type);
+        assertAndTestNumberOfImplementedInterfaces(0, type);
+        assertAndTestNumberOfPossibleUnions(1, type);
 
-        StaticTests.findUnionTypeAndTest(Vehicle.class, "Vehicle", type);
+        findUnionTypeAndTest(Vehicle.class, "Vehicle", type);
     }
 
     @Test
     public void testComplexOutputType() {
 
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(Complex.class, "ComplexOutput", 4, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.25");
+        DiscoveredObjectType type = findAndTestObjectType(Complex.class, "ComplexOutput", 4, 1);
+        findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.25");
+        assertDescriptionEquals(type, "D980");
 
-        StaticTests.findFieldAndTest("name", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod nameField = findFieldAndTest("name", type, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(nameField);
 
-        StaticTests.findFieldAndTest("value", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod valueField = findFieldAndTest("value", type, TypeInformation.nullable(String.class));
+        assertDescriptionEquals(valueField, "D2900");
 
-        MappedFieldMethod priorityField = StaticTests.findFieldAndTest("priority", type, 0, 1, TypeInformation.nonNullable(int.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
+        MappedFieldMethod priorityField = findFieldAndTest("priority", type, 0, 1, TypeInformation.nonNullable(int.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
+        assertDescriptionIsNull(priorityField);
 
-        StaticTests.findFieldAndTest("inner", type, TypeInformation.nullable(Complex.class));
+        MappedFieldMethod innerField = findFieldAndTest("inner", type, TypeInformation.nullable(Complex.class));
+        assertDescriptionEquals(innerField, "D891");
     }
 
     @Test
     public void testFooOutputType() {
-        DiscoveredObjectType objectType = StaticTests.findAndTestObjectType(Foo.class, "FooOutput", 12);
+        DiscoveredObjectType objectType = findAndTestObjectType(Foo.class, "FooOutput", 12);
+        assertDescriptionEquals(objectType, "D456");
 
-        StaticTests.findFieldAndTest("stringValue", objectType, 0, TypeInformation.nullable(String.class));
+        MappedFieldMethod stringValueField = findFieldAndTest("stringValue", objectType, 0, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(stringValueField);
 
-        StaticTests.findFieldAndTest("longValue", objectType, 0, TypeInformation.nonNullable(long.class));
+        MappedFieldMethod longValueField = findFieldAndTest("longValue", objectType, 0, TypeInformation.nonNullable(long.class));
+        assertDescriptionIsNull(longValueField);
 
-        StaticTests.findFieldAndTest("intValue", objectType, 0, TypeInformation.nonNullable(int.class));
+        MappedFieldMethod intValueField = findFieldAndTest("intValue", objectType, 0, TypeInformation.nonNullable(int.class));
+        assertDescriptionIsNull(intValueField);
 
-        StaticTests.findFieldAndTest("intValue2", objectType, 0, TypeInformation.nonNullable(int.class));
+        MappedFieldMethod intValue2Field = findFieldAndTest("intValue2", objectType, 0, TypeInformation.nonNullable(int.class));
+        assertDescriptionIsNull(intValue2Field);
 
-        StaticTests.findFieldAndTest("doubleValue", objectType, 0, TypeInformation.nonNullable(double.class));
+        MappedFieldMethod doubleValueField = findFieldAndTest("doubleValue", objectType, 0, TypeInformation.nonNullable(double.class));
+        assertDescriptionIsNull(doubleValueField);
 
-        StaticTests.findFieldAndTest("floatValue", objectType, 0, TypeInformation.nonNullable(float.class));
+        MappedFieldMethod floatValueField = findFieldAndTest("floatValue", objectType, 0, TypeInformation.nonNullable(float.class));
+        assertDescriptionIsNull(floatValueField);
 
-        StaticTests.findFieldAndTest("byteValue", objectType, 0, TypeInformation.nonNullable(byte.class));
+        MappedFieldMethod byteValueField = findFieldAndTest("byteValue", objectType, 0, TypeInformation.nonNullable(byte.class));
+        assertDescriptionIsNull(byteValueField);
 
-        StaticTests.findFieldAndTest("shortValue", objectType, 0, TypeInformation.nonNullable(short.class));
+        MappedFieldMethod shortValueField = findFieldAndTest("shortValue", objectType, 0, TypeInformation.nonNullable(short.class));
+        assertDescriptionIsNull(shortValueField);
 
-        StaticTests.findFieldAndTest("charValue", objectType, 0, TypeInformation.nonNullable(char.class));
+        MappedFieldMethod charValueField = findFieldAndTest("charValue", objectType, 0, TypeInformation.nonNullable(char.class));
+        assertDescriptionIsNull(charValueField);
 
-        StaticTests.findFieldAndTest("booleanValue", objectType, 0, TypeInformation.nonNullable(boolean.class));
+        MappedFieldMethod booleanValueField = findFieldAndTest("booleanValue", objectType, 0, TypeInformation.nonNullable(boolean.class));
+        assertDescriptionIsNull(booleanValueField);
 
-        StaticTests.findFieldAndTest("booleanValue2", objectType, 0, TypeInformation.nonNullable(boolean.class));
+        MappedFieldMethod booleanValue2Field = findFieldAndTest("booleanValue2", objectType, 0, TypeInformation.nonNullable(boolean.class));
+        assertDescriptionIsNull(booleanValue2Field);
 
-        StaticTests.findFieldAndTest("intArray", objectType, 0, TypeInformation.nullableArray(int.class));
+        MappedFieldMethod intArrayField = findFieldAndTest("intArray", objectType, 0, TypeInformation.nullableArray(int.class));
+        assertDescriptionEquals(intArrayField, "D989");
     }
 
     @Test
     public void testIntListType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(IntList.class, "IntList", 4);
+        DiscoveredObjectType type = findAndTestObjectType(IntList.class, "IntList", 4);
+        assertDescriptionIsNull(type);
 
-        StaticTests.findFieldAndTest("data", type, TypeInformation.nullableList(Integer.class));
+        MappedFieldMethod dataField = findFieldAndTest("data", type, TypeInformation.nullableList(Integer.class));
+        assertDescriptionIsNull(dataField);
 
-        StaticTests.findFieldAndTest("isEmpty", type, TypeInformation.nonNullable(boolean.class));
+        MappedFieldMethod isEmptyField = findFieldAndTest("isEmpty", type, TypeInformation.nonNullable(boolean.class));
+        assertDescriptionIsNull(isEmptyField);
 
-        MappedFieldMethod sizeField = StaticTests.findFieldAndTest("size", type, 1, TypeInformation.nonNullable(int.class));
-        StaticTests.findParameterAndTest(null, sizeField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 0, TypeInformation.nullable(DataFetchingEnvironment.class));
+        MappedFieldMethod sizeField = findFieldAndTest("size", type, 1, TypeInformation.nonNullable(int.class));
+        findParameterAndTest(null, sizeField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 0, TypeInformation.nullable(DataFetchingEnvironment.class));
+        assertDescriptionIsNull(sizeField);
 
-        MappedFieldMethod getField = StaticTests.findFieldAndTest("get", type, 1, TypeInformation.nullable(Integer.class));
-        StaticTests.findParameterAndTest("index", getField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), 0);
+        MappedFieldMethod getField = findFieldAndTest("get", type, 1, TypeInformation.nullable(Integer.class));
+        findParameterAndTest("index", getField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), 0);
+        assertDescriptionIsNull(getField);
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(0, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
     }
 
     @Test
     public void testMutation() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(TestMutation.class, "TestMutation", 6, 0, MappedElementType.MUTATION);
+        DiscoveredObjectType type = findAndTestObjectType(TestMutation.class, "TestMutation", 6, 0, MappedElementType.MUTATION);
+        assertDescriptionIsNull(type);
 
-        MappedFieldMethod encodeToBase64Field = StaticTests.findFieldAndTest("encodeToBase64", type, 1, TypeInformation.nullable(String.class));
-        StaticTests.findParameterAndTest("input", encodeToBase64Field, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(String.class));
+        MappedFieldMethod encodeToBase64Field = findFieldAndTest("encodeToBase64", type, 1, TypeInformation.nullable(String.class));
+        MappedParameter inputParameter = findParameterAndTest("input", encodeToBase64Field, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(inputParameter);
+        assertDescriptionIsNull(encodeToBase64Field);
 
-        MappedFieldMethod splitField = StaticTests.findFieldAndTest("split", type, 2, 1, TypeInformation.nullableList(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", splitField, "version", "1.0.12");
-        StaticTests.findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
-        MappedParameter splitorParameter = StaticTests.findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
+        MappedFieldMethod splitField = findFieldAndTest("split", type, 2, 1, TypeInformation.nullableList(String.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", splitField, "version", "1.0.12");
+        MappedParameter inputParameter2 = findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
+        assertDescriptionEquals(inputParameter2, "D2019");
+        MappedParameter splitorParameter = findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
+        assertDescriptionIsNull(splitorParameter);
+        assertDescriptionEquals(splitField, "D145");
 
-        MappedFieldMethod combineInto3DMatrixField = StaticTests.findFieldAndTest("combineInto3DMatrix", type, 2, 0, TypeInformation.nullableArray(int.class, 3));
-        StaticTests.findParameterAndTest("a", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableArray(int.class, 2));
-        StaticTests.findParameterAndTest(isParameterNamePresent() ? "b" : "arg1", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, TypeInformation.nullableList(Integer.class, 2));
+        MappedFieldMethod combineInto3DMatrixField = findFieldAndTest("combineInto3DMatrix", type, 2, 0, TypeInformation.nullableArray(int.class, 3));
+        MappedParameter aParameter = findParameterAndTest("a", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableArray(int.class, 2));
+        assertDescriptionIsNull(aParameter);
+        MappedParameter bParameter = findParameterAndTest(isParameterNamePresent() ? "b" : "arg1", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, TypeInformation.nullableList(Integer.class, 2));
+        assertDescriptionIsNull(bParameter);
+        assertDescriptionIsNull(combineInto3DMatrixField);
 
-        MappedFieldMethod listToArrayField = StaticTests.findFieldAndTest("listToArray", type, 1, 0, TypeInformation.nullableArray(int.class));
-        StaticTests.findParameterAndTest(isParameterNamePresent() ? "list" : "arg0", listToArrayField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableList(Integer.class));
+        MappedFieldMethod listToArrayField = findFieldAndTest("listToArray", type, 1, 0, TypeInformation.nullableArray(int.class));
+        MappedParameter listParameter = findParameterAndTest(isParameterNamePresent() ? "list" : "arg0", listToArrayField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableList(Integer.class));
+        assertDescriptionIsNull(listParameter);
+        assertDescriptionIsNull(listToArrayField);
 
-        MappedFieldMethod inputToOutputField = StaticTests.findFieldAndTest("inputToOutput", type, 1, 1, TypeInformation.nullable(Foo.class));
-        StaticTests.findParameterAndTest("input", inputToOutputField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Foo.class),
-                new Foo().setIntValue(-1).setIntValue2(-2).setIntArray(new int[]{1, 2, 3, 4}));
-        StaticTests.findAppliedAnnotationAndTest(FooProvider.class, "FooProvider", inputToOutputField, "value", new Foo().setIntValue(-100).setIntValue2(-200),
+        MappedFieldMethod inputToOutputField = findFieldAndTest("inputToOutput", type, 1, 1, TypeInformation.nullable(Foo.class));
+        findAppliedAnnotationAndTest(FooProvider.class, "FooProvider", inputToOutputField, "value", new Foo().setIntValue(-100).setIntValue2(-200),
                 "arrayValues", new Foo[]{new Foo().setIntValue(-25), new Foo().setIntValue(-26), new Foo().setIntValue(-27)},
                 "listValues", Arrays.asList(new Foo().setIntValue(-1000), new Foo().setIntValue(-2000), new Foo().setIntValue(-3000)));
+        MappedParameter inputParameter3 = findParameterAndTest("input", inputToOutputField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Foo.class),
+                new Foo().setIntValue(-1).setIntValue2(-2).setIntArray(new int[]{1, 2, 3, 4}));
+        assertDescriptionIsNull(inputParameter3);
+        assertDescriptionIsNull(inputToOutputField);
 
-        MappedFieldMethod inputToOutputFromDirectiveField = StaticTests.findFieldAndTest("inputToOutputFromDirective", type, 2, 0, TypeInformation.nullable(Foo.class));
-        StaticTests.findParameterAndTest("index", inputToOutputFromDirectiveField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), -1);
+        MappedFieldMethod inputToOutputFromDirectiveField = findFieldAndTest("inputToOutputFromDirective", type, 2, 0, TypeInformation.nullable(Foo.class));
+        MappedParameter indexParameter = findParameterAndTest("index", inputToOutputFromDirectiveField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), -1);
+        assertDescriptionIsNull(indexParameter);
+        assertDescriptionIsNull(inputToOutputFromDirectiveField);
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(1, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
 
-        StaticTests.findInterfaceTypeAndTest(MutationInterface.class, "MutationInterface", type);
+        findInterfaceTypeAndTest(MutationInterface.class, "MutationInterface", type);
     }
 
     @Test
     public void testNormalUserType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(NormalUser.class, "User", 2);
+        DiscoveredObjectType type = findAndTestObjectType(NormalUser.class, "User", 2);
+        assertDescriptionIsNull(type);
 
-        StaticTests.findFieldAndTest("name", type, TypeInformation.nonNullable(String.class));
+        MappedFieldMethod nameField = findFieldAndTest("name", type, TypeInformation.nonNullable(String.class));
+        assertDescriptionIsNull(nameField);
 
-        StaticTests.findFieldAndTest("type", type, TypeInformation.nonNullable(UserType.class));
+        MappedFieldMethod typeField = findFieldAndTest("type", type, TypeInformation.nonNullable(UserType.class));
+        assertDescriptionEquals(typeField, "D8776");
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(1, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(1, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
 
-        StaticTests.findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
+        findInterfaceTypeAndTest(UserInterface.class, "UserInterface", type);
     }
 
     @Test
     public void testPageDetailsType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(PageDetails.class, "PageDetails", 2);
+        DiscoveredObjectType type = findAndTestObjectType(PageDetails.class, "PageDetails", 2);
+        assertDescriptionIsNull(type);
 
-        StaticTests.findFieldAndTest("page", type, TypeInformation.nonNullable(int.class));
+        MappedFieldMethod pageField = findFieldAndTest("page", type, TypeInformation.nonNullable(int.class));
+        assertDescriptionIsNull(pageField);
 
-        StaticTests.findFieldAndTest("size", type, TypeInformation.nonNullable(int.class));
+        MappedFieldMethod sizeField = findFieldAndTest("size", type, TypeInformation.nonNullable(int.class));
+        assertDescriptionEquals(sizeField, "D428");
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(0, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
     }
 
     @Test
     public void testQueryType() {
-        DiscoveredObjectType type = StaticTests.findAndTestObjectType(Query.class, "TestQuery", 11, 1, MappedElementType.QUERY);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.6");
+        DiscoveredObjectType type = findAndTestObjectType(Query.class, "TestQuery", 11, 1, MappedElementType.QUERY);
+        findAppliedAnnotationAndTest(Since.class, "Since", type, "version", "1.0.6");
+        assertDescriptionIsNull(type);
 
-        MappedFieldMethod getListField = StaticTests.findFieldAndTest("getList", type, 1, TypeInformation.nullable(IntList.class));
-        StaticTests.findParameterAndTest("period", getListField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(IntPeriodScalar.class));
+        MappedFieldMethod getListField = findFieldAndTest("getList", type, 1, TypeInformation.nullable(IntList.class));
+        MappedParameter periodParameter = findParameterAndTest("period", getListField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(IntPeriodScalar.class));
+        assertDescriptionIsNull(getListField);
+        assertDescriptionIsNull(periodParameter);
 
-        MappedFieldMethod multiplyMatrixField = StaticTests.findFieldAndTest("multiplyMatrices", type, 2, TypeInformation.nullableList(Integer.class, 2));
-        StaticTests.findParameterAndTest("m1", multiplyMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullableList(Integer.class, 2),
+        MappedFieldMethod multiplyMatricesField = findFieldAndTest("multiplyMatrices", type, 2, TypeInformation.nullableList(Integer.class, 2));
+        MappedParameter m1Parameter = findParameterAndTest("m1", multiplyMatricesField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullableList(Integer.class, 2),
                 Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6), Arrays.asList(7, 8, 9)));
-        StaticTests.findParameterAndTest("m2", multiplyMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullableArray(Integer.class, 2),
+        assertDescriptionIsNull(m1Parameter);
+        MappedParameter m2Parameter = findParameterAndTest("m2", multiplyMatricesField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullableArray(Integer.class, 2),
                 new Integer[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
+        assertDescriptionIsNull(m2Parameter);
+        assertDescriptionIsNull(multiplyMatricesField);
 
-        MappedFieldMethod getUserField = StaticTests.findFieldAndTest("getUser", type, 1, TypeInformation.nullable(UserInterface.class));
-        StaticTests.findParameterAndTest("user", getUserField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nonNullable(InputUser.class));
+        MappedFieldMethod getUserField = findFieldAndTest("getUser", type, 1, TypeInformation.nullable(UserInterface.class));
+        MappedParameter userParameter = findParameterAndTest("user", getUserField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nonNullable(InputUser.class));
+        assertDescriptionIsNull(getUserField);
+        assertDescriptionIsNull(userParameter);
 
-        MappedFieldMethod getVehicleField = StaticTests.findFieldAndTest("getVehicle", type, 2, TypeInformation.nullable(Vehicle.class));
-        StaticTests.findParameterAndTest("isCar", getVehicleField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Boolean.class), true);
-        StaticTests.findParameterAndTest(null, getVehicleField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
+        MappedFieldMethod getVehicleField = findFieldAndTest("getVehicle", type, 2, TypeInformation.nullable(Vehicle.class));
+        MappedParameter isCarParameter = findParameterAndTest("isCar", getVehicleField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Boolean.class), true);
+        findParameterAndTest(null, getVehicleField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
+        assertDescriptionIsNull(isCarParameter);
+        assertDescriptionIsNull(getVehicleField);
 
-        MappedFieldMethod getBankAccountField = StaticTests.findFieldAndTest("getBankAccount", type, 2, TypeInformation.nullable(BankAccount.class));
-        StaticTests.findParameterAndTest(isParameterNamePresent() ? "username" : "arg0", getBankAccountField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
-        StaticTests.findParameterAndTest(null, getBankAccountField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
+        MappedFieldMethod getBankAccountField = findFieldAndTest("getBankAccount", type, 2, TypeInformation.nullable(BankAccount.class));
+        MappedParameter usernameParameter = findParameterAndTest(isParameterNamePresent() ? "username" : "arg0", getBankAccountField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
+        findParameterAndTest(null, getBankAccountField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
+        assertDescriptionEquals(usernameParameter, "username of bank account owner");
+        assertDescriptionIsNull(getBankAccountField);
 
-        MappedFieldMethod isSystemParamsHealthyField = StaticTests.findFieldAndTest("isSystemParamsHealthy", type, 4, TypeInformation.nonNullable(boolean.class));
-        StaticTests.findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.ADAPTED_SCHEMA, 0, TypeInformation.nullable(AdaptedGraphQLSchema.class));
-        StaticTests.findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.ADAPTED_SCHEMA, 1, TypeInformation.nullable(AdaptedGraphQLSchema.class));
-        StaticTests.findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 2, TypeInformation.nullable(DataFetchingEnvironment.class));
-        StaticTests.findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.DIRECTIVES, 3, TypeInformation.nullable(GraphqlDirectivesHolder.class));
+        MappedFieldMethod isSystemParamsHealthyField = findFieldAndTest("isSystemParamsHealthy", type, 4, TypeInformation.nonNullable(boolean.class));
+        findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.ADAPTED_SCHEMA, 0, TypeInformation.nullable(AdaptedGraphQLSchema.class));
+        findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.ADAPTED_SCHEMA, 1, TypeInformation.nullable(AdaptedGraphQLSchema.class));
+        findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 2, TypeInformation.nullable(DataFetchingEnvironment.class));
+        findParameterAndTest(null, isSystemParamsHealthyField, ParameterModel.DIRECTIVES, 3, TypeInformation.nullable(GraphqlDirectivesHolder.class));
+        assertDescriptionIsNull(isSystemParamsHealthyField);
 
-        MappedFieldMethod isDirectivesHealthyField = StaticTests.findFieldAndTest("isDirectivesHealthy", type, 1, TypeInformation.nonNullable(boolean.class));
-        StaticTests.findParameterAndTest(null, isDirectivesHealthyField, ParameterModel.DIRECTIVES, 0, TypeInformation.nullable(GraphqlDirectivesHolder.class));
+        MappedFieldMethod isDirectivesHealthyField = findFieldAndTest("isDirectivesHealthy", type, 1, TypeInformation.nonNullable(boolean.class));
+        findParameterAndTest(null, isDirectivesHealthyField, ParameterModel.DIRECTIVES, 0, TypeInformation.nullable(GraphqlDirectivesHolder.class));
+        assertDescriptionIsNull(isDirectivesHealthyField);
 
-        MappedFieldMethod getPageDetailsField = StaticTests.findFieldAndTest("getPageDetails", type, 2, 1, TypeInformation.nullable(PageDetails.class));
-        StaticTests.findParameterAndTest(null, getPageDetailsField, ParameterModel.ADAPTED_SCHEMA, 0, TypeInformation.nullable(AdaptedGraphQLSchema.class));
-        StaticTests.findParameterAndTest(null, getPageDetailsField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
-        StaticTests.findAppliedAnnotationAndTest(AddPageParameters.class, "AddPageParameters", getPageDetailsField);
+        MappedFieldMethod getPageDetailsField = findFieldAndTest("getPageDetails", type, 2, 1, TypeInformation.nullable(PageDetails.class));
+        findAppliedAnnotationAndTest(AddPageParameters.class, "AddPageParameters", getPageDetailsField);
+        findParameterAndTest(null, getPageDetailsField, ParameterModel.ADAPTED_SCHEMA, 0, TypeInformation.nullable(AdaptedGraphQLSchema.class));
+        findParameterAndTest(null, getPageDetailsField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
+        assertDescriptionIsNull(getPageDetailsField);
 
-        StaticTests.findFieldAndTest("getDeveloperName", type, TypeInformation.nullable(String.class));
+        MappedFieldMethod getDeveloperNameField = findFieldAndTest("getDeveloperName", type, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(getDeveloperNameField);
 
-        MappedFieldMethod serializeToStringField = StaticTests.findFieldAndTest("serializeToString", type, 2, 0, TypeInformation.nullable(String.class));
-        StaticTests.findParameterAndTest("input", serializeToStringField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Complex.class),
+        MappedFieldMethod serializeToStringField = findFieldAndTest("serializeToString", type, 2, 0, TypeInformation.nullable(String.class));
+        MappedParameter inputParameter = findParameterAndTest("input", serializeToStringField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Complex.class),
                 new Complex("k1", "v1", 1).setInner(new Complex("k2", "v2", 2).setInner(new Complex("k3", "v3", 3))));
-        StaticTests.findParameterAndTest("separator", serializeToStringField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullable(char.class), ',');
+        assertDescriptionIsNull(inputParameter);
+        MappedParameter separatorParameter = findParameterAndTest("separator", serializeToStringField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullable(char.class), ',');
+        assertDescriptionIsNull(separatorParameter);
+        assertDescriptionIsNull(serializeToStringField);
 
-        MappedFieldMethod serializeToStringFromDirective = StaticTests.findFieldAndTest("serializeToStringFromDirective", type, 2, 0, TypeInformation.nullable(String.class));
-        StaticTests.findParameterAndTest("separator", serializeToStringFromDirective, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(char.class), ',');
-        StaticTests.findParameterAndTest(null, serializeToStringFromDirective, ParameterModel.DIRECTIVES, 1, TypeInformation.nullable(GraphqlDirectivesHolder.class));
+        MappedFieldMethod serializeToStringFromDirective = findFieldAndTest("serializeToStringFromDirective", type, 2, 0, TypeInformation.nullable(String.class));
+        MappedParameter separatorParameter2 = findParameterAndTest("separator", serializeToStringFromDirective, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(char.class), ',');
+        assertDescriptionIsNull(separatorParameter2);
+        findParameterAndTest(null, serializeToStringFromDirective, ParameterModel.DIRECTIVES, 1, TypeInformation.nullable(GraphqlDirectivesHolder.class));
+        assertDescriptionIsNull(serializeToStringFromDirective);
 
-        StaticTests.assertAndTestNumberOfImplementedInterfaces(0, type);
-        StaticTests.assertAndTestNumberOfPossibleUnions(0, type);
+        assertAndTestNumberOfImplementedInterfaces(0, type);
+        assertAndTestNumberOfPossibleUnions(0, type);
     }
 }
