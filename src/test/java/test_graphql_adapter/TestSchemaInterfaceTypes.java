@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.Since;
 import test_graphql_adapter.schema.types.*;
-import test_graphql_adapter.utils.StaticTests;
+
+import static test_graphql_adapter.utils.StaticTests.*;
 
 public class TestSchemaInterfaceTypes {
 
@@ -36,27 +37,36 @@ public class TestSchemaInterfaceTypes {
 
     @Test
     public void testMutationInterfaceType() {
-        DiscoveredInterfaceType interfaceType = StaticTests.findAndTestInterfaceType(MutationInterface.class, "MutationInterface", 0, 2, TestMutation.class);
+        DiscoveredInterfaceType interfaceType = findAndTestInterfaceType(MutationInterface.class, "MutationInterface", 0, 2, TestMutation.class);
+        assertDescriptionEquals(interfaceType, "Mutation Abstract");
 
-        MappedFieldMethod encodeToBase64Field = StaticTests.findFieldAndTest("encodeToBase64", interfaceType, 1, TypeInformation.nullable(String.class));
-        MappedParameter inputParameter = StaticTests.findParameterAndTest("input", encodeToBase64Field, ParameterModel.SCHEMA_ARGUMENT, 0, 1, TypeInformation.nullable(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputParameter, "version", "1.0.14");
+        MappedFieldMethod encodeToBase64Field = findFieldAndTest("encodeToBase64", interfaceType, 1, TypeInformation.nullable(String.class));
+        MappedParameter inputParameter = findParameterAndTest("input", encodeToBase64Field, ParameterModel.SCHEMA_ARGUMENT, 0, 1, TypeInformation.nullable(String.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", inputParameter, "version", "1.0.14");
+        assertDescriptionEquals(inputParameter, "D29876");
+        assertDescriptionEquals(encodeToBase64Field, "D2299");
 
-        MappedFieldMethod splitField = StaticTests.findFieldAndTest("split", interfaceType, 2, 1, TypeInformation.nullableList(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", splitField, "version", "1.0.12");
-        StaticTests.findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
-        MappedParameter splitorParameter = StaticTests.findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
+        MappedFieldMethod splitField = findFieldAndTest("split", interfaceType, 2, 1, TypeInformation.nullableList(String.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", splitField, "version", "1.0.12");
+        MappedParameter inputParameter2 = findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
+        assertDescriptionEquals(inputParameter2, "D2019");
+        MappedParameter splitorParameter = findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
+        assertDescriptionIsNull(splitorParameter);
+        assertDescriptionEquals(splitField, "D145");
     }
 
     @Test
     public void testUserInterfaceInterfaceType() {
-        DiscoveredInterfaceType interfaceType = StaticTests.findAndTestInterfaceType(UserInterface.class, "UserInterface", 1, 2, NormalUser.class, AdminUser.class);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", interfaceType, "version", "1.0.4");
+        DiscoveredInterfaceType interfaceType = findAndTestInterfaceType(UserInterface.class, "UserInterface", 1, 2, NormalUser.class, AdminUser.class);
+        findAppliedAnnotationAndTest(Since.class, "Since", interfaceType, "version", "1.0.4");
+        assertDescriptionEquals(interfaceType, "D8999999");
 
-        MappedFieldMethod nameField = StaticTests.findFieldAndTest("name", interfaceType, 0, 1, TypeInformation.nonNullable(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", nameField, "version", "1.0.11");
+        MappedFieldMethod nameField = findFieldAndTest("name", interfaceType, 0, 1, TypeInformation.nonNullable(String.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", nameField, "version", "1.0.11");
+        assertDescriptionIsNull(nameField);
 
-        StaticTests.findFieldAndTest("type", interfaceType, 0, 0, TypeInformation.nonNullable(UserType.class));
+        MappedFieldMethod typeField = findFieldAndTest("type", interfaceType, 0, 0, TypeInformation.nonNullable(UserType.class));
+        assertDescriptionIsNull(typeField);
     }
 }

@@ -22,9 +22,9 @@ import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.Since;
 import test_graphql_adapter.schema.types.IntPeriodScalar;
 import test_graphql_adapter.schema.types.Splitor;
-import test_graphql_adapter.utils.StaticTests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static test_graphql_adapter.utils.StaticTests.*;
 
 public class TestSchemaScalarTypes {
 
@@ -35,21 +35,23 @@ public class TestSchemaScalarTypes {
 
     @Test
     public void testPeriodScalarType() {
-        DiscoveredScalarType scalarType = StaticTests.findAndTestScalarType(IntPeriodScalar.class, "Period");
+        DiscoveredScalarType scalarType = findAndTestScalarType(IntPeriodScalar.class, "Period");
+        assertDescriptionEquals(scalarType, "This is a custom description");
 
         assertEquals(scalarType.asMappedElement().baseClass(), IntPeriodScalar.class);
         assertEquals(scalarType.asMappedElement().coercing().getClass(), IntPeriodScalar.CoercingImpl.class);
 
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", scalarType, "version", "1.0.2");
+        findAppliedAnnotationAndTest(Since.class, "Since", scalarType, "version", "1.0.2");
     }
 
     @Test
     public void testSplitorScalarType() {
-        DiscoveredScalarType scalarType = StaticTests.findAndTestScalarType(Splitor.class, "Splitor");
+        DiscoveredScalarType scalarType = findAndTestScalarType(Splitor.class, "Splitor");
+        assertDescriptionEquals(scalarType, "Splitor Description");
 
         assertEquals(scalarType.asMappedElement().baseClass(), Splitor.class);
         assertEquals(scalarType.asMappedElement().coercing().getClass(), Splitor.CoercingImpl.class);
 
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", scalarType, "version", "1.0.3");
+        findAppliedAnnotationAndTest(Since.class, "Since", scalarType, "version", "1.0.3");
     }
 }

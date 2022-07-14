@@ -23,7 +23,8 @@ import org.junit.jupiter.api.Test;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.Since;
 import test_graphql_adapter.schema.types.*;
-import test_graphql_adapter.utils.StaticTests;
+
+import static test_graphql_adapter.utils.StaticTests.*;
 
 public class TestSchemaInputTypes {
 
@@ -35,66 +36,90 @@ public class TestSchemaInputTypes {
     @Test
     public void testComplexInputType() {
 
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(Complex.class, "ComplexInput", 4, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.25");
+        DiscoveredInputType inputType = findAndTestInputType(Complex.class, "ComplexInput", 4, 1);
+        findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.25");
+        assertDescriptionEquals(inputType, "D980");
 
-        StaticTests.findInputFieldAndTest("name", inputType, TypeInformation.nullable(String.class));
+        MappedInputFieldMethod nameField = findInputFieldAndTest("name", inputType, TypeInformation.nullable(String.class));
+        assertDescriptionIsNull(nameField);
 
-        StaticTests.findInputFieldAndTest("value", inputType, TypeInformation.nullable(String.class));
+        MappedInputFieldMethod valueField = findInputFieldAndTest("value", inputType, TypeInformation.nullable(String.class));
+        assertDescriptionEquals(valueField, "D2900");
 
-        MappedInputFieldMethod priorityField = StaticTests.findInputFieldAndTest("priority", inputType, 1, TypeInformation.nonNullable(int.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
+        MappedInputFieldMethod priorityField = findInputFieldAndTest("priority", inputType, 1, TypeInformation.nonNullable(int.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", priorityField, "version", "1.0.21");
+        assertDescriptionIsNull(priorityField);
 
-        StaticTests.findInputFieldAndTest("inner", inputType, 0, TypeInformation.nullable(Complex.class),
+        MappedInputFieldMethod innerField = findInputFieldAndTest("inner", inputType, 0, TypeInformation.nullable(Complex.class),
                 new Complex().setName("dn").setValue("dv").setPriority(100).setInner(new Complex().setName("idn").setValue("idv").setPriority(101)));
+        assertDescriptionEquals(innerField, "D891");
     }
 
     @Test
     public void testFooInputType() {
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(Foo.class, "FooInput", 12);
+        DiscoveredInputType inputType = findAndTestInputType(Foo.class, "FooInput", 12);
+        assertDescriptionEquals(inputType, "D456");
 
-        StaticTests.findInputFieldAndTest("stringValue", inputType, 0, TypeInformation.nullable(String.class), "DV1");
+        MappedInputFieldMethod stringValueField = findInputFieldAndTest("stringValue", inputType, 0, TypeInformation.nullable(String.class), "DV1");
+        assertDescriptionIsNull(stringValueField);
 
-        StaticTests.findInputFieldAndTest("longValue", inputType, 0, TypeInformation.nonNullable(long.class), 9223372036854775807L);
+        MappedInputFieldMethod longValueField = findInputFieldAndTest("longValue", inputType, 0, TypeInformation.nonNullable(long.class), 9223372036854775807L);
+        assertDescriptionIsNull(longValueField);
 
-        StaticTests.findInputFieldAndTest("intValue", inputType, 0, TypeInformation.nonNullable(int.class), 1);
+        MappedInputFieldMethod intValueField = findInputFieldAndTest("intValue", inputType, 0, TypeInformation.nonNullable(int.class), 1);
+        assertDescriptionIsNull(intValueField);
 
-        StaticTests.findInputFieldAndTest("intValue2", inputType, 0, TypeInformation.nonNullable(int.class), 10);
+        MappedInputFieldMethod intValue2Field = findInputFieldAndTest("intValue2", inputType, 0, TypeInformation.nonNullable(int.class), 10);
+        assertDescriptionIsNull(intValue2Field);
 
-        StaticTests.findInputFieldAndTest("doubleValue", inputType, 0, TypeInformation.nonNullable(double.class), 2123455500000.21D);
+        MappedInputFieldMethod doubleValueField = findInputFieldAndTest("doubleValue", inputType, 0, TypeInformation.nonNullable(double.class), 2123455500000.21D);
+        assertDescriptionIsNull(doubleValueField);
 
-        StaticTests.findInputFieldAndTest("floatValue", inputType, 0, TypeInformation.nonNullable(float.class), 15477542.236F);
+        MappedInputFieldMethod floatValueField = findInputFieldAndTest("floatValue", inputType, 0, TypeInformation.nonNullable(float.class), 15477542.236F);
+        assertDescriptionIsNull(floatValueField);
 
-        StaticTests.findInputFieldAndTest("byteValue", inputType, 0, TypeInformation.nonNullable(byte.class), (byte) 120);
+        MappedInputFieldMethod byteValueField = findInputFieldAndTest("byteValue", inputType, 0, TypeInformation.nonNullable(byte.class), (byte) 120);
+        assertDescriptionIsNull(byteValueField);
 
-        StaticTests.findInputFieldAndTest("shortValue", inputType, 0, TypeInformation.nonNullable(short.class), (short) 20000);
+        MappedInputFieldMethod shortValueField = findInputFieldAndTest("shortValue", inputType, 0, TypeInformation.nonNullable(short.class), (short) 20000);
+        assertDescriptionIsNull(shortValueField);
 
-        StaticTests.findInputFieldAndTest("charValue", inputType, 0, TypeInformation.nonNullable(char.class), 'c');
+        MappedInputFieldMethod charValueField = findInputFieldAndTest("charValue", inputType, 0, TypeInformation.nonNullable(char.class), 'c');
+        assertDescriptionIsNull(charValueField);
 
-        StaticTests.findInputFieldAndTest("booleanValue", inputType, 0, TypeInformation.nonNullable(boolean.class), true);
+        MappedInputFieldMethod booleanValueField = findInputFieldAndTest("booleanValue", inputType, 0, TypeInformation.nonNullable(boolean.class), true);
+        assertDescriptionIsNull(booleanValueField);
 
-        StaticTests.findInputFieldAndTest("booleanValue2", inputType, 0, TypeInformation.nonNullable(boolean.class), false);
+        MappedInputFieldMethod booleanValue2Field = findInputFieldAndTest("booleanValue2", inputType, 0, TypeInformation.nonNullable(boolean.class), false);
+        assertDescriptionIsNull(booleanValue2Field);
 
-        StaticTests.findInputFieldAndTest("intArray", inputType, 0, TypeInformation.nullableArray(int.class), new int[]{1, 2, 3});
+        MappedInputFieldMethod intArrayField = findInputFieldAndTest("intArray", inputType, 0, TypeInformation.nullableArray(int.class), new int[]{1, 2, 3});
+        assertDescriptionEquals(intArrayField, "D989");
     }
 
     @Test
     public void testInputUserType() {
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(InputUser.class, "InputUser", 2, 1);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.7");
+        DiscoveredInputType inputType = findAndTestInputType(InputUser.class, "InputUser", 2, 1);
+        findAppliedAnnotationAndTest(Since.class, "Since", inputType, "version", "1.0.7");
+        assertDescriptionIsNull(inputType);
 
-        StaticTests.findInputFieldAndTest("name", inputType, 0, TypeInformation.nonNullable(String.class), "Anonymous");
+        MappedInputFieldMethod nameField = findInputFieldAndTest("name", inputType, 0, TypeInformation.nonNullable(String.class), "Anonymous");
+        assertDescriptionIsNull(nameField);
 
-        MappedInputFieldMethod typeInputField = StaticTests.findInputFieldAndTest("type", inputType, 1, TypeInformation.nullable(UserType.class), UserType.Normal);
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", typeInputField, "version", "1.0.8");
+        MappedInputFieldMethod typeField = findInputFieldAndTest("type", inputType, 1, TypeInformation.nullable(UserType.class), UserType.Normal);
+        findAppliedAnnotationAndTest(Since.class, "Since", typeField, "version", "1.0.8");
+        assertDescriptionIsNull(typeField);
     }
 
     @Test
     public void testPageParametersType() {
-        DiscoveredInputType inputType = StaticTests.findAndTestInputType(PageParameters.class, "PageParameters", 2);
+        DiscoveredInputType inputType = findAndTestInputType(PageParameters.class, "PageParameters", 2);
+        assertDescriptionIsNull(inputType);
 
-        StaticTests.findInputFieldAndTest("page", inputType, TypeInformation.nonNullable(int.class));
+        MappedInputFieldMethod pageField = findInputFieldAndTest("page", inputType, TypeInformation.nonNullable(int.class));
+        assertDescriptionIsNull(pageField);
 
-        StaticTests.findInputFieldAndTest("size", inputType, TypeInformation.nonNullable(int.class));
+        MappedInputFieldMethod sizeField = findInputFieldAndTest("size", inputType, TypeInformation.nonNullable(int.class));
+        assertDescriptionIsNull(sizeField);
     }
 }

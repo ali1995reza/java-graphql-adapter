@@ -16,6 +16,7 @@
 package test_graphql_adapter.schema.directives;
 
 import graphql.introspection.Introspection;
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlDirective;
 import graphql_adapter.annotations.GraphqlDirectiveArgument;
 
@@ -24,8 +25,10 @@ import java.lang.annotation.RetentionPolicy;
 
 @GraphqlDirective(locations = {Introspection.DirectiveLocation.FIELD, Introspection.DirectiveLocation.QUERY, Introspection.DirectiveLocation.INLINE_FRAGMENT, Introspection.DirectiveLocation.FRAGMENT_DEFINITION, Introspection.DirectiveLocation.FRAGMENT_SPREAD}, functionality = AuthenticationDirectiveFunction.class)
 @Retention(RetentionPolicy.RUNTIME)
+@GraphqlDescription("D1")
 public @interface Authentication {
 
+    @GraphqlDescription("D2")
     @GraphqlDirectiveArgument
     String token();
 }

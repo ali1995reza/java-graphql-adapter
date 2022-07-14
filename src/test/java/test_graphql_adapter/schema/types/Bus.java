@@ -15,12 +15,14 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlField;
 import graphql_adapter.annotations.GraphqlObjectType;
 import test_graphql_adapter.schema.directives.*;
 
 @GraphqlObjectType
 @Since("1.0.1")
+@GraphqlDescription("Bus")
 public class Bus implements Vehicle {
 
     private String model;

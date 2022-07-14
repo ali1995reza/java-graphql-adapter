@@ -29,7 +29,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class AnnotationBaseDirectiveDescriptor implements AppliedDirectiveDescriptor {
+public class AnnotationBaseAppliedDirectiveDescriptor implements AppliedDirectiveDescriptor {
 
     @Override
     public List<DirectiveArgumentsValue> describeAppliedDirectives(MappedElement element, Map<Class<?>, MappedAnnotation> annotationsMap) {

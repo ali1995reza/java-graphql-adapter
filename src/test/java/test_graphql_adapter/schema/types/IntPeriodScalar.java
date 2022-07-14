@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @GraphqlScalar(name = "Period", coercing = IntPeriodScalar.CoercingImpl.class)
-@GraphqlDescription("This is an custom description")
+@GraphqlDescription("This is a custom description")
 @Since("1.0.2")
 public class IntPeriodScalar {
 

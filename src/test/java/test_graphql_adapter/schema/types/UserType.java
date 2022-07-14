@@ -15,19 +15,22 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlEnum;
 import graphql_adapter.annotations.GraphqlEnumValue;
 import graphql_adapter.annotations.SkipElement;
 import test_graphql_adapter.schema.directives.Since;
 
+@GraphqlDescription("An ENUM")
 @GraphqlEnum
 @Since("1.0.9")
 public enum UserType {
 
+    @GraphqlDescription("D101")
     @GraphqlEnumValue(name = "NORMAL")
     Normal,
+    @GraphqlDescription("D100")
     @Since("1.0.10")
-    @GraphqlEnumValue
     ADMIN,
     @SkipElement
     Unknown;

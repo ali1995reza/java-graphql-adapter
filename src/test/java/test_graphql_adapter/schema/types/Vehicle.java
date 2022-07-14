@@ -15,9 +15,11 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlUnion;
 import test_graphql_adapter.schema.directives.Since;
 
+@GraphqlDescription("Vehicle Union Description")
 @GraphqlUnion
 @Since("1.0.5")
 public interface Vehicle {

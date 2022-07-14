@@ -15,6 +15,7 @@
  */
 package test_graphql_adapter.schema.types;
 
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlObjectType;
 
 @GraphqlObjectType(name = "User")
@@ -32,6 +33,7 @@ public class NormalUser implements UserInterface {
         return name;
     }
 
+    @GraphqlDescription("D8776")
     @Override
     public UserType type() {
         return UserType.Normal;

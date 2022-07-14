@@ -16,11 +16,13 @@
 package test_graphql_adapter.schema.directives;
 
 import graphql.introspection.Introspection;
+import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlDirective;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+@GraphqlDescription("D99")
 @GraphqlDirective(name = "ToString", locations = Introspection.DirectiveLocation.FIELD_DEFINITION, functionality = ToStringDirectiveFunction.class)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ToStringDirective {

@@ -24,9 +24,10 @@ import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.*;
 import test_graphql_adapter.schema.types.Complex;
 import test_graphql_adapter.schema.types.Foo;
-import test_graphql_adapter.utils.StaticTests;
 
 import java.util.Arrays;
+
+import static test_graphql_adapter.utils.StaticTests.*;
 
 public class TestSchemaDirectives {
 
@@ -37,74 +38,93 @@ public class TestSchemaDirectives {
 
     @Test
     public void testAddPageParametersDirective() {
-        StaticTests.findAndTestDirective(AddPageParameters.class, "AddPageParameters", 0);
+        DiscoveredDirective directive = findAndTestDirective(AddPageParameters.class, "AddPageParameters", 0);
+        assertDescriptionIsNull(directive);
     }
 
     @Test
     public void testAuthenticationDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(Authentication.class, "Authentication", 1);
+        DiscoveredDirective directive = findAndTestDirective(Authentication.class, "Authentication", 1);
+        assertDescriptionEquals(directive, "D1");
 
-        StaticTests.findAnnotationMethodAndTest("token", directive, 0, TypeInformation.nullable(String.class));
+        MappedAnnotationMethod tokenArgument = findAnnotationMethodAndTest("token", directive, 0, TypeInformation.nullable(String.class));
+        assertDescriptionEquals(tokenArgument, "D2");
     }
 
     @Test
     public void testDelayDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(Delay.class, "Delay", 1);
+        DiscoveredDirective directive = findAndTestDirective(Delay.class, "Delay", 1);
 
-        StaticTests.findAnnotationMethodAndTest("seconds", directive, 0, TypeInformation.nonNullable(int.class));
+        MappedAnnotationMethod secondsArgument = findAnnotationMethodAndTest("seconds", directive, 0, TypeInformation.nonNullable(int.class));
+        assertDescriptionEquals(secondsArgument, "D3");
     }
 
     @Test
     public void testFooProviderDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(FooProvider.class, "FooProvider", 3);
+        DiscoveredDirective directive = findAndTestDirective(FooProvider.class, "FooProvider", 3);
+        assertDescriptionEquals(directive, "provide FooInput");
 
-        StaticTests.findAnnotationMethodAndTest("value", directive, 0, TypeInformation.nonNullable(Foo.class),
+        MappedAnnotationMethod valueArgument = findAnnotationMethodAndTest("value", directive, 0, TypeInformation.nonNullable(Foo.class),
                 new Foo().setIntValue(-101).setIntValue2(-102).setIntArray(new int[]{1, 2, 3, 4, 5, 6}));
+        assertDescriptionEquals(valueArgument, "D5");
 
-        StaticTests.findAnnotationMethodAndTest("arrayValues", directive, 0, TypeInformation.nullableArray(Foo.class, 1),
+        MappedAnnotationMethod arrayValuesArgument = findAnnotationMethodAndTest("arrayValues", directive, 0, TypeInformation.nullableArray(Foo.class, 1),
                 new Foo[]{new Foo().setIntValue(-25), new Foo().setIntValue(-26), new Foo().setIntValue(-27)});
+        assertDescriptionEquals(arrayValuesArgument, "D4");
 
-        StaticTests.findAnnotationMethodAndTest("listValues", directive, 0, TypeInformation.nonNullableList(Foo.class, 1),
+        MappedAnnotationMethod listValuesArgument = findAnnotationMethodAndTest("listValues", directive, 0, TypeInformation.nonNullableList(Foo.class, 1),
                 Arrays.asList(new Foo().setIntValue(-28), new Foo().setIntValue(-29), new Foo().setIntValue(-30)));
+        assertDescriptionIsNull(listValuesArgument);
     }
 
     @Test
     public void testHashDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(Hash.class, "Hash", 2);
+        DiscoveredDirective directive = findAndTestDirective(Hash.class, "Hash", 2);
+        assertDescriptionIsNull(directive);
 
-        StaticTests.findAnnotationMethodAndTest("algorithm", directive, 0, TypeInformation.nonNullable(String.class), "SHA-256");
-        StaticTests.findAnnotationMethodAndTest("salt", directive, 0, TypeInformation.nullable(String.class), "");
+        MappedAnnotationMethod algorithmArgument = findAnnotationMethodAndTest("algorithm", directive, 0, TypeInformation.nonNullable(String.class), "SHA-256");
+        assertDescriptionEquals(algorithmArgument, "the algorithm that directive will use to hash value");
+
+        MappedAnnotationMethod saltArgument = findAnnotationMethodAndTest("salt", directive, 0, TypeInformation.nullable(String.class), "");
+        assertDescriptionIsNull(saltArgument);
     }
 
     @Test
     public void testInputProviderDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(ComplexInputProvider.class, "InputProvider", 1);
+        DiscoveredDirective directive = findAndTestDirective(ComplexInputProvider.class, "InputProvider", 1);
+        assertDescriptionIsNull(directive);
 
-        MappedAnnotationMethod versionArgument = StaticTests.findAnnotationMethodAndTest("input", directive, 1, TypeInformation.nullable(Complex.class),
+        MappedAnnotationMethod versionArgument = findAnnotationMethodAndTest("input", directive, 1, TypeInformation.nullable(Complex.class),
                 new Complex("k1", "v1", 1).setInner(new Complex("k2", "v2", 2).setInner(new Complex("k3", "v3", 3))));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", versionArgument, "version", "1.0.20");
+        findAppliedAnnotationAndTest(Since.class, "Since", versionArgument, "version", "1.0.20");
+        assertDescriptionIsNull(versionArgument);
     }
 
     @Test
     public void testReverseDirective() {
-        StaticTests.findAndTestDirective(Reverse.class, "Reverse", 0);
+        DiscoveredDirective directive = findAndTestDirective(Reverse.class, "Reverse", 0);
+        assertDescriptionEquals(directive, "D77");
     }
 
     @Test
     public void testSinceDirective() {
-        DiscoveredDirective directive = StaticTests.findAndTestDirective(Since.class, "Since", 1);
+        DiscoveredDirective directive = findAndTestDirective(Since.class, "Since", 1);
+        assertDescriptionIsNull(directive);
 
-        MappedAnnotationMethod versionArgument = StaticTests.findAnnotationMethodAndTest("version", directive, 1, TypeInformation.nonNullable(String.class));
-        StaticTests.findAppliedAnnotationAndTest(Since.class, "Since", versionArgument, "version", "1.0.16");
+        MappedAnnotationMethod versionArgument = findAnnotationMethodAndTest("version", directive, 1, TypeInformation.nonNullable(String.class));
+        findAppliedAnnotationAndTest(Since.class, "Since", versionArgument, "version", "1.0.16");
+        assertDescriptionIsNull(versionArgument);
     }
 
     @Test
     public void testToStringDirective() {
-        StaticTests.findAndTestDirective(ToStringDirective.class, "ToString", 0);
+        DiscoveredDirective directive = findAndTestDirective(ToStringDirective.class, "ToString", 0);
+        assertDescriptionEquals(directive, "D99");
     }
 
     @Test
     public void testUpperCaseDirective() {
-        StaticTests.findAndTestDirective(UpperCase.class, "UpperCase", 0);
+        DiscoveredDirective directive = findAndTestDirective(UpperCase.class, "UpperCase", 0);
+        assertDescriptionIsNull(directive);
     }
 }
