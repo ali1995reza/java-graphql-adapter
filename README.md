@@ -112,10 +112,10 @@ the enum-class name.
 This annotation will use to set an interface as GraphQL interface. You can specify the name or the default strategy will
 use the interface name.
 
-#### @GraphqlInterface(`name() default ""`)
+#### @GraphqlUnion(`name() default ""`)
 
-This annotation will use to set an interface as GraphQL interface. You can specify the name or the default strategy will
-use the interface name.
+This annotation will use to set an interface as GraphQL union. You can specify the name or the default strategy will use
+the interface name.
 
 #### @GraphqlQuery(`name() default ""`)
 
@@ -181,6 +181,16 @@ string values without key double-quotation and single-quotation wrapped String v
 
 If an element such as a class, method or parameter contains this annotation the default strategy will skip this element
 and don't map it.
+
+### Interface
+
+All interfaces in java can map to a GraphQL interface. You can easily create and interface and annotate it with
+@GraphqlInterface and them implement it with your object types.
+
+### Union
+
+Like interfaces, you can create a GraphQL union by using @GraphqlUnion annotation. Then every object type which
+implement this interface will be a possible type of this union.
 
 ### Directive Functionality
 
