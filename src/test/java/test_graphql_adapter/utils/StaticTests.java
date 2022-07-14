@@ -411,4 +411,20 @@ public class StaticTests {
         }
         return unionType;
     }
+
+    public static void assertDescriptionEquals(MappedElement element, String expectedDescription) {
+        assertEquals(expectedDescription, element.description(), "description is not equals as expected");
+    }
+
+    public static void assertDescriptionEquals(DiscoveredElement<?, ?> element, String expectedDescription) {
+        assertDescriptionEquals(element.asMappedElement(), expectedDescription);
+    }
+
+    public static void assertDescriptionIsNull(MappedElement element) {
+        assertNull(element.description(), "description is not equals as expected");
+    }
+
+    public static void assertDescriptionIsNull(DiscoveredElement<?, ?> element) {
+        assertNull(element.asMappedElement().description());
+    }
 }
