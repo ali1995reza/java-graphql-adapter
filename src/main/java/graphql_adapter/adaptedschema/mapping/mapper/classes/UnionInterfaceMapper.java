@@ -35,7 +35,7 @@ import java.util.Map;
 public class UnionInterfaceMapper extends ElementMapperWithMethodMapper {
 
     public UnionInterfaceMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(classDescriptorChain, null, null, null, appliedDirectiveDescriptorChain);
+        super(classDescriptorChain, null, null, null, appliedDirectiveDescriptorChain, null);
     }
 
     public MappedUnionInterface mapUnionInterface(Class<?> clazz, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {

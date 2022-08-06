@@ -19,6 +19,7 @@ import graphql.introspection.Introspection;
 import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlDirective;
 import graphql_adapter.annotations.GraphqlDirectiveArgument;
+import test_graphql_adapter.schema.validators.NonNegative;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,7 +29,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Delay {
 
+    @NonNegative
     @GraphqlDescription("D3")
-    @GraphqlDirectiveArgument(nullable = false, name = "seconds")
+    @GraphqlDirectiveArgument(name = "seconds")
     int value();
 }

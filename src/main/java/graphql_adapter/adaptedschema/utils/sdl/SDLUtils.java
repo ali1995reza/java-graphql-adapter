@@ -67,17 +67,10 @@ public class SDLUtils {
     private final static String THREE_DOUBLE_QUOTATION = "\"\"\"";
     private final static String EMPTY = "";
 
-    public static StringBuffer createBuffer(GraphQLNamedSchemaElement element, boolean newLine) {
+    public static StringBuffer createBuffer(GraphQLNamedSchemaElement element) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(fromDescription(element.getDescription()));
-        if (newLine) {
-            buffer.append(NEW_LINE);
-        }
         return buffer;
-    }
-
-    public static StringBuffer createBuffer(GraphQLNamedSchemaElement element) {
-        return createBuffer(element, true);
     }
 
     public static String getSchemaObjectAsSDL(GraphQLSchema schema) {
@@ -232,7 +225,7 @@ public class SDLUtils {
         buffer.append(NEW_LINE);
         buffer.append(NEW_LINE);
         for (GraphQLFieldDefinition field : objectType.getFieldDefinitions()) {
-            buffer.append(fromDescription(INNER_OFFSET, field.getDescription())).append(NEW_LINE);
+            buffer.append(fromDescription(INNER_OFFSET, field.getDescription()));
             buffer.append(INNER_OFFSET);
             buffer.append(toSDL(field));
             buffer.append(NEW_LINE);
@@ -319,9 +312,9 @@ public class SDLUtils {
 
             CollectionUtils.forEach(directive.getArguments(),
                     argument -> buffer.append(DOUBLE_NEW_LINE).append(fromDescription(INNER_OFFSET, argument.getDescription()))
-                            .append(NEW_LINE).append(INNER_OFFSET).append(toSDL(argument)),
+                            .append(INNER_OFFSET).append(toSDL(argument)),
                     argument -> buffer.append(DOUBLE_NEW_LINE).append(fromDescription(INNER_OFFSET, argument.getDescription()))
-                            .append(NEW_LINE).append(INNER_OFFSET).append(toSDL(argument)).append(DOUBLE_NEW_LINE));
+                            .append(INNER_OFFSET).append(toSDL(argument)).append(DOUBLE_NEW_LINE));
 
             buffer.append(ARGUMENT_END);
         }
@@ -433,15 +426,6 @@ public class SDLUtils {
         return buffer.toString();
     }
 
-    public static String toSDLSeparateLine(List<GraphQLAppliedDirective> directives) {
-        if (CollectionUtils.isEmpty(directives)) {
-            return EMPTY;
-        }
-        StringBuffer buffer = new StringBuffer();
-        directives.forEach(directive -> buffer.append(toSDL(directive)).append(NEW_LINE));
-        return buffer.toString();
-    }
-
     private static boolean filterBuiltInTypes(GraphQLNamedSchemaElement element) {
         return !BuiltInTypes.contains(element.getName());
     }
@@ -452,23 +436,23 @@ public class SDLUtils {
         }
         StringBuilder stringBuilder = new StringBuilder();
         if (description.contains(END_OF_LINE)) {
-            stringBuilder.append(offset).append(THREE_DOUBLE_QUOTATION).append(SPACE);
+            stringBuilder.append(offset).append(THREE_DOUBLE_QUOTATION);
             String[] lines = description.split(END_OF_LINE);
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
                 if (i != 0) {
-                    stringBuilder.append(offset).append(spaces(4));
+                    stringBuilder.append(offset).append(spaces(3));
                 }
                 stringBuilder.append(line);
                 if (i < lines.length - 1) {
                     stringBuilder.append(NEW_LINE);
                 }
             }
-            stringBuilder.append(SPACE).append(THREE_DOUBLE_QUOTATION);
+            stringBuilder.append(THREE_DOUBLE_QUOTATION);
         } else {
-            stringBuilder.append(offset).append(DOUBLE_QUOTATION).append(SPACE).append(description).append(SPACE).append(DOUBLE_QUOTATION);
+            stringBuilder.append(offset).append(DOUBLE_QUOTATION).append(description).append(DOUBLE_QUOTATION);
         }
-        return stringBuilder.toString();
+        return stringBuilder.append(NEW_LINE).toString();
     }
 
     private static String fromDescription(String description) {

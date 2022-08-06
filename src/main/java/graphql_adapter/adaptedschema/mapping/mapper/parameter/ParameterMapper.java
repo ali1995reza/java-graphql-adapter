@@ -25,8 +25,10 @@ import graphql_adapter.adaptedschema.mapping.mapper.AbstractElementMapper;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescription;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.ValidatorDescriptor;
 import graphql_adapter.adaptedschema.mapping.validator.ParameterValidator;
 import graphql_adapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import graphql_adapter.adaptedschema.utils.ValidatableElementUtils;
 import graphql_adapter.adaptedschema.utils.chain.Chain;
 import graphql_adapter.codegenerator.ObjectConstructor;
 
@@ -36,8 +38,8 @@ import java.util.Map;
 
 public class ParameterMapper extends AbstractElementMapper {
 
-    public ParameterMapper(Chain<ParameterDescriptor> parameterDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(null, null, parameterDescriptorChain, null, appliedDirectiveDescriptorChain);
+    public ParameterMapper(Chain<ParameterDescriptor> parameterDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain, Chain<ValidatorDescriptor> validatorDescriptorChain) {
+        super(null, null, parameterDescriptorChain, null, appliedDirectiveDescriptorChain, validatorDescriptorChain);
     }
 
     public MappedParameter mapParameter(Class<?> clazz, Method method, Parameter parameter, int index, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
@@ -51,7 +53,7 @@ public class ParameterMapper extends AbstractElementMapper {
             return getSystemParameter(parameter, index);
         }
 
-        TypeInformation<?> type = TypeInformation.of(parameter, argumentDescription.nullable());
+        TypeInformation<?> type = TypeInformation.of(parameter, argumentDescription.nullability());
 
         MappedParameter mappedParameter = MappedParameter.newParameter()
                 .name(argumentDescription.name())
@@ -60,9 +62,14 @@ public class ParameterMapper extends AbstractElementMapper {
                 .index(index)
                 .description(argumentDescription.description())
                 .defaultValue(parseAndGetDefaultValue(argumentDescription.defaultValue(), type, constructor, builder))
+                .addValidators(describeArgumentValidators(parameter, method, index, clazz))
                 .build();
 
         mappedParameter = addAppliedAnnotations(MappedParameter::newParameter, mappedParameter, annotations, constructor, builder);
+
+        if(mappedParameter.hasDefaultValue()) {
+            ValidatableElementUtils.validate(mappedParameter.defaultValue(), mappedParameter, constructor);
+        }
 
         ParameterValidator.validateParameter(mappedParameter, clazz, method, parameter);
 

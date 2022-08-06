@@ -1,0 +1,5 @@
+mutation {
+    a: inputToOutputFromDirective @FooProvider(listValues: [{intArray: [-10]}, {intArray: [-100,-1000,-10000,-100000]}]) {
+        stringValue
+    }
+}

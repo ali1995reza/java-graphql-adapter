@@ -15,6 +15,8 @@
  */
 package graphql_adapter.adaptedschema.utils;
 
+import graphql_adapter.adaptedschema.utils.chain.Chain;
+
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -90,6 +92,10 @@ public class CollectionUtils {
         }
     }
 
+    public static <T> void forEach(Collection<T> collection, Consumer<T> forEach) {
+        forEach(collection, forEach, forEach);
+    }
+
     public static <T> void forEach(T[] array, Consumer<T> forEach, Consumer<T> forLast) {
         if (isEmpty(array)) {
             return;
@@ -108,7 +114,13 @@ public class CollectionUtils {
     }
 
     public static <T> void forEachUnknownArray(Object unknownArray, Consumer<T> forEach, Consumer<T> forLast) {
-        if (unknownArray == null || !unknownArray.getClass().isArray() || Array.getLength(unknownArray) == 0) {
+        if (unknownArray == null) {
+            return;
+        }
+        if (!unknownArray.getClass().isArray()) {
+            throw new IllegalStateException("provided object is not an array");
+        }
+        if (Array.getLength(unknownArray) == 0) {
             return;
         }
 
@@ -149,8 +161,19 @@ public class CollectionUtils {
         return set;
     }
 
+    public static <T> Chain<T> getOrEmptyChain(Chain<T> chain) {
+        if (isEmpty(chain)) {
+            return Chain.empty();
+        }
+        return chain;
+    }
+
     public static boolean isEmpty(Collection<?> collection) {
         return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(Chain<?> chain) {
+        return chain == null || chain.isEmpty();
     }
 
     public static boolean isEmpty(Map<?, ?> map) {

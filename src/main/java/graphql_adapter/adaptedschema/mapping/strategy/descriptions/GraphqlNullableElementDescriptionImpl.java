@@ -15,16 +15,19 @@
  */
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions;
 
-public class GraphqlNullableElementDescriptionImpl extends GraphqlElementDescriptionImpl {
+import java.util.List;
 
-    private final boolean nullable;
+public class GraphqlNullableElementDescriptionImpl extends GraphqlElementDescriptionImpl implements GraphqlNullableContainerElementDescription {
 
-    public GraphqlNullableElementDescriptionImpl(String name, String description, boolean nullable) {
+    private final List<Boolean> nullability;
+
+    public GraphqlNullableElementDescriptionImpl(String name, String description, List<Boolean> nullability) {
         super(name, description);
-        this.nullable = nullable;
+        this.nullability = nullability;
     }
 
-    public boolean nullable() {
-        return nullable;
+    @Override
+    public List<Boolean> nullability() {
+        return nullability;
     }
 }

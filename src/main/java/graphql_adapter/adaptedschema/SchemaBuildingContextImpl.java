@@ -32,7 +32,7 @@ import java.util.*;
 
 import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
-final class BuildingContextImpl implements BuildingContext {
+final class SchemaBuildingContextImpl implements SchemaBuildingContext {
 
     private final Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses;
     private final Map<MappedClass, GraphQLNamedType> rawTypes = new HashMap<>();
@@ -42,10 +42,10 @@ final class BuildingContextImpl implements BuildingContext {
     private final ObjectConstructor objectConstructor;
     private final boolean usePariTypesForEachOther;
 
-    BuildingContextImpl(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses,
-                        GraphQLSchema.Builder schemaBuilder,
-                        ObjectConstructor objectConstructor,
-                        boolean usePariTypesForEachOther) {
+    SchemaBuildingContextImpl(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses,
+                              GraphQLSchema.Builder schemaBuilder,
+                              ObjectConstructor objectConstructor,
+                              boolean usePariTypesForEachOther) {
         Assert.isNotNull(mappedClasses, new IllegalStateException("mapped classes is null"));
         Assert.isNotNull(schemaBuilder, new IllegalStateException("provided schema builder is null"));
         this.mappedClasses = mappedClasses;
@@ -77,7 +77,7 @@ final class BuildingContextImpl implements BuildingContext {
     }
 
     @Override
-    public GraphQLTypeReference geOutputTypeFor(Class<?> c) {
+    public GraphQLTypeReference getOutputTypeFor(Class<?> c) {
         GraphQLTypeReference reference = getObjectTypeFor(c);
         if (reference != null) return reference;
         reference = getEnumFor(c);

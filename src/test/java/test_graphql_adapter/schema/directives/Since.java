@@ -18,6 +18,8 @@ package test_graphql_adapter.schema.directives;
 import graphql.introspection.Introspection;
 import graphql_adapter.annotations.GraphqlDirective;
 import graphql_adapter.annotations.GraphqlDirectiveArgument;
+import graphql_adapter.annotations.GraphqlNonNull;
+import test_graphql_adapter.schema.validators.Match;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -26,7 +28,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Since {
 
+    @Match(".+")
     @Since("1.0.16")
-    @GraphqlDirectiveArgument(name = "version", nullable = false)
-    String value();
+    @GraphqlDirectiveArgument(name = "version")
+    @GraphqlNonNull String value();
 }

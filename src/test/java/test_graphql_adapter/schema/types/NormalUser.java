@@ -35,7 +35,8 @@ public class NormalUser implements UserInterface {
 
     @GraphqlDescription("D8776")
     @Override
-    public UserType type() {
+    public
+    UserType type() {
         return UserType.Normal;
     }
 

@@ -18,6 +18,7 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter;
 import graphql.schema.DataFetchingEnvironment;
 import graphql_adapter.adaptedschema.AdaptedGraphQLSchema;
 import graphql_adapter.adaptedschema.assertion.Assert;
+import graphql_adapter.adaptedschema.mapping.mapper.utils.DimensionsNullabilityUtils;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescription;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
 import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
@@ -48,7 +49,7 @@ public class AutomaticParameterDescriptor implements ParameterDescriptor {
 
         return GraphqlArgumentDescription.newArgumentDescription()
                 .name(getName(parameter, parameterIndex))
-                .nullable(isNullable(parameter))
+                .nullability(DimensionsNullabilityUtils.getNullabilityOfDimensions(parameter))
                 .description(DescriptorUtils.getDescription(parameter))
                 .defaultValue(DescriptorUtils.getDefaultValue(parameter))
                 .build();
@@ -61,10 +62,6 @@ public class AutomaticParameterDescriptor implements ParameterDescriptor {
             return parameter.getName();
         }
         return argNameIfNotPresent + index;
-    }
-
-    private boolean isNullable(Parameter parameter) {
-        return !parameter.getType().isPrimitive();
     }
 
     private boolean isSystemParameter(Parameter parameter) {

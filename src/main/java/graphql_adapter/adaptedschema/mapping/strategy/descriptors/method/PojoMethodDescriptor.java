@@ -17,6 +17,7 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptors.method;
 
 import graphql_adapter.adaptedschema.functions.impl.RawValueParser;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.mapping.mapper.utils.DimensionsNullabilityUtils;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlDirectiveArgumentDescription;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlFieldDescription;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.field.GraphqlInputFieldDescription;
@@ -24,6 +25,7 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptors.utils.Descript
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 public class PojoMethodDescriptor implements MethodDescriptor {
 
@@ -47,14 +49,14 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         if (method.getDeclaringClass() != clazz) {
             return null;
         }
-        TypeInformation<?> information = TypeInformation.of(method, !method.getReturnType().isPrimitive());
+        TypeInformation<?> information = TypeInformation.of(method);
         return GraphqlDirectiveArgumentDescription.newDirectiveArgumentDescription()
                 .name(getName(method))
                 .description(DescriptorUtils.getDescription(method))
                 .defaultValue(DescriptorUtils.getDefaultValueOfAnnotationMethod(method, RawValueParser.class))
                 .dimensions(information.dimensions())
                 .type(information.type())
-                .nullable(information.isNullable())
+                .nullability(information.nullability())
                 .dimensionModel(information.dimensionModel())
                 .build();
     }
@@ -113,15 +115,15 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         }
         return GraphqlInputFieldDescription.newInputFieldDescription()
                 .name(getName(method))
-                .nullable(isNullable(method))
+                .nullability(nullability(method))
                 .setter(setter)
                 .defaultValue(DescriptorUtils.getDefaultValue(method))
                 .description(DescriptorUtils.getDescription(method))
                 .build();
     }
 
-    private static boolean isNullable(Method method) {
-        return !method.getReturnType().isPrimitive();
+    private static List<Boolean> nullability(Method method) {
+        return DimensionsNullabilityUtils.getNullabilityOfDimensions(method);
     }
 
     private GraphqlFieldDescription outputField(Method method, Class<?> clazz) {
@@ -133,7 +135,7 @@ public class PojoMethodDescriptor implements MethodDescriptor {
         }
         return GraphqlFieldDescription.newFieldDescription()
                 .name(getName(method))
-                .nullable(isNullable(method))
+                .nullability(nullability(method))
                 .description(DescriptorUtils.getDescription(method))
                 .build();
     }

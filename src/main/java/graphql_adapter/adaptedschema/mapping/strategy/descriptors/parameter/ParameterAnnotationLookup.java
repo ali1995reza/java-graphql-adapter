@@ -18,24 +18,27 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ParameterAnnotationLookup {
 
-    public static <T extends Annotation> T findFirstAppears(Method method, int parameterIndex, Class<T> annotationClass) {
+    public static <T extends Annotation> ParameterAnnotationLookupResult<T> findFirstAppears(Method method, int parameterIndex, Class<T> annotationClass) {
 
         Parameter parameter = method.getParameters()[parameterIndex];
 
         if (parameter.getAnnotation(annotationClass) != null) {
-            return parameter.getAnnotation(annotationClass);
+            return new ParameterAnnotationLookupResult<>(parameter.getAnnotation(annotationClass), parameter);
         } else {
 
             if (method.getDeclaringClass().getSuperclass() != null) {
                 try {
 
                     Method m = method.getDeclaringClass().getSuperclass().getMethod(method.getName(), method.getParameterTypes());
-                    T annotation = findFirstAppears(m, parameterIndex, annotationClass);
-                    if (annotation != null) {
-                        return annotation;
+                    ParameterAnnotationLookupResult<T> result = findFirstAppears(m, parameterIndex, annotationClass);
+                    if (result != null) {
+                        return result;
                     }
                 } catch (NoSuchMethodException ignored) {
                 }
@@ -43,9 +46,9 @@ public class ParameterAnnotationLookup {
             for (Class<?> cls : method.getDeclaringClass().getInterfaces()) {
                 try {
                     Method m = cls.getMethod(method.getName(), method.getParameterTypes());
-                    T annotation = findFirstAppears(m, parameterIndex, annotationClass);
-                    if (annotation != null) {
-                        return annotation;
+                    ParameterAnnotationLookupResult<T> result = findFirstAppears(m, parameterIndex, annotationClass);
+                    if (result != null) {
+                        return result;
                     }
                 } catch (NoSuchMethodException ignored) {
                 }
@@ -53,5 +56,43 @@ public class ParameterAnnotationLookup {
         }
 
         return null;
+    }
+
+    public static List<Annotation> getAllAnnotations(Parameter parameter, Method method, int index) {
+        List<Annotation> list = new ArrayList<>();
+        getAllAnnotations(parameter, method, index, list);
+        return list;
+    }
+
+    private static void getAllAnnotations(Parameter parameter, Method method, int index, List<Annotation> list) {
+        Class<?> clazz = method.getDeclaringClass();
+        for (Class<?> inter : clazz.getInterfaces()) {
+            try {
+                Method superMethod = getMethod(inter, method.getName(), method.getParameterTypes());
+                getAllAnnotations(superMethod.getParameters()[index], superMethod, index, list);
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+        if (clazz.getSuperclass() != null) {
+            try {
+                Method superMethod = getMethod(clazz.getSuperclass(), method.getName(), method.getParameterTypes());
+                getAllAnnotations(superMethod.getParameters()[index], superMethod, index, list);
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+        list.addAll(Arrays.asList(parameter.getAnnotations()));
+    }
+
+    private static Method getMethod(Class<?> clazz, String name, Class<?>... params) throws NoSuchMethodException {
+        try {
+            return clazz.getMethod(name, params);
+        } catch (NoSuchMethodException ignored) {
+        }
+
+        try {
+            return clazz.getDeclaredMethod(name, params);
+        } catch (NoSuchMethodException e) {
+            throw e;
+        }
     }
 }

@@ -24,6 +24,7 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations.Ap
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.classes.ClassDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.ValidatorDescriptor;
 import graphql_adapter.adaptedschema.mapping.validator.ClassValidator;
 import graphql_adapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import graphql_adapter.adaptedschema.utils.ClassUtils;
@@ -38,8 +39,8 @@ import java.util.Collections;
 import java.util.Map;
 
 public class AnnotationMapper extends ElementMapperWithMethodMapper {
-    public AnnotationMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, null, appliedDirectiveDescriptorChain);
+    public AnnotationMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain, Chain<ValidatorDescriptor> validatorDescriptorChain) {
+        super(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, null, appliedDirectiveDescriptorChain, validatorDescriptorChain);
     }
 
     public MappedAnnotation mapAnnotation(Class<? extends Annotation> clazz, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {

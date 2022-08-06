@@ -38,9 +38,9 @@ public class MappingUtils {
                 Type inner = paraType.getActualTypeArguments()[0];
                 TypeDetails details = findTypeDetails(inner);
 
-                return new TypeDetails(details.type(), details.dimensions(), details.dimensionModel());
+                return new TypeDetails(details.type(), details.dimensions(), details.dimensionModel(), true);
             } else {
-                return new TypeDetails(Object.class, 0, DimensionModel.SINGLE);
+                return new TypeDetails(Object.class, 0, DimensionModel.SINGLE, false);
             }
         }
         return findTypeDetails(type);
@@ -57,18 +57,18 @@ public class MappingUtils {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             if (parameterizedType.getRawType() != List.class)
-                return new TypeDetails((Class<?>) parameterizedType.getRawType(), 0, DimensionModel.SINGLE);
+                return new TypeDetails((Class<?>) parameterizedType.getRawType(), 0, DimensionModel.SINGLE, false);
 
             Type innerType = parameterizedType.getActualTypeArguments()[0];
             return detectDimensionsDetails(innerType, 1);
         } else if (type instanceof Class) {
             Class<?> clazz = cast(type);
             if (clazz == List.class)
-                return new TypeDetails(Object.class, 1, DimensionModel.LIST);
+                return new TypeDetails(Object.class, 1, DimensionModel.LIST, false);
             else if (clazz.isArray())
                 return forArray(clazz);
             else
-                return new TypeDetails(clazz, 0, DimensionModel.SINGLE);
+                return new TypeDetails(clazz, 0, DimensionModel.SINGLE, false);
         }
 
         throw new IllegalStateException("unknown type class");
@@ -80,14 +80,14 @@ public class MappingUtils {
             if (parameterizedType.getRawType() == List.class) {
                 return detectDimensionsDetails(parameterizedType.getActualTypeArguments()[0], dims + 1);
             } else {
-                return new TypeDetails(cast(parameterizedType.getRawType()), dims, DimensionModel.LIST);
+                return new TypeDetails(cast(parameterizedType.getRawType()), dims, DimensionModel.LIST, false);
             }
         } else if (type instanceof Class) {
             Class<?> clazz = cast(type);
             if (clazz == List.class)
-                return new TypeDetails(Object.class, dims + 1, DimensionModel.LIST);
+                return new TypeDetails(Object.class, dims + 1, DimensionModel.LIST, false);
             else
-                return new TypeDetails(clazz, dims, DimensionModel.LIST);
+                return new TypeDetails(clazz, dims, DimensionModel.LIST, false);
         }
 
         throw new IllegalStateException("unknown type class");
@@ -99,6 +99,6 @@ public class MappingUtils {
             ++dims;
             clazz = clazz.getComponentType();
         }
-        return new TypeDetails(clazz, dims, DimensionModel.ARRAY);
+        return new TypeDetails(clazz, dims, DimensionModel.ARRAY, false);
     }
 }

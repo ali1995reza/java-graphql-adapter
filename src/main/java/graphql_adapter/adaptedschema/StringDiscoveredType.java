@@ -42,4 +42,9 @@ final class StringDiscoveredType extends DiscoveredScalarTypeImpl {
     public String toString() {
         return StringDiscoveredType.class.getSimpleName();
     }
+
+    @Override
+    void makeImmutable() {
+        super.makeImmutable();
+    }
 }

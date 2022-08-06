@@ -25,6 +25,7 @@ import graphql_adapter.adaptedschema.exceptions.MappingGraphqlTypeException;
 import graphql_adapter.adaptedschema.exceptions.MultipleGraphqlTopLevelTypeException;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedInputTypeClass;
@@ -33,10 +34,12 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedScala
 import graphql_adapter.adaptedschema.mapping.mapped_elements.enums.MappedEnum;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.interfaces.MappedInterface;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.interfaces.MappedUnionInterface;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedAnnotationMethod;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedFieldMethod;
 import graphql_adapter.adaptedschema.mapping.mapper.ClassMapper;
 import graphql_adapter.adaptedschema.scalar.ScalarEntry;
 import graphql_adapter.adaptedschema.utils.Reference;
+import graphql_adapter.adaptedschema.utils.ValidatableElementUtils;
 import graphql_adapter.adaptedschema.utils.class_resolver.ClassResolver;
 import graphql_adapter.adaptedschema.utils.class_resolver.filter.ClassFilter;
 import graphql_adapter.codegenerator.DataFetcherGenerator;
@@ -150,11 +153,15 @@ public final class AdaptedGraphQLSchemaBuilder {
 
         GraphQLSchema.Builder schema = GraphQLSchema.newSchema();
 
-        final BuildingContextImpl context =
-                new BuildingContextImpl(mappedClasses,
+        final SchemaBuildingContextImpl context =
+                new SchemaBuildingContextImpl(mappedClasses,
                         schema,
                         objectConstructor,
                         usePairTypesAsEachOther);
+
+        validateDefaultValues(mappedClasses, context);
+
+        validateAppliedAnnotationsArgumentValues(mappedClasses, context);
 
         discoverDirectives(mappedClasses, context);
 
@@ -203,6 +210,67 @@ public final class AdaptedGraphQLSchemaBuilder {
         return schemaReference.set(new AdaptedGraphQLSchema(schema.build(), allElements, objectConstructor, usePairTypesAsEachOther))
                 .lock()
                 .get();
+    }
+
+    private void addDataFetchers(List<DiscoveredElement<?, ?>> discoveredElements, DataFetcherGenerator dataFetcherGenerator, GraphQLCodeRegistry.Builder code, Supplier<AdaptedGraphQLSchema> schemaSupplier, SchemaBuildingContext context) {
+        DirectiveHandlingContextImpl directiveContext = (DirectiveHandlingContextImpl) context.directiveHandlingContext();
+        discoveredElements.stream().filter(AdaptedGraphQLSchemaBuilder::isInterfaceOrType).forEach(d -> {
+            Map<String, MappedFieldMethod> methods = d instanceof DiscoveredObjectType ?
+                    ((DiscoveredObjectType) d).asMappedElement().fieldMethods() :
+                    ((DiscoveredInterfaceType) d).asMappedElement().fieldMethods();
+
+            MappedObjectTypeClass mappedClass = (MappedObjectTypeClass) d.asMappedElement();
+
+            for (MappedFieldMethod method : methods.values()) {
+                code.dataFetcher(FieldCoordinates.coordinates(
+                        mappedClass.name(),
+                        method.name()
+                ), new DataFetcherHandler(directiveContext.applyChanges(mappedClass.name(), method.name(), dataFetcherGenerator.generate(mappedClass, method)), mappedClass, method, schemaSupplier));
+            }
+        });
+    }
+
+    private GraphQLNamedSchemaElement discover(MappedElement mappedElement, SchemaBuildingContextImpl context) {
+
+        if (mappedElement == StringDiscoveredType.getInstance().asMappedElement()) {
+            context.setGraphQLTypeFor(StringDiscoveredType.getInstance().asMappedElement(),
+                    StringDiscoveredType.getInstance().asGraphqlElement());
+            return StringDiscoveredType.getInstance().asGraphqlElement();
+        }
+
+        if (mappedElement == BooleanDiscoveredType.getInstance().asMappedElement()) {
+            context.setGraphQLTypeFor(BooleanDiscoveredType.getInstance().asMappedElement(),
+                    BooleanDiscoveredType.getInstance().asGraphqlElement());
+            return BooleanDiscoveredType.getInstance().asGraphqlElement();
+        }
+
+        if (mappedElement.mappedType().isDirective()) {
+            GraphQLDirective type = GraphQLElementBuilder.buildDirective((MappedAnnotation) mappedElement, context);
+            context.setDirective((MappedAnnotation) mappedElement, type);
+            return type;
+        }
+
+        GraphQLNamedType type = null;
+        MappedClass mappedClass = (MappedClass) mappedElement;
+
+        if (mappedClass.mappedType().isTopLevelType() || mappedClass.mappedType().isObjectType()) {
+            type = GraphQLElementBuilder.buildOutputObjectType((MappedObjectTypeClass) mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType().isInterface()) {
+            type = GraphQLElementBuilder.buildInterface((MappedInterface) mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType().isInputType()) {
+            type = GraphQLElementBuilder.buildInputObjectType((MappedInputTypeClass) mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType().isEnum()) {
+            type = GraphQLElementBuilder.buildEnumType((MappedEnum) mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        } else if (mappedClass.mappedType().isScalar()) {
+            type = GraphQLElementBuilder.buildScalarType((MappedScalarClass) mappedClass, context);
+            context.setGraphQLTypeFor(mappedClass, type);
+        }
+
+        return type;
     }
 
     public DiscoveredElement<?, ?> buildDiscoveredElement(MappedElement element, GraphQLNamedSchemaElement schemaElement) {
@@ -327,22 +395,12 @@ public final class AdaptedGraphQLSchemaBuilder {
         return usePairTypesAsEachOther(true);
     }
 
-    private void addDataFetchers(List<DiscoveredElement<?, ?>> discoveredElements, DataFetcherGenerator dataFetcherGenerator, GraphQLCodeRegistry.Builder code, Supplier<AdaptedGraphQLSchema> schemaSupplier, BuildingContext context) {
-        DirectiveHandlingContextImpl directiveContext = (DirectiveHandlingContextImpl) context.directiveHandlingContext();
-        discoveredElements.stream().filter(AdaptedGraphQLSchemaBuilder::isInterfaceOrType).forEach(d -> {
-            Map<String, MappedFieldMethod> methods = d instanceof DiscoveredObjectType ?
-                    ((DiscoveredObjectType) d).asMappedElement().fieldMethods() :
-                    ((DiscoveredInterfaceType) d).asMappedElement().fieldMethods();
-
-            MappedObjectTypeClass mappedClass = (MappedObjectTypeClass) d.asMappedElement();
-
-            for (MappedFieldMethod method : methods.values()) {
-                code.dataFetcher(FieldCoordinates.coordinates(
-                        mappedClass.name(),
-                        method.name()
-                ), new DataFetcherHandler(directiveContext.applyChanges(mappedClass.name(), method.name(), dataFetcherGenerator.generate(mappedClass, method)), mappedClass, method, schemaSupplier));
-            }
-        });
+    private void discoverDirectives(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, SchemaBuildingContextImpl context) {
+        mappedClasses.values()
+                .forEach(map -> map.values()
+                        .stream()
+                        .filter(element -> element.mappedType().isDirective())
+                        .forEach(mappedClass -> discover(mappedClass, context)));
     }
 
     private void addIfNotExists(Class<?> c) {
@@ -359,58 +417,7 @@ public final class AdaptedGraphQLSchemaBuilder {
         return all;
     }
 
-    private GraphQLNamedSchemaElement discover(MappedElement mappedElement, BuildingContextImpl context) {
-
-        if (mappedElement == StringDiscoveredType.getInstance().asMappedElement()) {
-            context.setGraphQLTypeFor(StringDiscoveredType.getInstance().asMappedElement(),
-                    StringDiscoveredType.getInstance().asGraphqlElement());
-            return StringDiscoveredType.getInstance().asGraphqlElement();
-        }
-
-        if (mappedElement == BooleanDiscoveredType.getInstance().asMappedElement()) {
-            context.setGraphQLTypeFor(BooleanDiscoveredType.getInstance().asMappedElement(),
-                    BooleanDiscoveredType.getInstance().asGraphqlElement());
-            return BooleanDiscoveredType.getInstance().asGraphqlElement();
-        }
-
-        if (mappedElement.mappedType().isDirective()) {
-            GraphQLDirective type = GraphQLElementBuilder.buildDirective((MappedAnnotation) mappedElement, context);
-            context.setDirective((MappedAnnotation) mappedElement, type);
-            return type;
-        }
-
-        GraphQLNamedType type = null;
-        MappedClass mappedClass = (MappedClass) mappedElement;
-
-        if (mappedClass.mappedType().isTopLevelType() || mappedClass.mappedType().isObjectType()) {
-            type = GraphQLElementBuilder.buildOutputObjectType((MappedObjectTypeClass) mappedClass, context);
-            context.setGraphQLTypeFor(mappedClass, type);
-        } else if (mappedClass.mappedType().isInterface()) {
-            type = GraphQLElementBuilder.buildInterface((MappedInterface) mappedClass, context);
-            context.setGraphQLTypeFor(mappedClass, type);
-        } else if (mappedClass.mappedType().isInputType()) {
-            type = GraphQLElementBuilder.buildInputObjectType((MappedInputTypeClass) mappedClass, context);
-            context.setGraphQLTypeFor(mappedClass, type);
-        } else if (mappedClass.mappedType().isEnum()) {
-            type = GraphQLElementBuilder.buildEnumType((MappedEnum) mappedClass, context);
-            context.setGraphQLTypeFor(mappedClass, type);
-        } else if (mappedClass.mappedType().isScalar()) {
-            type = GraphQLElementBuilder.buildScalarType((MappedScalarClass) mappedClass, context);
-            context.setGraphQLTypeFor(mappedClass, type);
-        }
-
-        return type;
-    }
-
-    private void discoverDirectives(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, BuildingContextImpl context) {
-        mappedClasses.values()
-                .forEach(map -> map.values()
-                        .stream()
-                        .filter(element -> element.mappedType().isDirective())
-                        .forEach(mappedClass -> discover(mappedClass, context)));
-    }
-
-    private void discoverTypesExceptUnions(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, BuildingContextImpl context) {
+    private void discoverTypesExceptUnions(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, SchemaBuildingContextImpl context) {
         mappedClasses.values()
                 .forEach(map -> map.values()
                         .stream()
@@ -418,7 +425,7 @@ public final class AdaptedGraphQLSchemaBuilder {
                         .forEach(mappedClass -> discover(mappedClass, context)));
     }
 
-    private GraphQLType discoverUnion(MappedUnionInterface unionClass, List<MappedClass> possibles, BuildingContextImpl context) {
+    private GraphQLType discoverUnion(MappedUnionInterface unionClass, List<MappedClass> possibles, SchemaBuildingContextImpl context) {
         GraphQLUnionType unionType =
                 GraphQLElementBuilder.buildUnionType(unionClass, possibles, context);
 
@@ -427,7 +434,7 @@ public final class AdaptedGraphQLSchemaBuilder {
         return unionType;
     }
 
-    private void discoverUnionTypes(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, BuildingContextImpl context) {
+    private void discoverUnionTypes(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, SchemaBuildingContextImpl context) {
         mappedClasses.values()
                 .forEach(map -> map.values()
                         .stream()
@@ -436,7 +443,7 @@ public final class AdaptedGraphQLSchemaBuilder {
                                 context.possibleTypesOf((MappedClass) mappedClass), context)));
     }
 
-    private Map<MappedElement, DiscoveredElement<?, ?>> getDiscoveredElements(BuildingContextImpl context) {
+    private Map<MappedElement, DiscoveredElement<?, ?>> getDiscoveredElements(SchemaBuildingContextImpl context) {
         Map<MappedElement, DiscoveredElement<?, ?>> discoveredElements = new HashMap<>();
 
         context.rawTypes().keySet()
@@ -451,30 +458,13 @@ public final class AdaptedGraphQLSchemaBuilder {
         return discoveredElements;
     }
 
-    private static boolean isDirective(DiscoveredElement<?, ?> element) {
-        return element.asMappedElement().mappedType().isDirective();
-    }
-
-    private static boolean isInputType(DiscoveredElement<?, ?> element) {
-        return element.asMappedElement().mappedType().isInputType();
-    }
-
-    private static boolean isInterfaceOrType(DiscoveredElement<?, ?> element) {
-        return element.asMappedElement().mappedType().isTopLevelType() || element.asMappedElement()
-                .mappedType().isOneOf(MappedElementType.INTERFACE, MappedElementType.OBJECT_TYPE);
-    }
-
-    private static boolean isScalar(DiscoveredElement<?, ?> element) {
-        return element.asMappedElement().mappedType().isScalar();
-    }
-
     private void makeImmutable(List<DiscoveredElement<?, ?>> elements) {
         elements.stream().filter(element -> element instanceof DiscoveredTypeImpl)
                 .map(element -> (DiscoveredTypeImpl<?, ?>) element)
-                .forEach(DiscoveredTypeImpl::setImmutable);
+                .forEach(DiscoveredTypeImpl::setImmutableIfNotImmutable);
     }
 
-    private void predictPossibleTypes(Map<MappedElement, DiscoveredElement<?, ?>> discoveredElements, GraphQLCodeRegistry.Builder code, BuildingContextImpl context) {
+    private void predictPossibleTypes(Map<MappedElement, DiscoveredElement<?, ?>> discoveredElements, GraphQLCodeRegistry.Builder code, SchemaBuildingContextImpl context) {
         DirectiveHandlingContextImpl directiveContext = (DirectiveHandlingContextImpl) context.directiveHandlingContext();
         discoveredElements.values().forEach(discoveredType -> {
 
@@ -512,5 +502,79 @@ public final class AdaptedGraphQLSchemaBuilder {
                         directiveContext.applyChanges(unionType.name(), typeResolverGenerator.generate(unionType)));
             }
         });
+    }
+
+    private static boolean isDirective(DiscoveredElement<?, ?> element) {
+        return element.asMappedElement().mappedType().isDirective();
+    }
+
+    private static boolean isInputType(DiscoveredElement<?, ?> element) {
+        return element.asMappedElement().mappedType().isInputType();
+    }
+
+    private static boolean isInterfaceOrType(DiscoveredElement<?, ?> element) {
+        return element.asMappedElement().mappedType().isTopLevelType() || element.asMappedElement()
+                .mappedType().isOneOf(MappedElementType.INTERFACE, MappedElementType.OBJECT_TYPE);
+    }
+
+    private static boolean isScalar(DiscoveredElement<?, ?> element) {
+        return element.asMappedElement().mappedType().isScalar();
+    }
+
+    private static void validateAppliedAnnotationsArgumentValues(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, SchemaBuildingContext context) {
+        for (Map<MappedElementType, MappedElement> map : mappedClasses.values()) {
+            for (MappedElement element : map.values()) {
+                for (AppliedAnnotation appliedAnnotation : element.appliedAnnotations()) {
+                    MappedAnnotation annotation = context.getMappedClassFor(appliedAnnotation.annotationClass(), MappedElementType.DIRECTIVE);
+                    for (MappedAnnotationMethod method : annotation.mappedMethods().values()) {
+                        Object value = appliedAnnotation.arguments().get(method.name());
+                        ValidatableElementUtils.validateDeeply(value, method, context);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void validateDefaultValues(Map<Class<?>, Map<MappedElementType, MappedElement>> mappedClasses, SchemaBuildingContext context) {
+        for (Map<MappedElementType, MappedElement> map : mappedClasses.values()) {
+            if (map.containsKey(MappedElementType.INPUT_TYPE)) {
+                MappedInputTypeClass inputType = (MappedInputTypeClass) map.get(MappedElementType.INPUT_TYPE);
+                inputType.inputFiledMethods().values().forEach(inputField ->
+                        ValidatableElementUtils.validateDeeply(inputField.defaultValue(), inputField, context));
+            }
+            if (map.containsKey(MappedElementType.OBJECT_TYPE)) {
+                MappedObjectTypeClass objectType = (MappedObjectTypeClass) map.get(MappedElementType.OBJECT_TYPE);
+                for (MappedFieldMethod field : objectType.fieldMethods().values()) {
+                    field.parameters().forEach(parameter ->
+                            ValidatableElementUtils.validateDeeply(parameter.defaultValue(), parameter, context));
+                }
+            }
+            if (map.containsKey(MappedElementType.QUERY)) {
+                MappedObjectTypeClass objectType = (MappedObjectTypeClass) map.get(MappedElementType.QUERY);
+                for (MappedFieldMethod field : objectType.fieldMethods().values()) {
+                    field.parameters().forEach(parameter ->
+                            ValidatableElementUtils.validateDeeply(parameter.defaultValue(), parameter, context));
+                }
+            }
+            if (map.containsKey(MappedElementType.MUTATION)) {
+                MappedObjectTypeClass objectType = (MappedObjectTypeClass) map.get(MappedElementType.MUTATION);
+                for (MappedFieldMethod field : objectType.fieldMethods().values()) {
+                    field.parameters().forEach(parameter ->
+                            ValidatableElementUtils.validateDeeply(parameter.defaultValue(), parameter, context));
+                }
+            }
+            if (map.containsKey(MappedElementType.SUBSCRIPTION)) {
+                MappedObjectTypeClass objectType = (MappedObjectTypeClass) map.get(MappedElementType.SUBSCRIPTION);
+                for (MappedFieldMethod field : objectType.fieldMethods().values()) {
+                    field.parameters().forEach(parameter ->
+                            ValidatableElementUtils.validateDeeply(parameter.defaultValue(), parameter, context));
+                }
+            }
+            if (map.containsKey(MappedElementType.DIRECTIVE)) {
+                MappedAnnotation annotation = (MappedAnnotation) map.get(MappedElementType.DIRECTIVE);
+                annotation.mappedMethods().values().forEach(method ->
+                        ValidatableElementUtils.validateDeeply(method.defaultValue(), method, context));
+            }
+        }
     }
 }

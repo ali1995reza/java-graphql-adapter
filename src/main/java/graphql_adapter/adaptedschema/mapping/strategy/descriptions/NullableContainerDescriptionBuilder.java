@@ -15,28 +15,32 @@
  */
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public abstract class NullableContainerDescriptionBuilder<T extends NullableContainerDescriptionBuilder<T, E>, E extends GraphqlNullableContainerElementDescription> extends GraphqlElementDescriptionBuilder<T, E> {
 
-    private boolean nullable = false;
+    private List<Boolean> nullability = new ArrayList<>();
 
     @Override
     public T copy(E e) {
         return super.copy(e)
-                .nullable(e.nullable());
+                .nullability(new ArrayList<>(e.nullability()));
     }
 
     @Override
     public T refresh() {
-        this.nullable = false;
+        this.nullability.clear();
         return super.refresh();
     }
 
-    public boolean isNullable() {
-        return nullable;
+    public List<Boolean> nullability() {
+        return Collections.unmodifiableList(nullability);
     }
 
-    public T nullable(boolean nullable) {
-        this.nullable = nullable;
+    public T nullability(List<Boolean> nullability) {
+        this.nullability = nullability;
         return castThis();
     }
 }

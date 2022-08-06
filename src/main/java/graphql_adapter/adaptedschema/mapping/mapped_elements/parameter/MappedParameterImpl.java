@@ -15,10 +15,12 @@
  */
 package graphql_adapter.adaptedschema.mapping.mapped_elements.parameter;
 
+import graphql_adapter.adaptedschema.mapping.mapped_elements.GraphqlValidator;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementImpl;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
+import graphql_adapter.adaptedschema.utils.CollectionUtils;
 
 import java.lang.reflect.Parameter;
 import java.util.List;
@@ -27,14 +29,16 @@ import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 final class MappedParameterImpl extends MappedElementImpl implements MappedParameter {
 
+    private final List<GraphqlValidator> validators;
     private final Object defaultValue;
     private final Parameter parameter;
     private final int index;
     private final TypeInformation<?> type;
     private final ParameterModel model;
 
-    MappedParameterImpl(String name, MappedElementType mappedType, String description, List<AppliedAnnotation> appliedAnnotations, Object defaultValue, Parameter parameter, int index, TypeInformation<?> type, ParameterModel model) {
+    MappedParameterImpl(String name, MappedElementType mappedType, String description, List<AppliedAnnotation> appliedAnnotations, List<GraphqlValidator> validators, Object defaultValue, Parameter parameter, int index, TypeInformation<?> type, ParameterModel model) {
         super(name, mappedType, description, appliedAnnotations);
+        this.validators = CollectionUtils.getOrEmptyList(validators);
         this.defaultValue = defaultValue;
         this.parameter = parameter;
         this.index = index;
@@ -65,5 +69,10 @@ final class MappedParameterImpl extends MappedElementImpl implements MappedParam
     @Override
     public TypeInformation<?> type() {
         return type;
+    }
+
+    @Override
+    public List<GraphqlValidator> validators() {
+        return validators;
     }
 }

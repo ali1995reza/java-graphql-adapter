@@ -25,6 +25,7 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedFieldM
 import graphql_adapter.adaptedschema.mapping.mapped_elements.parameter.MappedParameter;
 import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
 import graphql_adapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
+import graphql_adapter.adaptedschema.utils.ValidatableElementUtils;
 import graphql_adapter.codegenerator.AdaptedGraphQLDataFetcher;
 import graphql_adapter.codegenerator.DataFetcherGenerator;
 
@@ -32,6 +33,12 @@ import java.lang.reflect.Parameter;
 import java.util.List;
 
 public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
+
+    private final static BuildingObjectConfig BUILDING_CONFIG = BuildingObjectConfig.newConfig()
+            .useExactProvidedListForScalarTypes()
+            .dontUseInputFieldDefaultValues()
+            .validateInputFields()
+            .build();
 
     @Override
     public AdaptedGraphQLDataFetcher<?> generate(MappedObjectTypeClass cls, MappedFieldMethod method) {
@@ -75,10 +82,11 @@ public class ReflectionDataFetcherGenerator implements DataFetcherGenerator {
                     } else {
                         Object paramValue = environment.getArgument(parameter.name());
                         if (paramValue != null) {
-                            args[i] = schema.objectBuilder().buildFromObject(environment.getArgument(parameter.name()), parameter.type(), BuildingObjectConfig.ONLY_USE_EXACT_LIST);
+                            args[i] = schema.objectBuilder().buildFromObject(environment.getArgument(parameter.name()), parameter.type(), BUILDING_CONFIG);
                         } else if (isNotSetToNull(environment.getField().getArguments(), parameter.name())) {
                             args[i] = parameter.defaultValue();
                         }
+                        ValidatableElementUtils.validate(paramValue, parameter, schema.objectConstructor());
                     }
                 }
 

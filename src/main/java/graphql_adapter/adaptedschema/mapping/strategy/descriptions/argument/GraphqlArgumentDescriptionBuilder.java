@@ -27,7 +27,7 @@ public class GraphqlArgumentDescriptionBuilder extends DefaultValueContainerElem
 
     @Override
     public GraphqlArgumentDescription build() {
-        return new GraphqlArgumentDescriptionImpl(name(), description(), isNullable(), defaultValue(), isSystemParameter());
+        return new GraphqlArgumentDescriptionImpl(name(), description(), nullability(), defaultValue(), isSystemParameter());
     }
 
     @Override

@@ -16,10 +16,8 @@
 package test_graphql_adapter.schema.types;
 
 import graphql.schema.DataFetchingEnvironment;
-import graphql_adapter.annotations.DefaultValue;
-import graphql_adapter.annotations.GraphqlArgument;
-import graphql_adapter.annotations.GraphqlField;
-import graphql_adapter.annotations.GraphqlObjectType;
+import graphql_adapter.annotations.*;
+import test_graphql_adapter.schema.validators.NonNegative;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,12 +39,12 @@ public class IntList {
     }
 
     @GraphqlField
-    public Integer get(@DefaultValue("0") @GraphqlArgument(name = "index", nullable = false) int index) {
+    public Integer get(@NonNegative @DefaultValue("0") @GraphqlArgument(name = "index") @GraphqlNonNull int index) {
         return data.get(index);
     }
 
-    @GraphqlField(nullable = false)
-    public boolean isEmpty() {
+    @GraphqlField
+    public @GraphqlNonNull boolean isEmpty() {
         return data.isEmpty();
     }
 
@@ -57,8 +55,8 @@ public class IntList {
         this.data = data;
     }
 
-    @GraphqlField(nullable = false)
-    public int size(DataFetchingEnvironment environment) {
+    @GraphqlField
+    public @GraphqlNonNull int size(DataFetchingEnvironment environment) {
         return data.size();
     }
 }

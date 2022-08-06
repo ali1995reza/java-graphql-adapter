@@ -18,12 +18,14 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptions.argument;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.DefaultValueDetails;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefaultValueContainerElementDescriptionImpl;
 
+import java.util.List;
+
 final class GraphqlArgumentDescriptionImpl extends GraphqlDefaultValueContainerElementDescriptionImpl implements GraphqlArgumentDescription {
 
     private final boolean systemParameter;
 
-    public GraphqlArgumentDescriptionImpl(String name, String description, boolean nullable, DefaultValueDetails defaultValue, boolean systemParameter) {
-        super(name, description, nullable, defaultValue);
+    public GraphqlArgumentDescriptionImpl(String name, String description, List<Boolean> nullability, DefaultValueDetails defaultValue, boolean systemParameter) {
+        super(name, description, nullability, defaultValue);
         this.systemParameter = systemParameter;
     }
 

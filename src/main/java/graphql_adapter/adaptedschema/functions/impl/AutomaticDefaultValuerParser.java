@@ -22,8 +22,14 @@ import graphql_adapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
 
 public class AutomaticDefaultValuerParser implements ValueParser<String, Object> {
 
+    private final static BuildingObjectConfig BUILDING_CONFIG = BuildingObjectConfig.newConfig()
+            .dontUseInputFieldDefaultValues()
+            .dontUseExactProvidedListForScalarTypes()
+            .validateInputFields()
+            .build();
+
     @Override
     public Object parse(String input, TypeInformation<?> type, ValueParsingContext context) {
-        return context.objectBuilder().buildFromObject(input, type, BuildingObjectConfig.DISABLE_BOTH);
+        return context.objectBuilder().buildFromObject(input, type, BUILDING_CONFIG);
     }
 }

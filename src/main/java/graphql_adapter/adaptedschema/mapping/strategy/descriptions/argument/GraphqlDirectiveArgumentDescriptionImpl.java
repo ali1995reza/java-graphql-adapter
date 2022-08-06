@@ -21,6 +21,8 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptions.DefaultValueD
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefaultValueContainerElementDescriptionImpl;
 import graphql_adapter.adaptedschema.utils.NullifyUtils;
 
+import java.util.List;
+
 public class GraphqlDirectiveArgumentDescriptionImpl extends GraphqlDefaultValueContainerElementDescriptionImpl implements GraphqlDirectiveArgumentDescription {
 
     private final int dimensions;
@@ -28,8 +30,8 @@ public class GraphqlDirectiveArgumentDescriptionImpl extends GraphqlDefaultValue
     private final Class<?> type;
     private final Class<? extends ValueParser<?, ?>> valueParser;
 
-    public GraphqlDirectiveArgumentDescriptionImpl(String name, String description, boolean nullable, DefaultValueDetails defaultValue, int dimensions, DimensionModel dimensionModel, Class<?> type, Class<? extends ValueParser<?, ?>> valueParser) {
-        super(name, description, nullable, defaultValue);
+    public GraphqlDirectiveArgumentDescriptionImpl(String name, String description, List<Boolean> nullability, DefaultValueDetails defaultValue, int dimensions, DimensionModel dimensionModel, Class<?> type, Class<? extends ValueParser<?, ?>> valueParser) {
+        super(name, description, nullability, defaultValue);
         this.dimensions = dimensions;
         this.dimensionModel = NullifyUtils.getOrDefault(dimensionModel, DimensionModel.SINGLE);
         this.type = type;

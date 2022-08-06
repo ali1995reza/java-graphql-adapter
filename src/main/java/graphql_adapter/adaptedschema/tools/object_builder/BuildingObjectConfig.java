@@ -19,34 +19,18 @@ import graphql_adapter.adaptedschema.utils.builder.IBuilder;
 
 public class BuildingObjectConfig {
 
-    public final static BuildingObjectConfig DISABLE_BOTH = BuildingObjectConfig.newConfig()
-            .dontUseInputFieldDefaultValues()
-            .dontUseExactProvidedListForScalarTypes()
-            .build();
-
-    public final static BuildingObjectConfig ENABLE_BOTH = BuildingObjectConfig.newConfig()
-            .dontUseInputFieldDefaultValues()
-            .dontUseExactProvidedListForScalarTypes()
-            .build();
-
-    public final static BuildingObjectConfig ONLY_USE_EXACT_LIST = BuildingObjectConfig.newConfig()
-            .dontUseInputFieldDefaultValues()
-            .useExactProvidedListForScalarTypes()
-            .build();
-
-    public final static BuildingObjectConfig ONLY_USE_DEFAULT_VALUES = BuildingObjectConfig.newConfig()
-            .useInputFieldsDefaultValues()
-            .dontUseExactProvidedListForScalarTypes()
-            .build();
-
     public static BuildingObjectConfig.Builder newConfig() {
         return new Builder();
     }
+
     private final boolean useInputFieldsDefaultValues;
     private final boolean useExactProvidedListForScalarTypes;
-    public BuildingObjectConfig(boolean useInputFieldsDefaultValues, boolean useExactProvidedListForScalarTypes) {
+    private final boolean validateInputFields;
+
+    public BuildingObjectConfig(boolean useInputFieldsDefaultValues, boolean useExactProvidedListForScalarTypes, boolean validateInputFields) {
         this.useInputFieldsDefaultValues = useInputFieldsDefaultValues;
         this.useExactProvidedListForScalarTypes = useExactProvidedListForScalarTypes;
+        this.validateInputFields = validateInputFields;
     }
 
     public boolean useExactProvidedListForScalarTypes() {
@@ -57,14 +41,19 @@ public class BuildingObjectConfig {
         return useInputFieldsDefaultValues;
     }
 
+    public boolean validateInputFields() {
+        return validateInputFields;
+    }
+
     public static class Builder implements IBuilder<Builder, BuildingObjectConfig> {
 
         private boolean useInputFieldsDefaultValues = false;
         private boolean useExactProvidedListForScalarTypes = false;
+        private boolean validateInputFields = false;
 
         @Override
         public BuildingObjectConfig build() {
-            return new BuildingObjectConfig(useInputFieldsDefaultValues, useExactProvidedListForScalarTypes);
+            return new BuildingObjectConfig(useInputFieldsDefaultValues, useExactProvidedListForScalarTypes, validateInputFields);
         }
 
         @Override
@@ -78,6 +67,7 @@ public class BuildingObjectConfig {
         public Builder refresh() {
             this.useInputFieldsDefaultValues = false;
             this.useExactProvidedListForScalarTypes = false;
+            this.validateInputFields = false;
             return this;
         }
 
@@ -106,5 +96,19 @@ public class BuildingObjectConfig {
         public Builder useInputFieldsDefaultValues() {
             return this.useInputFieldsDefaultValues(true);
         }
+
+        public Builder dontValidateInputFields() {
+            return validateInputFields(false);
+        }
+
+        public Builder validateInputFields() {
+            return validateInputFields(true);
+        }
+
+        public Builder validateInputFields(boolean validateInputFields) {
+            this.validateInputFields = validateInputFields;
+            return this;
+        }
+
     }
 }

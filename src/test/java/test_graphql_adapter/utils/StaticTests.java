@@ -17,9 +17,7 @@ package test_graphql_adapter.utils;
 
 import graphql_adapter.adaptedschema.discovered.*;
 import graphql_adapter.adaptedschema.functions.ValueParser;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.*;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedInputTypeClass;
@@ -35,6 +33,7 @@ import graphql_adapter.adaptedschema.utils.NameValidationUtils;
 import test_graphql_adapter.schema.TestSchemaProvider;
 
 import java.lang.annotation.Annotation;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -426,5 +425,18 @@ public class StaticTests {
 
     public static void assertDescriptionIsNull(DiscoveredElement<?, ?> element) {
         assertNull(element.asMappedElement().description());
+    }
+
+    public static void assertNoValidators(ValidatableMappedElement element) {
+        testValidators(element, 0);
+    }
+
+    @SafeVarargs
+    public static void testValidators(ValidatableMappedElement element, int expectedNumberOfValidators, Consumer<GraphqlValidator>... handlers) {
+        assertEquals(expectedNumberOfValidators, element.validators().size());
+        assertEquals(handlers.length, expectedNumberOfValidators);
+        for (int i = 0; i < element.validators().size(); i++) {
+            handlers[i].accept(element.validators().get(i));
+        }
     }
 }

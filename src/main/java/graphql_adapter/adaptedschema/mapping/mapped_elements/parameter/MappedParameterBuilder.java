@@ -15,12 +15,18 @@
  */
 package graphql_adapter.adaptedschema.mapping.mapped_elements.parameter;
 
+import graphql_adapter.adaptedschema.assertion.Assert;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.GraphqlValidator;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementBuilder;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.utils.CollectionUtils;
 
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public final class MappedParameterBuilder extends MappedElementBuilder<MappedParameterBuilder, MappedParameter> {
 
@@ -30,7 +36,8 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 MappedElementType.ARGUMENT,
                 null,
                 Collections.emptyList(),
-                null,
+                Collections.emptyList()
+                , null,
                 parameter,
                 index, TypeInformation.adaptedSchema(parameter),
                 ParameterModel.ADAPTED_SCHEMA
@@ -47,6 +54,7 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 MappedElementType.ARGUMENT,
                 null,
                 Collections.emptyList(),
+                Collections.emptyList(),
                 null,
                 parameter,
                 index,
@@ -60,6 +68,7 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 null,
                 MappedElementType.ARGUMENT,
                 null,
+                Collections.emptyList(),
                 Collections.emptyList(),
                 null,
                 parameter,
@@ -75,15 +84,16 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 MappedElementType.ARGUMENT,
                 null,
                 Collections.emptyList(),
+                Collections.emptyList(),
                 null,
                 parameter,
                 index,
-
                 TypeInformation.of(parameter),
                 ParameterModel.SKIPPED
         );
     }
 
+    private final List<GraphqlValidator> validators = new ArrayList<>();
     private Parameter parameter;
     private TypeInformation<?> type;
     private Object defaultValue;
@@ -100,6 +110,7 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
                 elementType(),
                 description(),
                 appliedAnnotations(),
+                validators(),
                 defaultValue(),
                 parameter(),
                 index(),
@@ -109,11 +120,13 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
 
     @Override
     public MappedParameterBuilder copy(MappedParameter element) {
-        return super.copy(element)
+        super.copy(element)
                 .parameter(element.parameter())
                 .index(element.index())
                 .type(element.type())
                 .defaultValue(element.defaultValue());
+        element.validators().forEach(this::addValidator);
+        return this;
     }
 
     @Override
@@ -122,7 +135,49 @@ public final class MappedParameterBuilder extends MappedElementBuilder<MappedPar
         this.type = null;
         this.defaultValue = null;
         this.index = -1;
+        this.clearValidators();
         return super.refresh();
+    }
+
+    public MappedParameterBuilder addValidator(GraphqlValidator validator) {
+        Assert.isNotNull(validator, new NullPointerException("validator is null"));
+        this.validators.add(validator);
+        return this;
+    }
+
+    public MappedParameterBuilder addValidators(GraphqlValidator... validators) {
+        if (CollectionUtils.isEmpty(validators)) {
+            return castThis();
+        }
+        for (GraphqlValidator validator : validators) {
+            this.addValidator(validator);
+        }
+        return this;
+    }
+
+    public MappedParameterBuilder addValidators(Collection<GraphqlValidator> validators) {
+        if (CollectionUtils.isEmpty(validators)) {
+            return castThis();
+        }
+        for (GraphqlValidator validator : validators) {
+            this.addValidator(validator);
+        }
+        return this;
+    }
+
+    public MappedParameterBuilder clearValidators() {
+        this.validators.clear();
+        return this;
+    }
+
+    public MappedParameterBuilder removeValidator(GraphqlValidator validator) {
+        Assert.isNotNull(validator, new NullPointerException("validator is null"));
+        this.validators.remove(validator);
+        return this;
+    }
+
+    public List<GraphqlValidator> validators() {
+        return Collections.unmodifiableList(new ArrayList<>(validators));
     }
 
     public MappedParameterBuilder defaultValue(Object defaultValue) {

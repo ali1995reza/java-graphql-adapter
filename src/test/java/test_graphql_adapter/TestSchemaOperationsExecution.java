@@ -24,7 +24,7 @@ import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.types.Bus;
 import test_graphql_adapter.schema.types.Car;
 import test_graphql_adapter.utils.ExecutionResultParser;
-import test_graphql_adapter.utils.QueryResolver;
+import test_graphql_adapter.utils.OperationResolver;
 import test_graphql_adapter.utils.TestUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -40,9 +40,7 @@ public class TestSchemaOperationsExecution {
     private final GraphQL graphQL;
 
     public TestSchemaOperationsExecution() {
-
-        graphQL = GraphQL.newGraphQL(TestSchemaProvider.schema().getSchema()).build();
-        LOGGER.info(TestSchemaProvider.schema().asSchemaDefinitionLanguage());
+        graphQL = GraphQL.newGraphQL(TestSchemaProvider.schema().graphQLSchema()).build();
     }
 
     @Test
@@ -94,7 +92,6 @@ public class TestSchemaOperationsExecution {
     @Test
     public void testDirectiveArgumentCustomArrayValueParser() {
         ExecutionResultParser parser = execute("Mutation-7");
-        System.out.println(parser);
 
         assertEquals((String) null, parser.getData("a.stringValue"));
         assertEquals(0L, (Long) parser.getData("a.longValue"));
@@ -112,7 +109,6 @@ public class TestSchemaOperationsExecution {
     @Test
     public void testDirectiveArgumentCustomListValueParser() {
         ExecutionResultParser parser = execute("Mutation-8");
-        System.out.println(parser);
 
         assertEquals((String) null, parser.getData("a.stringValue"));
         assertEquals(0L, (Long) parser.getData("a.longValue"));
@@ -269,7 +265,7 @@ public class TestSchemaOperationsExecution {
     public void testMultipleFieldDirectives() {
         ExecutionResultParser parser = execute("Mutation-2");
 
-        String expected = Base64.getEncoder().encodeToString("some_input".getBytes(StandardCharsets.UTF_8));
+        String expected = Base64.getEncoder().encodeToString("input".getBytes(StandardCharsets.UTF_8));
         expected = TestUtils.base64Hash(expected, "MD5");
         expected = new StringBuffer().append(expected).reverse().toString();
 
@@ -342,7 +338,7 @@ public class TestSchemaOperationsExecution {
 
     private ExecutionResultParser execute(String filename) {
 
-        String query = QueryResolver.getQuery(filename);
+        String query = OperationResolver.getOperation(filename);
 
         LOGGER.info("Executing Query : \r\n" + query);
 

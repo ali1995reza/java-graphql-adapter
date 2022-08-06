@@ -23,9 +23,11 @@ public final class TypeDetails {
     private final Class<?> type;
     private final int dimensions;
     private final DimensionModel dimensionModel;
+    private final boolean isAsync;
 
-    TypeDetails(Class<?> type, int dimensions, DimensionModel dimensionModel) {
+    TypeDetails(Class<?> type, int dimensions, DimensionModel dimensionModel, boolean isAsync) {
         this.dimensionModel = dimensionModel;
+        this.isAsync = isAsync;
         Assert.isNotNegative(dimensions, new IllegalStateException("an array dimension can not be <0"));
         Assert.isNotNull(type, new NullPointerException("provided type is null"));
         this.type = type;
@@ -38,7 +40,12 @@ public final class TypeDetails {
                 "type=" + type +
                 ", dimensions=" + dimensions +
                 ", dimensionModel=" + dimensionModel +
+                ", isAsync=" + isAsync +
                 '}';
+    }
+
+    public boolean isAsync() {
+        return isAsync;
     }
 
     public DimensionModel dimensionModel() {

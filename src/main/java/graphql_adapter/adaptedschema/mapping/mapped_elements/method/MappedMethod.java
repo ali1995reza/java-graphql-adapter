@@ -15,14 +15,11 @@
  */
 package graphql_adapter.adaptedschema.mapping.mapped_elements.method;
 
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeContainerMappedElement;
 
 import java.lang.reflect.Method;
 
-public interface MappedMethod extends MappedElement {
+public interface MappedMethod extends TypeContainerMappedElement {
 
     Method method();
-
-    TypeInformation<?> type();
 }

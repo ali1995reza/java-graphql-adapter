@@ -15,11 +15,9 @@
  */
 package test_graphql_adapter.schema.types;
 
-import graphql_adapter.annotations.GraphqlArgument;
-import graphql_adapter.annotations.GraphqlDescription;
-import graphql_adapter.annotations.GraphqlField;
-import graphql_adapter.annotations.GraphqlInterface;
+import graphql_adapter.annotations.*;
 import test_graphql_adapter.schema.directives.Since;
+import test_graphql_adapter.schema.validators.Match;
 
 import java.util.List;
 
@@ -29,12 +27,12 @@ public interface MutationInterface {
 
     @GraphqlDescription("D2299")
     @GraphqlField
-    String encodeToBase64(@GraphqlDescription("D29876") @Since("1.0.14") @GraphqlArgument(name = "input") String input);
+    String encodeToBase64(@GraphqlDescription("D29876") @Match("\\w{5,}") @Since("1.0.14") @GraphqlArgument(name = "input") String input);
 
     @GraphqlDescription("D145")
     @Since("1.0.12")
     @GraphqlField
-    default List<String> split(@GraphqlDescription("D2019") @GraphqlArgument(name = "input") String input, @Since("1.0.13") @GraphqlArgument(name = "splitor", nullable = false) Splitor splitor) {
+    default List<String> split(@GraphqlDescription("D2019") @GraphqlArgument(name = "input") String input, @Since("1.0.13") @GraphqlArgument(name = "splitor") @GraphqlNonNull Splitor splitor) {
         return splitor.split(input);
     }
 }

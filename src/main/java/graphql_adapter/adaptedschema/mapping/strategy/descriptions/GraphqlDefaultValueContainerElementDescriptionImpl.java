@@ -15,12 +15,14 @@
  */
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions;
 
+import java.util.List;
+
 public class GraphqlDefaultValueContainerElementDescriptionImpl extends GraphqlNullableElementDescriptionImpl implements GraphqlDefaultValueContainerElementDescription {
 
     private final DefaultValueDetails defaultValue;
 
-    public GraphqlDefaultValueContainerElementDescriptionImpl(String name, String description, boolean nullable, DefaultValueDetails defaultValue) {
-        super(name, description, nullable);
+    public GraphqlDefaultValueContainerElementDescriptionImpl(String name, String description, List<Boolean> nullability, DefaultValueDetails defaultValue) {
+        super(name, description, nullability);
         this.defaultValue = defaultValue;
     }
 

@@ -25,6 +25,7 @@ import test_graphql_adapter.schema.parsers.CustomDirectiveArgumentFooArrayValueP
 import test_graphql_adapter.schema.parsers.CustomDirectiveArgumentFooListValueParser;
 import test_graphql_adapter.schema.parsers.CustomDirectiveArgumentFooValueParser;
 import test_graphql_adapter.schema.types.Foo;
+import test_graphql_adapter.schema.validators.FooValidation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,15 +35,17 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FooProvider {
 
+    @FooValidation
     @GraphqlDescription("D4")
-    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooArrayValueParser.class, type = Foo.class, dimensions = 1, dimensionModel = DimensionModel.ARRAY)
+    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooArrayValueParser.class, type = Foo.class, dimensions = 1, dimensionModel = DimensionModel.ARRAY, nullability = {false, false})
     int[] arrayValues() default {-25, -26, -27};
 
-    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooListValueParser.class, type = Foo.class, dimensions = 1, dimensionModel = DimensionModel.LIST, nullable = false)
+    @FooValidation
+    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooListValueParser.class, type = Foo.class, dimensions = 1, dimensionModel = DimensionModel.LIST)
     int[] listValues() default {-28, -29, -30};
 
     @GraphqlDescription("D5")
     @DefaultValue("{intValue:-101, intValue2:-102, intArray:[1,2,3,4,5,6]}")
-    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooValueParser.class, type = Foo.class, nullable = false)
+    @GraphqlDirectiveArgument(valueParser = CustomDirectiveArgumentFooValueParser.class, type = Foo.class, nullability = false)
     int[] value();
 }

@@ -17,21 +17,24 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptors.method;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MethodAnnotationLookup {
 
-    public static <T extends Annotation> T findFirstAppears(Method method, Class<T> annotationClass) {
+    public static <T extends Annotation> MethodAnnotationLookupResult<T> findFirstAppears(Method method, Class<T> annotationClass) {
         if (method.getAnnotation(annotationClass) != null) {
-            return method.getAnnotation(annotationClass);
+            return new MethodAnnotationLookupResult<>(method.getAnnotation(annotationClass), method);
         } else {
 
             if (method.getDeclaringClass().getSuperclass() != null) {
                 try {
 
                     Method m = method.getDeclaringClass().getSuperclass().getMethod(method.getName(), method.getParameterTypes());
-                    T annotation = findFirstAppears(m, annotationClass);
-                    if (annotation != null) {
-                        return annotation;
+                    MethodAnnotationLookupResult<T> result = findFirstAppears(m, annotationClass);
+                    if (result != null) {
+                        return result;
                     }
                 } catch (NoSuchMethodException ignored) {
                 }
@@ -39,9 +42,9 @@ public class MethodAnnotationLookup {
             for (Class<?> cls : method.getDeclaringClass().getInterfaces()) {
                 try {
                     Method m = cls.getMethod(method.getName(), method.getParameterTypes());
-                    T annotation = findFirstAppears(m, annotationClass);
-                    if (annotation != null) {
-                        return annotation;
+                    MethodAnnotationLookupResult<T> result = findFirstAppears(m, annotationClass);
+                    if (result != null) {
+                        return result;
                     }
                 } catch (NoSuchMethodException ignored) {
                 }
@@ -49,5 +52,43 @@ public class MethodAnnotationLookup {
         }
 
         return null;
+    }
+
+    public static List<Annotation> getAllAnnotations(Method method) {
+        List<Annotation> list = new ArrayList<>();
+        getAllAnnotations(method, list);
+        return list;
+    }
+
+    private static void getAllAnnotations(Method method, List<Annotation> list) {
+        Class<?> clazz = method.getDeclaringClass();
+        for (Class<?> inter : clazz.getInterfaces()) {
+            try {
+                Method superMethod = getMethod(inter, method.getName(), method.getParameterTypes());
+                getAllAnnotations(superMethod, list);
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+        if (clazz.getSuperclass() != null) {
+            try {
+                Method superMethod = getMethod(clazz.getSuperclass(), method.getName(), method.getParameterTypes());
+                getAllAnnotations(superMethod, list);
+            } catch (NoSuchMethodException ignored) {
+            }
+        }
+        list.addAll(Arrays.asList(method.getAnnotations()));
+    }
+
+    private static Method getMethod(Class<?> clazz, String name, Class<?>... params) throws NoSuchMethodException {
+        try {
+            return clazz.getMethod(name, params);
+        } catch (NoSuchMethodException ignored) {
+        }
+
+        try {
+            return clazz.getDeclaredMethod(name, params);
+        } catch (NoSuchMethodException e) {
+            throw e;
+        }
     }
 }

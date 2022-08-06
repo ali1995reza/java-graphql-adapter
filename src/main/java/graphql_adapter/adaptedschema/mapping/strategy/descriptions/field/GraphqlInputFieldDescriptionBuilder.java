@@ -30,7 +30,7 @@ public class GraphqlInputFieldDescriptionBuilder extends DefaultValueContainerEl
 
     @Override
     public GraphqlInputFieldDescription build() {
-        return new GraphqlInputFieldDescriptionImpl(name(), description(), isNullable(), defaultValue(), setter());
+        return new GraphqlInputFieldDescriptionImpl(name(), description(), nullability(), defaultValue(), setter());
     }
 
     @Override

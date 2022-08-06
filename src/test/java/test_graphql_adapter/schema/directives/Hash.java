@@ -19,6 +19,9 @@ import graphql.introspection.Introspection;
 import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlDirective;
 import graphql_adapter.annotations.GraphqlDirectiveArgument;
+import graphql_adapter.annotations.GraphqlNonNull;
+import test_graphql_adapter.schema.validators.Match;
+import test_graphql_adapter.schema.validators.OneOf;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,10 +30,13 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Hash {
 
+    @Match("[A-Z0-9a-z_\\-]*")
+    @OneOf({"SHA-256", "MD5"})
     @GraphqlDescription("the algorithm that directive will use to hash value")
-    @GraphqlDirectiveArgument(nullable = false)
-    String algorithm() default "SHA-256";
+    @GraphqlDirectiveArgument
+    @GraphqlNonNull String algorithm() default "SHA-256";
 
+    @Match("[A-Z0-9a-z_]*")
     @GraphqlDirectiveArgument
     String salt() default "";
 }

@@ -17,12 +17,10 @@ package graphql_adapter.adaptedschema.mapping.mapper;
 
 import graphql.introspection.Introspection;
 import graphql_adapter.adaptedschema.assertion.Assert;
+import graphql_adapter.adaptedschema.exceptions.GraphqlValidationException;
 import graphql_adapter.adaptedschema.exceptions.MappingSchemaElementException;
 import graphql_adapter.adaptedschema.functions.ValueParsingContext;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementBuilder;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.*;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotationBuilder;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.MappedAnnotation;
@@ -43,9 +41,9 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptors.classes.ClassD
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.field.EnumConstantDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.ValidatorDescriptor;
 import graphql_adapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import graphql_adapter.adaptedschema.utils.CollectionUtils;
-import graphql_adapter.adaptedschema.utils.NullifyUtils;
 import graphql_adapter.adaptedschema.utils.chain.Chain;
 import graphql_adapter.codegenerator.ObjectConstructor;
 
@@ -70,21 +68,59 @@ public class AbstractElementMapper {
     private final Chain<ParameterDescriptor> parameterDescriptorChain;
     private final Chain<EnumConstantDescriptor> enumValueDescriptorChain;
     private final Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain;
+    private final Chain<ValidatorDescriptor> validatorDescriptorChain;
 
-    public AbstractElementMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<EnumConstantDescriptor> enumValueDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        this.classDescriptorChain = NullifyUtils.getOrDefault(classDescriptorChain, Chain.empty());
-        this.methodDescriptorChain = NullifyUtils.getOrDefault(methodDescriptorChain, Chain.empty());
-        this.parameterDescriptorChain = NullifyUtils.getOrDefault(parameterDescriptorChain, Chain.empty());
-        this.enumValueDescriptorChain = NullifyUtils.getOrDefault(enumValueDescriptorChain, Chain.empty());
-        this.appliedDirectiveDescriptorChain = NullifyUtils.getOrDefault(appliedDirectiveDescriptorChain, Chain.empty());
+    public AbstractElementMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<EnumConstantDescriptor> enumValueDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain, Chain<ValidatorDescriptor> validatorDescriptorChain) {
+        this.classDescriptorChain = CollectionUtils.getOrEmptyChain(classDescriptorChain);
+        this.methodDescriptorChain = CollectionUtils.getOrEmptyChain(methodDescriptorChain);
+        this.parameterDescriptorChain = CollectionUtils.getOrEmptyChain(parameterDescriptorChain);
+        this.enumValueDescriptorChain = CollectionUtils.getOrEmptyChain(enumValueDescriptorChain);
+        this.appliedDirectiveDescriptorChain = CollectionUtils.getOrEmptyChain(appliedDirectiveDescriptorChain);
+        this.validatorDescriptorChain = CollectionUtils.getOrEmptyChain(validatorDescriptorChain);
+    }
+
+    public List<GraphqlValidator> describeArgumentValidators(Parameter parameter, Method method, int index, Class<?> clazz) {
+        for (ValidatorDescriptor descriptor : validatorDescriptorChain) {
+            if (descriptor.skipArgumentValidators(parameter, method, clazz)) {
+                return null;
+            }
+            List<GraphqlValidator> validators = descriptor.describeArgumentValidators(parameter, method, index, clazz);
+            if (validators != null) {
+                return validators;
+            }
+        }
+        return null;
+    }
+
+    public List<GraphqlValidator> describeDirectiveArgumentValidators(Method method, Class<? extends Annotation> clazz) {
+        for (ValidatorDescriptor descriptor : validatorDescriptorChain) {
+            if (descriptor.skipDirectiveArgumentValidators(method, clazz)) {
+                return null;
+            }
+            List<GraphqlValidator> validators = descriptor.describeDirectiveArgumentValidators(method, clazz);
+            if (validators != null) {
+                return validators;
+            }
+        }
+        return null;
+    }
+
+    public List<GraphqlValidator> describeInputFieldValidators(Method method, Class<?> clazz) {
+        for (ValidatorDescriptor descriptor : validatorDescriptorChain) {
+            if (descriptor.skipInputFieldValidators(method, clazz)) {
+                return null;
+            }
+            List<GraphqlValidator> validators = descriptor.describeInputFieldValidators(method, clazz);
+            if (validators != null) {
+                return validators;
+            }
+        }
+        return null;
     }
 
     protected final <T extends MappedElement> T addAppliedAnnotations(Supplier<MappedElementBuilder<?, T>> builderSupplier, T element, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
         if (annotations == null || annotations.isEmpty() || constructor == null || builder == null) {
             return element;
-        }
-        if (element.name().equals("version")) {
-            System.out.println();
         }
         List<DirectiveArgumentsValue> values = describeAppliedDirectives(element, annotations);
         if (values == null || values.isEmpty()) {
@@ -358,12 +394,14 @@ public class AbstractElementMapper {
         ValueParsingContext context = new ValueParsingContext(constructor, builder);
         for (MappedAnnotationMethod method : annotation.mappedMethods().values()) {
             Object value = argumentsValue.getArgumentValue(method.name());
-            if (value == null) {
-                continue;
+            if (value != null) {
+                value = constructor.getInstance(method.valueParser())
+                        .parse(cast(value), method.type(), context);
             }
-            value = constructor.getInstance(method.valueParser())
-                    .parse(cast(value), method.type(), context);
-            appliedAnnotationBuilder.addArgument(method.name(), value);
+            validate(value, method, constructor);
+            if (value != null) {
+                appliedAnnotationBuilder.addArgument(method.name(), value);
+            }
         }
         return appliedAnnotationBuilder.build();
     }
@@ -403,6 +441,16 @@ public class AbstractElementMapper {
                 return separateAnnotations(annotations, Introspection.DirectiveLocation.INTERFACE);
             default:
                 return Collections.emptyMap();
+        }
+    }
+
+    private static void validate(Object value, ValidatableMappedElement element, ObjectConstructor constructor) throws GraphqlValidationException {
+        if (CollectionUtils.isEmpty(element.validators())) {
+            return;
+        }
+        for (GraphqlValidator validator : element.validators()) {
+            constructor.getInstance(validator.validationFunction())
+                    .validate(cast(value), validator.validationArgument(), element);
         }
     }
 }

@@ -34,7 +34,7 @@ public class GraphqlDirectiveArgumentDescriptionBuilder extends DefaultValueCont
         return new GraphqlDirectiveArgumentDescriptionImpl(
                 name(),
                 description(),
-                isNullable(),
+                nullability(),
                 defaultValue(),
                 dimensions(),
                 dimensionModel(),

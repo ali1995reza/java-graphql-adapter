@@ -23,6 +23,7 @@ import graphql_adapter.adaptedschema.discovered.DiscoveredElement;
 import graphql_adapter.adaptedschema.discovered.DiscoveredEnumType;
 import graphql_adapter.adaptedschema.discovered.DiscoveredInputType;
 import graphql_adapter.adaptedschema.discovered.DiscoveredScalarType;
+import graphql_adapter.adaptedschema.exceptions.GraphqlValidationException;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.DimensionModel;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElement;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
@@ -34,6 +35,7 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.enums.MappedEnumCon
 import graphql_adapter.adaptedschema.mapping.mapped_elements.method.MappedInputFieldMethod;
 import graphql_adapter.adaptedschema.utils.ClassUtils;
 import graphql_adapter.adaptedschema.utils.CollectionUtils;
+import graphql_adapter.adaptedschema.utils.ValidatableElementUtils;
 import graphql_adapter.codegenerator.ObjectConstructor;
 
 import java.lang.reflect.Array;
@@ -125,6 +127,8 @@ public class ObjectBuilder {
             } else {
                 return buildFromSingleObject(type, object, config);
             }
+        } catch (GraphqlValidationException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalStateException("can not parse object : " + object.getClass().getName() + "{ " + object + " }, class [" + type + "], dimensions [" + dimensions + "], dimension-model [" + dimensionModel + "]", e);
         }
@@ -152,6 +156,8 @@ public class ObjectBuilder {
             } else {
                 return buildFromSingleValue(value, type, config);
             }
+        } catch (GraphqlValidationException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalStateException("can not parse value : " + value + ", class [" + type + "], dimensions [" + dimensions + "], dimension-model [" + dimensionModel + "]", e);
         }
@@ -218,14 +224,15 @@ public class ObjectBuilder {
 
         for (MappedInputFieldMethod method : inputTypeClass.inputFiledMethods().values()) {
             Object value = map.get(method.name());
-            if (value == null && method.defaultValue() != null && config.useInputFieldsDefaultValues()) {
-                method.setter().invoke(instance, (Object) method.defaultValue());
-                continue;
+            if (value == null && method.hasDefaultValue() && config.useInputFieldsDefaultValues()) {
+                value = method.defaultValue();
             }
-            if (value == null) {
-                continue;
+            if (config.validateInputFields()) {
+                ValidatableElementUtils.validate(value, method, objectConstructor);
             }
-            method.setter().invoke(instance, buildFromObject(value, method.type(), config));
+            if (value != null) {
+                method.setter().invoke(instance, buildFromObject(value, method.type(), config));
+            }
         }
 
         return instance;
@@ -243,19 +250,29 @@ public class ObjectBuilder {
         if (config.useInputFieldsDefaultValues()) {
             for (MappedInputFieldMethod method : inputType.inputFiledMethods().values()) {
                 Value<?> value = findValueFromObject(objectValue, method.name());
+                Object javaValue = null;
                 if (value == null && method.hasDefaultValue()) {
-                    method.setter().invoke(instance, (Object) method.defaultValue());
-                    continue;
+                    javaValue = method.defaultValue();
+                } else {
+                    javaValue = buildFromValue(value, method.type(), config);
                 }
-                if (value == null) {
-                    continue;
+                if (config.validateInputFields()) {
+                    ValidatableElementUtils.validate(javaValue, method, objectConstructor);
                 }
-                method.setter().invoke(instance, buildFromValue(value, method.type(), config));
+                if (javaValue != null) {
+                    method.setter().invoke(instance, javaValue);
+                }
             }
         } else {
             for (ObjectField field : objectValue.getObjectFields()) {
                 MappedInputFieldMethod method = inputType.inputFiledMethods().get(field.getName());
-                method.setter().invoke(instance, buildFromValue(field.getValue(), method.type(), config));
+                Object value = buildFromValue(field.getValue(), method.type(), config);
+                if (config.validateInputFields()) {
+                    ValidatableElementUtils.validate(value, method, objectConstructor);
+                }
+                if (value != null) {
+                    method.setter().invoke(instance, value);
+                }
             }
         }
 
@@ -411,7 +428,7 @@ public class ObjectBuilder {
         try {
             return objectMapper.readValue(input, Map.class);
         } catch (JsonProcessingException e) {
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 

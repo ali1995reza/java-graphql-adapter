@@ -18,13 +18,15 @@ package test_graphql_adapter.schema.types;
 import graphql_adapter.annotations.DefaultValue;
 import graphql_adapter.annotations.GraphqlInputField;
 import graphql_adapter.annotations.GraphqlInputType;
+import graphql_adapter.annotations.GraphqlNonNull;
 import test_graphql_adapter.schema.directives.Since;
+import test_graphql_adapter.schema.validators.Match;
 
 import java.util.Objects;
 
 @GraphqlInputType
 @Since("1.0.7")
-public class InputUser {
+public class InputUser extends InputUserAbstract {
 
     private String name;
     private UserType type;
@@ -50,8 +52,11 @@ public class InputUser {
                 '}';
     }
 
+    @Match("[A-Za-z0-9]+")
     @DefaultValue("Anonymous")
-    @GraphqlInputField(name = "name", setter = "setName", nullable = false)
+    @GraphqlInputField(name = "name", setter = "setName")
+    @GraphqlNonNull
+    @Override
     public String getName() {
         return name;
     }

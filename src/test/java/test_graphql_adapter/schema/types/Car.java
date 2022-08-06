@@ -21,7 +21,7 @@ import graphql_adapter.annotations.GraphqlObjectType;
 import test_graphql_adapter.schema.directives.ToStringDirective;
 
 @GraphqlObjectType
-public class Car implements Vehicle {
+public abstract class Car implements Vehicle {
 
     private String model;
     private Integer produceYear;

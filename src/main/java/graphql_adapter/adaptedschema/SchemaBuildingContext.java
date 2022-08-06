@@ -22,13 +22,13 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.classes.MappedClass;
 import graphql_adapter.codegenerator.ObjectConstructor;
 
-interface BuildingContext {
+public interface SchemaBuildingContext {
 
     void addToPossibleTypesOf(MappedClass mappedClass, MappedClass possible);
 
     SchemaDirectiveHandlingContext directiveHandlingContext();
 
-    GraphQLTypeReference geOutputTypeFor(Class<?> clazz);
+    GraphQLTypeReference getOutputTypeFor(Class<?> clazz);
 
     GraphQLDirective getDirectiveFor(Class<?> clazz);
 

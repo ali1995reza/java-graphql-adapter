@@ -34,7 +34,7 @@ public @interface GraphqlDirectiveArgument {
 
     String name() default "";
 
-    boolean nullable() default true;
+    boolean[] nullability() default {};
 
     Class<?> type() default Void.class;
 

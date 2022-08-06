@@ -21,15 +21,16 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptors.classes.ClassD
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.field.EnumConstantDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.ValidatorDescriptor;
 import graphql_adapter.adaptedschema.utils.chain.Chain;
 
 public class ElementMapperWithMethodMapper extends AbstractElementMapper {
 
     private final MethodMapper methodMapper;
 
-    public ElementMapperWithMethodMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<EnumConstantDescriptor> enumValueDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, enumValueDescriptorChain, appliedDirectiveDescriptorChain);
-        this.methodMapper = new MethodMapper(methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain);
+    public ElementMapperWithMethodMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<EnumConstantDescriptor> enumValueDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain, Chain<ValidatorDescriptor> validatorDescriptorChain) {
+        super(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, enumValueDescriptorChain, appliedDirectiveDescriptorChain, validatorDescriptorChain);
+        this.methodMapper = new MethodMapper(methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain, validatorDescriptorChain);
     }
 
     public MethodMapper methodMapper() {

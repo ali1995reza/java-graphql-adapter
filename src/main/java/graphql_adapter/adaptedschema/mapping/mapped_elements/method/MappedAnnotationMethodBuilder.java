@@ -17,9 +17,9 @@ package graphql_adapter.adaptedschema.mapping.mapped_elements.method;
 
 import graphql_adapter.adaptedschema.functions.ValueParser;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedMethodBuilder;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.ValidatableMappedMethodBuilder;
 
-public class MappedAnnotationMethodBuilder extends MappedMethodBuilder<MappedAnnotationMethodBuilder, MappedAnnotationMethod> {
+public class MappedAnnotationMethodBuilder extends ValidatableMappedMethodBuilder<MappedAnnotationMethodBuilder, MappedAnnotationMethod> {
 
     public static MappedAnnotationMethodBuilder newBuilder() {
         return new MappedAnnotationMethodBuilder();
@@ -40,6 +40,7 @@ public class MappedAnnotationMethodBuilder extends MappedMethodBuilder<MappedAnn
                 appliedAnnotations(),
                 method(),
                 type(),
+                validators(),
                 defaultValue(),
                 valueParser()
         );

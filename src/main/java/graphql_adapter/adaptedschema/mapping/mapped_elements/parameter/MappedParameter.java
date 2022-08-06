@@ -16,11 +16,11 @@
 package graphql_adapter.adaptedschema.mapping.mapped_elements.parameter;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.DefaultValueContainerMappedElement;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.ValidatableMappedElement;
 
 import java.lang.reflect.Parameter;
 
-public interface MappedParameter extends DefaultValueContainerMappedElement {
+public interface MappedParameter extends DefaultValueContainerMappedElement, ValidatableMappedElement {
 
     static MappedParameterBuilder newParameter() {
         return MappedParameterBuilder.newBuilder();
@@ -31,6 +31,4 @@ public interface MappedParameter extends DefaultValueContainerMappedElement {
     ParameterModel model();
 
     Parameter parameter();
-
-    TypeInformation<?> type();
 }

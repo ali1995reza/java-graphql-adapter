@@ -1,0 +1,387 @@
+"java.math.BigDecimal"
+scalar BigDecimal
+
+"Built-in Boolean"
+scalar Boolean
+
+"java.lang.Byte"
+scalar Byte
+
+"java.lang.Char"
+scalar Char
+
+"java.lang.Double"
+scalar Double
+
+"java.lang.Float"
+scalar Float
+
+"java.lang.Integer"
+scalar Int
+
+"java.lang.Long"
+scalar Long
+
+"This is a custom description"
+scalar Period @Since(version: "1.0.2")
+
+"java.lang.Short"
+scalar Short
+
+"Splitor Description"
+scalar Splitor @Since(version: "1.0.3")
+
+"Built-in String"
+scalar String
+
+"Directs the executor to include this field or fragment only when the `if` argument is true"
+directive @include(
+
+    "Included when true."
+    if: Boolean!
+
+) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"Directs the executor to skip this field or fragment when the `if`'argument is true."
+directive @skip(
+
+    "Skipped when true."
+    if: Boolean!
+
+) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"D99"
+directive @ToString on FIELD_DEFINITION
+
+directive @Hash(
+
+    salt: String = ""
+
+    "the algorithm that directive will use to hash value"
+    algorithm: String! = "SHA-256"
+
+) on FIELD | FIELD_DEFINITION
+
+"D77"
+directive @Reverse on FIELD | FIELD_DEFINITION
+
+"make delay to fetch data as seconds"
+directive @Delay(
+
+    "D3"
+    seconds: Int!
+
+) on QUERY | FIELD | FIELD_DEFINITION
+
+"provide FooInput"
+directive @FooProvider(
+
+    listValues: [FooInput] = [{intValue2: 0, charValue: " ", intValue: -28, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -29, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -30, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}]
+
+    "D5"
+    value: FooInput! = {intValue2: -102, charValue: " ", intValue: -101, floatValue: 0, doubleValue: 0, longValue: 0, intArray: [1, 2, 3, 4, 5, 6], stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}
+
+    "D4"
+    arrayValues: [FooInput!]! = [{intValue2: 0, charValue: " ", intValue: -25, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -26, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -27, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}]
+
+) on QUERY | FIELD | FIELD_DEFINITION
+
+directive @UpperCase on FIELD | FIELD_DEFINITION
+
+directive @InputProvider(
+
+    input: ComplexInput! = {name: "k1", priority: 1, value: "v1", inner: {name: "k2", priority: 2, value: "v2", inner: {name: "k3", priority: 3, value: "v3", inner: null}}} @Since(version: "1.0.20")
+
+) on QUERY | FIELD
+
+directive @Since(
+
+    version: String! @Since(version: "1.0.16")
+
+) on SCHEMA | SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INTERFACE | UNION | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+
+"D1"
+directive @Authentication(
+
+    "D2"
+    token: String!
+
+) on QUERY | FIELD | FRAGMENT_DEFINITION | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @AddPageParameters on FIELD_DEFINITION
+
+"Marks the field, argument, input field or enum value as deprecated"
+directive @deprecated(
+
+    "The reason for the deprecation"
+    reason: String = "No longer supported"
+
+) on FIELD_DEFINITION | ARGUMENT_DEFINITION | ENUM_VALUE | INPUT_FIELD_DEFINITION
+
+"Exposes a URL that specifies the behaviour of this scalar."
+directive @specifiedBy(
+
+    "The URL that specifies the behaviour of this scalar."
+    url: String!
+
+) on SCALAR
+
+"An ENUM"
+enum UserType @Since(version: "1.0.9") {
+
+    NORMAL
+
+    ADMIN
+
+}
+
+"D980"
+input ComplexInput @Since(version: "1.0.25") {
+
+    name: String
+
+    priority: Int! @Since(version: "1.0.21")
+
+    "D2900"
+    value: String
+
+    "D891"
+    inner: ComplexInput = {name: "dn", priority: 100, value: "dv", inner: {name: "idn", priority: 101, value: "idv", inner: null}}
+
+}
+
+"D456"
+input FooInput {
+
+    intValue2: Int! = 10
+
+    charValue: Char! = "c"
+
+    intValue: Int! = 1
+
+    floatValue: Float! = 15477542
+
+    doubleValue: Double! = 2123455500000.2099609375
+
+    longValue: Long! = 9223372036854775807
+
+    "D989"
+    intArray: [Int!] = [1, 2, 3]
+
+    stringValue: String = "DV1"
+
+    booleanValue2: Boolean! = false
+
+    booleanValue: Boolean! = true
+
+    shortValue: Short! = 20000
+
+    byteValue: Byte! = 120
+
+}
+
+input InputUser @Since(version: "1.0.7") {
+
+    name: String! = "Anonymous"
+
+    type: UserType = NORMAL @Since(version: "1.0.8")
+
+}
+
+input PageParameters {
+
+    size: Int!
+
+    page: Int!
+
+}
+
+"Mutation Abstract"
+interface MutationInterface {
+
+    "D2299"
+    encodeToBase64(" D29876 " input: String @Since(version: "1.0.14")): String
+
+    "D145"
+    split(" D2019 " input: String, splitor: Splitor! @Since(version: "1.0.13")): [String] @Since(version: "1.0.12")
+
+}
+
+"D8999999"
+interface UserInterface @Since(version: "1.0.4") {
+
+    name: String! @Since(version: "1.0.11")
+
+    type: UserType!
+
+}
+
+type Admin implements UserInterface {
+
+    name: String!
+
+    type: UserType!
+
+    token: String
+
+}
+
+type BankAccount {
+
+    id: String
+
+    "Balance as dollar"
+    balance: Double
+
+    username: String
+
+}
+
+"Bus"
+type Bus @Since(version: "1.0.1") {
+
+    model: String @Hash(salt: "some_salt",  algorithm: "SHA-256")
+
+    produceYear: String @ToString
+
+    size: Int
+
+}
+
+type Car {
+
+    model: String
+
+    "D76543"
+    produceYear: String @ToString
+
+}
+
+"D980"
+type ComplexOutput @Since(version: "1.0.25") {
+
+    name: String
+
+    priority: Int! @Since(version: "1.0.21")
+
+    "D2900"
+    value: String
+
+    "D891"
+    inner: ComplexOutput
+
+}
+
+"D456"
+type FooOutput {
+
+    intValue2: Int!
+
+    charValue: Char!
+
+    intValue: Int!
+
+    floatValue: Float!
+
+    doubleValue: Double!
+
+    longValue: Long!
+
+    "D989"
+    intArray: [Int!]
+
+    stringValue: String
+
+    booleanValue2: Boolean!
+
+    booleanValue: Boolean!
+
+    shortValue: Short!
+
+    byteValue: Byte!
+
+}
+
+type IntList {
+
+    isEmpty: Boolean!
+
+    data: [Int]
+
+    size: Int!
+
+    get(index: Int! = 0): Int
+
+}
+
+type PageDetails {
+
+    "D428"
+    size: Int!
+
+    page: Int!
+
+}
+
+type User implements UserInterface {
+
+    name: String!
+
+    "D8776"
+    type: UserType!
+
+}
+
+"Vehicle Union Description"
+union Vehicle @Since(version: "1.0.5") = Car | Bus
+
+type TestMutation implements MutationInterface {
+
+    combineInto3DMatrix(a: [[Int!]!], arg1: [[Int!]]): [[[Int!]!]]
+
+    "D145"
+    split(" D2019 " input: String, splitor: Splitor! @Since(version: "1.0.13")): [String] @Since(version: "1.0.12")
+
+    inputToOutput(input: FooInput = {intValue2: -2, charValue: " ", intValue: -1, floatValue: 0, doubleValue: 0, longValue: 0, intArray: [1, 2, 3, 4], stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}): FooOutput @FooProvider(listValues: [{intValue2: 0, charValue: " ", intValue: -1000, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -2000, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -3000, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}],  value: {intValue2: -200, charValue: " ", intValue: -100, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0},  arrayValues: [{intValue2: 0, charValue: " ", intValue: -25, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -26, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}, {intValue2: 0, charValue: " ", intValue: -27, floatValue: 0, doubleValue: 0, longValue: 0, intArray: null, stringValue: null, booleanValue2: false, booleanValue: false, shortValue: 0, byteValue: 0}])
+
+    inputToOutputFromDirective(index: Int! = -1): FooOutput
+
+    encodeToBase64(input: String): String
+
+    listToArray(arg0: [Int]): [Int!]
+
+}
+
+type TestQuery @Since(version: "1.0.6") {
+
+    serializeToString(input: ComplexInput = {name: "k1", priority: 1, value: "v1", inner: {name: "k2", priority: 2, value: "v2", inner: {name: "k3", priority: 3, value: "v3", inner: null}}}, separator: Char! = ","): String
+
+    getBankAccount(" username of bank account owner " arg0: String): BankAccount
+
+    getPageDetails(" page parameters " pageParameters: PageParameters): PageDetails @AddPageParameters
+
+    serializeToStringFromDirective(separator: Char! = ","): String
+
+    getList(period: Period): IntList
+
+    getVehicle(isCar: Boolean = true): Vehicle
+
+    getDeveloperName: String
+
+    getUser(user: InputUser!): UserInterface
+
+    isSystemParamsHealthy: Boolean!
+
+    multiplyMatrices(m1: [[Int]]! = [[1, 2, 3], [4, 5, 6], [7, 8, 9]], m2: [[Int!]!]! = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]): [[Int]]
+
+    isDirectivesHealthy: Boolean!
+
+}
+
+schema {
+
+    query:  TestQuery
+
+    mutation:  TestMutation
+
+}

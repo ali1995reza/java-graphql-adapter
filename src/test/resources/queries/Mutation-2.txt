@@ -1,3 +1,0 @@
-mutation {
-    encodeToBase64(input: "some_input") @Hash(algorithm: "MD5") @Reverse
-}

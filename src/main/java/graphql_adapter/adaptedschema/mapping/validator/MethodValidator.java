@@ -28,6 +28,7 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.parameter.MappedPar
 import java.lang.reflect.Method;
 
 import static graphql_adapter.adaptedschema.exceptions.SchemaExceptionBuilder.exception;
+import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 public class MethodValidator {
 
@@ -58,9 +59,8 @@ public class MethodValidator {
         ElementValidator.validateElement(mappedMethod, clazz, method, true, e);
         Assert.isNotNull(mappedMethod.method(), exception(e, "provided method for mapped method is null", clazz, method));
         if (validateType) {
-            final boolean nullable = (mappedMethod.type().hasDimensions() || !mappedMethod.type().type().isPrimitive()) && mappedMethod.type().isNullable();
-            TypeInformation<?> expectedType = TypeInformation.of(mappedMethod.method(), nullable);
-            Assert.isEquals(expectedType, mappedMethod.type(), exception(e, "mapped method detected type is not valid", clazz, method));
+            TypeInformation<?> expectedType = TypeInformation.of(mappedMethod.method());
+            Assert.isTrue(expectedType.canBeEqualsTo(cast(mappedMethod.type())), exception(e, "mapped method detected type is not valid - expected : " + expectedType + ", actual: " + mappedMethod.type(), clazz, method));
         }
     }
 }

@@ -25,7 +25,7 @@ abstract class DiscoveredTypeImpl<T extends GraphQLType, E extends MappedClass> 
     private final E mappedElement;
     private final String name;
     private final T graphQLType;
-    private boolean isImmutable = false;
+    private boolean immutable = false;
 
     public DiscoveredTypeImpl(E mappedElement, String name, T graphQLType) {
         this.mappedElement = mappedElement;
@@ -52,9 +52,19 @@ abstract class DiscoveredTypeImpl<T extends GraphQLType, E extends MappedClass> 
 
     }
 
+    protected final boolean isImmutable() {
+        return immutable;
+    }
+
     final synchronized void setImmutable() {
-        Assert.isFalse(isImmutable, new IllegalStateException("this type already immutable"));
+        Assert.isFalse(immutable, new IllegalStateException("this type already immutable"));
         makeImmutable();
-        this.isImmutable = true;
+        this.immutable = true;
+    }
+
+    final synchronized void setImmutableIfNotImmutable() {
+        if(!isImmutable()) {
+            setImmutable();
+        }
     }
 }

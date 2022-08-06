@@ -15,6 +15,7 @@
  */
 package graphql_adapter.adaptedschema.mapping.strategy.descriptors.method;
 
+import graphql_adapter.adaptedschema.mapping.mapper.utils.DimensionsNullabilityUtils;
 import graphql_adapter.adaptedschema.mapping.mapper.utils.MappingUtils;
 import graphql_adapter.adaptedschema.mapping.mapper.utils.TypeDetails;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlDirectiveArgumentDescription;
@@ -27,16 +28,20 @@ import graphql_adapter.annotations.GraphqlField;
 import graphql_adapter.annotations.GraphqlInputField;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
 
     @Override
     public GraphqlDirectiveArgumentDescription describeDirectiveArgument(Method method, Class<?> clazz) {
-        GraphqlDirectiveArgument directiveArgumentAnnotation = MethodAnnotationLookup.findFirstAppears(method, GraphqlDirectiveArgument.class);
+        MethodAnnotationLookupResult<GraphqlDirectiveArgument> result = MethodAnnotationLookup.findFirstAppears(method, GraphqlDirectiveArgument.class);
 
-        if (directiveArgumentAnnotation == null) {
+        if (result == null) {
             return null;
         }
+
+        GraphqlDirectiveArgument directiveArgumentAnnotation = result.annotation();
 
         String name = NullifyUtils.getOrDefault(directiveArgumentAnnotation.name(), method.getName());
         TypeDetails details = MappingUtils.findTypeDetails(method);
@@ -44,7 +49,7 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
         if (directiveArgumentAnnotation.type() == Void.class) {
             return GraphqlDirectiveArgumentDescription.newDirectiveArgumentDescription()
                     .name(name)
-                    .nullable(directiveArgumentAnnotation.nullable())
+                    .nullability(DimensionsNullabilityUtils.getNullabilityOfDimensions(method))
                     .type(details.type())
                     .dimensions(details.dimensions())
                     .dimensionModel(details.dimensionModel())
@@ -55,7 +60,7 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
         } else {
             return GraphqlDirectiveArgumentDescription.newDirectiveArgumentDescription()
                     .name(name)
-                    .nullable(directiveArgumentAnnotation.nullable())
+                    .nullability(of(directiveArgumentAnnotation.dimensions(), directiveArgumentAnnotation.nullability()))
                     .type(directiveArgumentAnnotation.type())
                     .dimensions(directiveArgumentAnnotation.dimensions())
                     .dimensionModel(directiveArgumentAnnotation.dimensionModel())
@@ -68,34 +73,38 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
 
     @Override
     public GraphqlFieldDescription describeField(Method method, Class<?> clazz) {
-        GraphqlField fieldAnnotation = MethodAnnotationLookup.findFirstAppears(method, GraphqlField.class);
+        MethodAnnotationLookupResult<GraphqlField> result = MethodAnnotationLookup.findFirstAppears(method, GraphqlField.class);
 
-        if (fieldAnnotation == null) {
+        if (result == null) {
             return null;
         }
+
+        GraphqlField fieldAnnotation = result.annotation();
 
         String name = NullifyUtils.getOrDefault(fieldAnnotation.name(), method.getName());
 
         return GraphqlFieldDescription.newFieldDescription()
                 .name(name)
-                .nullable(fieldAnnotation.nullable())
+                .nullability(DimensionsNullabilityUtils.getNullabilityOfDimensions(result.method()))
                 .description(DescriptorUtils.getDescription(method))
                 .build();
     }
 
     @Override
     public GraphqlInputFieldDescription describeInputField(Method method, Class<?> clazz) {
-        GraphqlInputField inputFieldAnnotation = MethodAnnotationLookup.findFirstAppears(method, GraphqlInputField.class);
+        MethodAnnotationLookupResult<GraphqlInputField> result = MethodAnnotationLookup.findFirstAppears(method, GraphqlInputField.class);
 
-        if (inputFieldAnnotation == null) {
+        if (result == null) {
             return null;
         }
+
+        GraphqlInputField inputFieldAnnotation = result.annotation();
 
         String name = NullifyUtils.getOrDefault(inputFieldAnnotation.name(), method.getName());
 
         return GraphqlInputFieldDescription.newInputFieldDescription()
                 .name(name)
-                .nullable(inputFieldAnnotation.nullable())
+                .nullability(DimensionsNullabilityUtils.getNullabilityOfDimensions(result.method()))
                 .setter(inputFieldAnnotation.setter())
                 .defaultValue(DescriptorUtils.getDefaultValue(method))
                 .description(DescriptorUtils.getDescription(method))
@@ -115,5 +124,24 @@ public class AnnotationBaseMethodDescriptor implements MethodDescriptor {
     @Override
     public boolean skipInputField(Method method, Class<?> clazz) {
         return DescriptorUtils.isSkipElementAnnotationPresent(method);
+    }
+
+    private static List<Boolean> listOfBooleans(boolean value, int size) {
+        List<Boolean> list = new ArrayList<>(size);
+        for(int i=0;i<size;i++) {
+            list.add(value);
+        }
+        return list;
+    }
+
+    private static List<Boolean> of(int size, boolean... booleans) {
+        if(booleans == null || booleans.length == 0) {
+            return listOfBooleans(true, size+1);
+        }
+        List<Boolean> list = new ArrayList<>();
+        for (boolean b : booleans) {
+            list.add(b);
+        }
+        return list;
     }
 }

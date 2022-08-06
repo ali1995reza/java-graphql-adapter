@@ -15,7 +15,9 @@
  */
 package graphql_adapter.adaptedschema.mapping.strategy.descriptions;
 
+import java.util.List;
+
 public interface GraphqlNullableContainerElementDescription extends GraphqlElementDescription {
 
-    boolean nullable();
+    List<Boolean> nullability();
 }

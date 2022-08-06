@@ -20,6 +20,8 @@ import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlInputType;
 import graphql_adapter.annotations.GraphqlObjectType;
 import test_graphql_adapter.schema.directives.Since;
+import test_graphql_adapter.schema.validators.Match;
+import test_graphql_adapter.schema.validators.NotOneOf;
 
 import java.util.Objects;
 
@@ -78,6 +80,7 @@ public class Complex {
         return this;
     }
 
+    @Match("[A-Za-z0-9]+")
     public String getName() {
         return name;
     }
@@ -87,6 +90,7 @@ public class Complex {
         return this;
     }
 
+    @NotOneOf({"-12345", "-123456", "-1234567"})
     @Since("1.0.21")
     public int getPriority() {
         return priority;

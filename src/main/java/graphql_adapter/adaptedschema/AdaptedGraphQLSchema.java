@@ -31,7 +31,7 @@ public final class AdaptedGraphQLSchema {
         return AdaptedGraphQLSchemaBuilder.newBuilder();
     }
 
-    private final GraphQLSchema schema;
+    private final GraphQLSchema graphQLSchema;
     private final String sdl;
     private final List<DiscoveredElement<?, ?>> discoveredElements;
     private final List<DiscoveredInputType> discoveredInputTypes;
@@ -45,9 +45,9 @@ public final class AdaptedGraphQLSchema {
     private final ObjectBuilder objectBuilder;
     private final TypeFinder typeFinder;
 
-    AdaptedGraphQLSchema(GraphQLSchema schema, List<DiscoveredElement<?, ?>> discoveredElements, ObjectConstructor objectConstructor, boolean usePariTypesForEachOther) {
-        this.schema = schema;
-        this.sdl = SDLUtils.toSDL(schema);
+    AdaptedGraphQLSchema(GraphQLSchema graphQLSchema, List<DiscoveredElement<?, ?>> discoveredElements, ObjectConstructor objectConstructor, boolean usePariTypesForEachOther) {
+        this.graphQLSchema = graphQLSchema;
+        this.sdl = SDLUtils.toSDL(graphQLSchema);
         this.discoveredInputTypes = CollectionUtils.separateToImmutableList(discoveredElements, DiscoveredInputType.class);
         this.discoveredInterfacesTypes = CollectionUtils.separateToImmutableList(discoveredElements, DiscoveredInterfaceType.class);
         this.discoveredObjectTypes = CollectionUtils.separateToImmutableList(discoveredElements, DiscoveredObjectType.class);
@@ -105,8 +105,8 @@ public final class AdaptedGraphQLSchema {
         return discoveredUnionTypes;
     }
 
-    public GraphQLSchema getSchema() {
-        return schema;
+    public GraphQLSchema graphQLSchema() {
+        return graphQLSchema;
     }
 
     public ObjectBuilder objectBuilder() {

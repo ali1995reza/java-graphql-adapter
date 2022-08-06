@@ -17,9 +17,11 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptions.field;
 
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.GraphqlNullableElementDescriptionImpl;
 
+import java.util.List;
+
 class GraphqlFieldDescriptionImpl extends GraphqlNullableElementDescriptionImpl implements GraphqlFieldDescription {
 
-    public GraphqlFieldDescriptionImpl(String name, String description, boolean nullable) {
-        super(name, description, nullable);
+    public GraphqlFieldDescriptionImpl(String name, String description, List<Boolean> nullability) {
+        super(name, description, nullability);
     }
 }

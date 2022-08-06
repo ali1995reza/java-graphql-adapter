@@ -4,8 +4,11 @@ Purpose of this library is to create `GraphQLSchema` by consuming your java clas
 of [GraphQL-Java](https://www.graphql-java.com/) library.
 
 ### Getting Started
+
 To add library in your project you can simply add this dependency:
+
 ```xml
+
 <dependency>
     <groupId>io.github.ali1995reza</groupId>
     <artifactId>graphql-adapter</artifactId>
@@ -67,13 +70,14 @@ The strategy of how to map your classes is here. `ClassMapper` will use **Descri
 to describe elements.You can change it by your own way. The default mapping strategy will use
 **_annotations_** and **POJO** model.
 
-There is 5 types of Descriptors :
+There is 6 types of Descriptors :
 
 - `ClassDescriptor`, which describe type based on a class
 - `MethodDescriptor`, which describe field, input-field or directive-argument based on a method
 - `ParameterDescriptor`, which describe argument base on a parameter
 - `EnumConstatntDescriptor`, which describe enum-value base on an enum constant
 - `AppliedDirectiveDescriptor`, which describe applied-directive base on an annotation
+- `ValidatorDescriptor`, which describe validators of a validatable-element such as input-field and argument
 
 `ClassMapper` hold user a chain of descriptors. To change the behavior of mapper you can set your own descriptors. For
 example if you want to apply a custom `ClassDescriptor`
@@ -92,7 +96,7 @@ classMapper.classDescriptorChain(Chain.newChain()
 As we explained in last part there is a dynamic mapping strategy. In this library I just developed an annotation base
 mapping strategy. There is multiple annotations for this strategy.
 
-#### @GraphqlType(`name() default ""`)
+#### @GraphqlObjectType(`name() default ""`)
 
 This annotation will use to set class as GraphQL object-type. You can specify the name or the default strategy will use
 the class name.
@@ -139,12 +143,12 @@ strategy will use the class name. Also, you have to set possible locations of di
 called `functionality` which is a class that will handle the directive functionality in building-schema time and
 execution time.
 
-#### @GraphqlField(`name() default "";` `nullable() default true;`)
+#### @GraphqlField(`name() default "";`)
 
 This annotation will use to set a method as GraphQL field. You can specify the name or the default strategy will use the
 method name. Also, it is possible to set field nullable. Each field is nullable by default.
 
-#### @GraphqlInputField(`name() default "";` `nullable() default true;` `setter() default "";`)
+#### @GraphqlInputField(`name() default "";` `setter() default "";`)
 
 This annotation will use to set a method as GraphQL input-field. You can specify the name or the default strategy will
 use the method name. Also, it is possible to set input-field nullable. Each input-field is nullable by default. You have
@@ -155,7 +159,7 @@ to set the setter-method name of the input-field too.
 This annotation will use to set an enum-constant as GraphQL enum-value. You can specify the name or the default strategy
 will use the enum-constant name. Also, default strategy will map enum-constants automatically.
 
-#### @GraphqlArgument(`name() default "";` `nullable() default true;`)
+#### @GraphqlArgument(`name() default "";`)
 
 This annotation will use to set a parameter of a method as GraphQL field. You can specify the name or the default
 strategy will use the method name. Also, it is possible to set argument nullable. Each argument is nullable by default.
@@ -163,12 +167,22 @@ You can skip a parameter, so it will always be null or (0,false) in primitives. 
 will provide details of fetching which you can set them in any position of parameters. System-parameter types are
 `DataFetchingEnvironment`, `GraphqlDirectivesHolder` and `AdaptedGraphQLSchema`.
 
-#### @GraphqlDirectiveArgument(`name() default "";` `type() default Void.class;` `nullable() default true;` `dimensions() default 0;` `dimensionModel() default DimensionModel.SINGLE;` `valueParser() default RawValueParser.class;`)
+#### @GraphqlDirectiveArgument(`name() default "";` `type() default Void.class;` `nullability() default {};` `dimensions() default 0;` `dimensionModel() default DimensionModel.SINGLE;` `valueParser() default RawValueParser.class;`)
 
 This annotation will use to set an annotation-method as a GraphQL directive argument. As possible types of an annotation
 method is limited you can set custom type details for the method. If you set custom type you have to set a
 custom `ValueParser` just for building-schema time. In execution time type resolving and building object will be
 automatic even if you set custom type.
+
+#### @GraphqlNonNull()
+
+This annotation will mark field, input field and arguments as non-nullable values. Primitives are always non-nullable.
+You can even set array component types and generic types as non-nullable using this annotation.
+
+#### @GraphqlValidation(`value()`)
+
+This annotation will set another annotation as a validation. You have to set a function as value to this annotation as
+validation functionality.
 
 #### @DefaultValue(`value();` `valueParser() default AutomaticDefaultValuerParser.class;`)
 
@@ -405,7 +419,12 @@ public class MyType {
     @GraphqlField
     public String myField(DataFetchingEnvironment environment, AdaptedGraphQLSchema schema) {
         MyInputType argument = (MyInputType) schema.objectBuilder()
-                .buildFromObject(environment.getArgument("argument"), MyInputType.class);
+                .buildFromObject(environment.getArgument("argument"), MyInputType.class, BuildingObjectConfig.newConfig()
+                        .useExactProvidedListForScalarTypes()
+                        .useInputFieldsDefaultValues()
+                        .validateInputFields()
+                        .build());
+
         return "some result";
     }
 }
@@ -540,6 +559,46 @@ public @interface UpperCase {
 }
 ```
 
+Also, we can create a validator like this:
+
+```java
+import graphql.introspection.Introspection;
+import graphql_adapter.annotations.GraphqlDirective;
+import graphql_adapter.annotations.GraphqlValidation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@GraphqlValidation(MatchValidationFunction.class)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Match {
+}
+```
+
+```java
+import graphql_adapter.adaptedschema.exceptions.GraphqlValidationException;
+import graphql_adapter.adaptedschema.functions.impl.GraphqlNonNullValidationFunction;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.ValidatableMappedElement;
+import test_graphql_adapter.schema.validators.exceptions.NotMatchException;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+
+public class MatchValidationFunction extends GraphqlNonNullValidationFunction<String, Match> {
+
+    private final static ConcurrentHashMap<String, Pattern> compiledPatterns = new ConcurrentHashMap<>();
+
+    @Override
+    protected void validateNonNull(String data, Match match, ValidatableMappedElement element) throws GraphqlValidationException {
+        if (!compiledPatterns.computeIfAbsent(match.value(), Pattern::compile).matcher(data).matches()) {
+            throw new NotMatchException(element.name() + " must be match pattern \"" + arguments.value() + "\" but was \"" + data + "\"", arguments.value(), data);
+        }
+    }
+}
+```
+
+Now we are able to use this validation on input-field, argument and directive arguments.
+
 And now we have to create our Query type.
 
 ```java
@@ -627,7 +686,7 @@ public class Main {
                 .add(UpperCase.class)
                 .build();
 
-        GraphQL graphQL = GraphQL.newGraphQL(schema.getSchema()).build();
+        GraphQL graphQL = GraphQL.newGraphQL(schema.graphQLSchema()).build();
 
         //multiply matrices
         ExecutionResult result = graphQL.execute("query {\n" +
@@ -662,16 +721,13 @@ Alireza@Akhoundi
 ALIREZA@AKHOUNDI
 ```
 
-
 ### License
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the
+License. You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "
+AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+language governing permissions and limitations under the License.

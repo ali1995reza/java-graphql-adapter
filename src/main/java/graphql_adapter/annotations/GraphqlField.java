@@ -25,6 +25,4 @@ import java.lang.annotation.Target;
 public @interface GraphqlField {
 
     String name() default "";
-
-    boolean nullable() default true;
 }

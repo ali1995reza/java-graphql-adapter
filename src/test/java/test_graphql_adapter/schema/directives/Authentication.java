@@ -19,6 +19,7 @@ import graphql.introspection.Introspection;
 import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlDirective;
 import graphql_adapter.annotations.GraphqlDirectiveArgument;
+import graphql_adapter.annotations.GraphqlNonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,5 +31,5 @@ public @interface Authentication {
 
     @GraphqlDescription("D2")
     @GraphqlDirectiveArgument
-    String token();
+    @GraphqlNonNull String token();
 }

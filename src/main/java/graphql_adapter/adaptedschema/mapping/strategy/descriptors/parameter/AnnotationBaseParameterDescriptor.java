@@ -17,6 +17,7 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter;
 
 import graphql.schema.DataFetchingEnvironment;
 import graphql_adapter.adaptedschema.AdaptedGraphQLSchema;
+import graphql_adapter.adaptedschema.mapping.mapper.utils.DimensionsNullabilityUtils;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.argument.GraphqlArgumentDescription;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.utils.DescriptorUtils;
 import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
@@ -31,9 +32,9 @@ public class AnnotationBaseParameterDescriptor implements ParameterDescriptor {
     @Override
     public GraphqlArgumentDescription describeFieldArgument(Method method, Parameter parameter, int parameterIndex) {
 
-        GraphqlArgument argument = ParameterAnnotationLookup.findFirstAppears(method, parameterIndex, GraphqlArgument.class);
+        ParameterAnnotationLookupResult<GraphqlArgument> lookupResult = ParameterAnnotationLookup.findFirstAppears(method, parameterIndex, GraphqlArgument.class);
 
-        if (argument == null) {
+        if (lookupResult == null) {
             if (isSystemParameter(parameter)) {
                 return GraphqlArgumentDescription.newArgumentDescription()
                         .systemParameter(true)
@@ -42,11 +43,13 @@ public class AnnotationBaseParameterDescriptor implements ParameterDescriptor {
             return null;
         }
 
+        GraphqlArgument argument = lookupResult.annotation();
+
         String name = StringUtils.isNullString(argument.name()) ? parameter.getName() : argument.name();
 
         return GraphqlArgumentDescription.newArgumentDescription()
                 .name(name)
-                .nullable(argument.nullable())
+                .nullability(DimensionsNullabilityUtils.getNullabilityOfDimensions(lookupResult.parameter()))
                 .defaultValue(DescriptorUtils.getDefaultValue(parameter))
                 .description(DescriptorUtils.getDescription(parameter))
                 .build();

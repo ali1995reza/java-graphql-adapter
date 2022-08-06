@@ -42,7 +42,7 @@ public class EnumMapper extends AbstractElementMapper {
     private final EnumConstantMapper enumConstantMapper;
 
     public EnumMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<EnumConstantDescriptor> enumValueDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(classDescriptorChain, null, null, enumValueDescriptorChain, appliedDirectiveDescriptorChain);
+        super(classDescriptorChain, null, null, enumValueDescriptorChain, appliedDirectiveDescriptorChain, null);
         this.enumConstantMapper = new EnumConstantMapper(enumValueDescriptorChain, appliedDirectiveDescriptorChain);
     }
 

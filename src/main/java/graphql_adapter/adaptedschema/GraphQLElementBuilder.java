@@ -54,7 +54,7 @@ import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 public class GraphQLElementBuilder {
 
-    public static GraphQLArgument buildArgument(MappedObjectTypeClass mappedClass, MappedFieldMethod method, MappedParameter parameter, BuildingContext context) {
+    public static GraphQLArgument buildArgument(MappedObjectTypeClass mappedClass, MappedFieldMethod method, MappedParameter parameter, SchemaBuildingContext context) {
         //so handle it please !
         GraphQLArgument.Builder argumentBuilder = GraphQLArgument.newArgument()
                 .name(parameter.name());
@@ -83,7 +83,7 @@ public class GraphQLElementBuilder {
         return argument;
     }
 
-    public static GraphQLArgument buildArgument(MappedAnnotation mappedClass, MappedAnnotationMethod method, BuildingContext context) {
+    public static GraphQLArgument buildArgument(MappedAnnotation mappedClass, MappedAnnotationMethod method, SchemaBuildingContext context) {
         //so handle it please !
         GraphQLArgument.Builder argumentBuilder = GraphQLArgument.newArgument()
                 .name(method.name());
@@ -112,7 +112,7 @@ public class GraphQLElementBuilder {
         return argument;
     }
 
-    public static GraphQLDirective buildDirective(MappedAnnotation mappedAnnotation, BuildingContext context) {
+    public static GraphQLDirective buildDirective(MappedAnnotation mappedAnnotation, SchemaBuildingContext context) {
 
         GraphQLDirective.Builder directiveType =
                 GraphQLDirective.newDirective();
@@ -132,7 +132,7 @@ public class GraphQLElementBuilder {
         return directiveType.build();
     }
 
-    public static GraphQLEnumType buildEnumType(MappedEnum mappedClass, BuildingContext context) {
+    public static GraphQLEnumType buildEnumType(MappedEnum mappedClass, SchemaBuildingContext context) {
         GraphQLEnumType.Builder enumTypeBuilder =
                 GraphQLEnumType.newEnum();
         enumTypeBuilder.name(mappedClass.name());
@@ -155,7 +155,7 @@ public class GraphQLElementBuilder {
         return enumType;
     }
 
-    public static GraphQLEnumValueDefinition buildEnumValue(MappedEnum mappedEnum, MappedEnumConstant enumConstant, BuildingContext context) {
+    public static GraphQLEnumValueDefinition buildEnumValue(MappedEnum mappedEnum, MappedEnumConstant enumConstant, SchemaBuildingContext context) {
         GraphQLEnumValueDefinition enumValue = GraphQLEnumValueDefinition.newEnumValueDefinition()
                 .name(enumConstant.name())
                 .value(enumConstant.constant())
@@ -172,22 +172,15 @@ public class GraphQLElementBuilder {
         return enumValue;
     }
 
-    public static GraphQLFieldDefinition buildField(MappedObjectTypeClass mappedClass, MappedFieldMethod method, BuildingContext context) {
+    public static GraphQLFieldDefinition buildField(MappedObjectTypeClass mappedClass, MappedFieldMethod method, SchemaBuildingContext context) {
         //so handle it please !
         GraphQLFieldDefinition.Builder fieldDefinitionBuilder = GraphQLFieldDefinition.newFieldDefinition();
         fieldDefinitionBuilder.name(method.name());
-        GraphQLTypeReference outputType = context.geOutputTypeFor(method.type().type());
+        GraphQLTypeReference outputType = context.getOutputTypeFor(method.type().type());
 
         Assert.isNotNull(outputType, exception(MappingGraphqlFieldException.class, "provided output type for [" + method.type() + "] is null", mappedClass.baseClass(), method.method()));
 
-        fieldDefinitionBuilder.type(
-                method.type().isNullable() ?
-                        (method.type().dimensions() > 0 ?
-                                (createList(outputType, method.type().dimensions())) : outputType)
-                        :
-                        new GraphQLNonNull((method.type().dimensions() > 0 ?
-                                (createList(outputType, method.type().dimensions())) : outputType))
-        );
+        fieldDefinitionBuilder.type(createOutputType(method.type(), context));
 
         for (MappedParameter parameter : method.parameters()) {
             if (parameter.model().isSchemaArgument()) {
@@ -209,7 +202,7 @@ public class GraphQLElementBuilder {
         return fieldDefinition;
     }
 
-    public static GraphQLInputObjectField buildInputField(MappedInputTypeClass mappedClass, MappedInputFieldMethod method, BuildingContext context) {
+    public static GraphQLInputObjectField buildInputField(MappedInputTypeClass mappedClass, MappedInputFieldMethod method, SchemaBuildingContext context) {
         if (method.method().getParameterCount() > 0) {
             throw new IllegalStateException("an InputField mapped method can not contains parameters - [method"
                     + method.method() + "]");
@@ -244,7 +237,7 @@ public class GraphQLElementBuilder {
         return inputField;
     }
 
-    public static GraphQLInputObjectType buildInputObjectType(MappedInputTypeClass mappedClass, BuildingContext context) {
+    public static GraphQLInputObjectType buildInputObjectType(MappedInputTypeClass mappedClass, SchemaBuildingContext context) {
 
         GraphQLInputObjectType.Builder inputObjectTypeBuilder =
                 GraphQLInputObjectType.newInputObject();
@@ -269,7 +262,7 @@ public class GraphQLElementBuilder {
         return inputObjectType;
     }
 
-    public static GraphQLInterfaceType buildInterface(MappedInterface mappedClass, BuildingContext context) {
+    public static GraphQLInterfaceType buildInterface(MappedInterface mappedClass, SchemaBuildingContext context) {
 
         GraphQLInterfaceType.Builder interfaceTypeBuilder =
                 GraphQLInterfaceType.newInterface();
@@ -294,7 +287,7 @@ public class GraphQLElementBuilder {
         return interfaceType;
     }
 
-    public static GraphQLObjectType buildOutputObjectType(MappedObjectTypeClass mappedClass, BuildingContext context) {
+    public static GraphQLObjectType buildOutputObjectType(MappedObjectTypeClass mappedClass, SchemaBuildingContext context) {
 
         GraphQLObjectType.Builder objectTypeBuilder =
                 GraphQLObjectType.newObject();
@@ -334,7 +327,7 @@ public class GraphQLElementBuilder {
         return objectType;
     }
 
-    public static GraphQLScalarType buildScalarType(MappedScalarClass scalarClass, BuildingContext context) {
+    public static GraphQLScalarType buildScalarType(MappedScalarClass scalarClass, SchemaBuildingContext context) {
 
         GraphQLScalarType scalarType = GraphQLScalarType.newScalar()
                 .name(scalarClass.name())
@@ -352,7 +345,7 @@ public class GraphQLElementBuilder {
         return scalarType;
     }
 
-    public static GraphQLUnionType buildUnionType(MappedUnionInterface mappedClass, List<MappedClass> possibles, BuildingContext context) {
+    public static GraphQLUnionType buildUnionType(MappedUnionInterface mappedClass, List<MappedClass> possibles, SchemaBuildingContext context) {
 
         GraphQLUnionType.Builder unionTypeBuilder =
                 GraphQLUnionType.newUnionType();
@@ -381,7 +374,7 @@ public class GraphQLElementBuilder {
         return unionType;
     }
 
-    public static Value<?> getValueFromEnum(Object o, BuildingContext context) {
+    public static Value<?> getValueFromEnum(Object o, SchemaBuildingContext context) {
         if (o == null) {
             return NullValue.newNullValue().build();
         }
@@ -389,7 +382,7 @@ public class GraphQLElementBuilder {
         return EnumValue.newEnumValue(mappedEnum.constantsByEnumValue().get(o).name()).build();
     }
 
-    private static <B extends GraphqlDirectivesContainerTypeBuilder<B, E>, E extends GraphqlTypeBuilder<E>> B addAppliedDirectives(B builder, GraphqlDirectiveDetails directiveDetails, BuildingContext context) {
+    private static <B extends GraphqlDirectivesContainerTypeBuilder<B, E>, E extends GraphqlTypeBuilder<E>> B addAppliedDirectives(B builder, GraphqlDirectiveDetails directiveDetails, SchemaBuildingContext context) {
         GraphQLAppliedDirective.Builder appliedDirective = GraphQLAppliedDirective.newDirective()
                 .name(directiveDetails.annotation().name());
 
@@ -409,7 +402,7 @@ public class GraphQLElementBuilder {
         return builder;
     }
 
-    private static Value<?> buildArrayValue(Object o, Class<?> clazz, int dimensions, DimensionModel dimensionModel, BuildingContext context) {
+    private static Value<?> buildArrayValue(Object o, Class<?> clazz, int dimensions, DimensionModel dimensionModel, SchemaBuildingContext context) {
         if (dimensionModel.isArray()) {
             return buildArrayValueFromArray(o, clazz, dimensions, context);
         } else {
@@ -417,7 +410,7 @@ public class GraphQLElementBuilder {
         }
     }
 
-    private static Value<?> buildArrayValueFromArray(Object array, Class<?> clazz, int dimensions, BuildingContext context) {
+    private static Value<?> buildArrayValueFromArray(Object array, Class<?> clazz, int dimensions, SchemaBuildingContext context) {
         if (array == null) {
             return NullValue.newNullValue().build();
         }
@@ -429,7 +422,7 @@ public class GraphQLElementBuilder {
         return arrayValue.build();
     }
 
-    private static Value<?> buildArrayValueFromList(Object o, Class<?> clazz, int dimensions, BuildingContext context) {
+    private static Value<?> buildArrayValueFromList(Object o, Class<?> clazz, int dimensions, SchemaBuildingContext context) {
         if (o == null) {
             return NullValue.of();
         }
@@ -445,7 +438,7 @@ public class GraphQLElementBuilder {
         return arrayValue.build();
     }
 
-    private static Value<?> buildValueFromObject(Object value, Class<?> clazz, int dimensions, DimensionModel dimensionModel, BuildingContext context) {
+    private static Value<?> buildValueFromObject(Object value, Class<?> clazz, int dimensions, DimensionModel dimensionModel, SchemaBuildingContext context) {
         if (dimensions > 0) {
             return buildArrayValue(value, clazz, dimensions, dimensionModel, context);
         } else {
@@ -453,11 +446,11 @@ public class GraphQLElementBuilder {
         }
     }
 
-    private static Value<?> buildValueFromObject(Object value, TypeInformation<?> type, BuildingContext context) {
+    private static Value<?> buildValueFromObject(Object value, TypeInformation<?> type, SchemaBuildingContext context) {
         return buildValueFromObject(value, type.type(), type.dimensions(), type.dimensionModel(), context);
     }
 
-    private static Value<?> buildValueFromSingleObject(Object o, BuildingContext context) {
+    private static Value<?> buildValueFromSingleObject(Object o, SchemaBuildingContext context) {
         if (o == null) {
             return NullValue.newNullValue().build();
         }
@@ -485,33 +478,42 @@ public class GraphQLElementBuilder {
         }
     }
 
-    private static GraphQLInputType createInputType(TypeInformation<?> type, BuildingContext context) {
+    private static GraphQLInputType createInputType(TypeInformation<?> type, SchemaBuildingContext context) {
         try {
             GraphQLTypeReference reference = context.getPossibleInputTypeFor(type.type());
-            GraphQLInputType inputType = type.hasDimensions() ? createList(reference, type.dimensions()) : reference;
-            if (!type.isNullable()) {
-                inputType = GraphQLNonNull.nonNull(inputType);
-            }
-            return inputType;
+            return (GraphQLInputType) createType(reference, type);
         } catch (Exception e) {
             throw new IllegalStateException("mapping type " + type + " throw an exception", e);
         }
     }
 
-    private static GraphQLList createList(GraphQLTypeReference type, int dims) {
-        if (dims < 1)
-            throw new IllegalStateException("can not create a list with dimensions <1");
-
-        GraphQLList list = new GraphQLList(type);
-        --dims;
-        for (int i = 0; i < dims; i++) {
-            list = new GraphQLList(list);
+    private static GraphQLOutputType createOutputType(TypeInformation<?> type, SchemaBuildingContext context) {
+        try {
+            GraphQLTypeReference reference = context.getOutputTypeFor(type.type());
+            return (GraphQLOutputType) createType(reference, type);
+        } catch (Exception e) {
+            throw new IllegalStateException("mapping type " + type + " throw an exception", e);
         }
-
-        return list;
     }
 
-    private static List<GraphqlDirectiveDetails> getDirectiveDetails(MappedElement element, BuildingContext context) {
+    private static GraphQLType createType(GraphQLType type, TypeInformation<?> typeInformation) {
+        for (int dimension = typeInformation.dimensions(); dimension >= 0; dimension--) {
+            if(dimension == typeInformation.dimensions()) {
+                if(!typeInformation.nullability(dimension)) {
+                    type = GraphQLNonNull.nonNull(type);
+                }
+            } else {
+                if(!typeInformation.nullability(dimension)) {
+                    type = GraphQLNonNull.nonNull(GraphQLList.list(type));
+                } else {
+                    type = GraphQLList.list(type);
+                }
+            }
+        }
+        return type;
+    }
+
+    private static List<GraphqlDirectiveDetails> getDirectiveDetails(MappedElement element, SchemaBuildingContext context) {
         if (CollectionUtils.isEmpty(element.appliedAnnotations())) {
             return Collections.emptyList();
         }
@@ -524,7 +526,7 @@ public class GraphQLElementBuilder {
         return details;
     }
 
-    private static Value<?> getValueFromScalar(Object o, BuildingContext context) {
+    private static Value<?> getValueFromScalar(Object o, SchemaBuildingContext context) {
         if (o == null) {
             return NullValue.newNullValue().build();
         }

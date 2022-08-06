@@ -41,6 +41,8 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.PojoMet
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.AnnotationBaseParameterDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.AutomaticParameterDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.AnnotationBaseValidatorDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.ValidatorDescriptor;
 import graphql_adapter.adaptedschema.scalar.ScalarEntry;
 import graphql_adapter.adaptedschema.tools.object_builder.ObjectBuilder;
 import graphql_adapter.adaptedschema.utils.ClassUtils;
@@ -83,11 +85,16 @@ public final class ClassMapper {
             .addToLast(new AnnotationBaseAppliedDirectiveDescriptor())
             .build();
 
+    public final static Chain<ValidatorDescriptor> DEFAULT_VALIDATOR_DESCRIPTORS = Chain.newChain()
+            .addToLast(new AnnotationBaseValidatorDescriptor())
+            .build();
+
     private Chain<ClassDescriptor> classDescriptorChain;
     private Chain<MethodDescriptor> methodDescriptorChain;
     private Chain<ParameterDescriptor> parameterDescriptorChain;
     private Chain<EnumConstantDescriptor> enumConstantDescriptorChain;
     private Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain;
+    private Chain<ValidatorDescriptor> validatorDescriptorChain;
 
     public ClassMapper() {
         this.setDefaultDescriptors();
@@ -116,7 +123,7 @@ public final class ClassMapper {
 
         ObjectBuilder objectBuilder = createObjectBuilder(scalarEntries, classes, existingClasses, constructor, usePairTypesAsEachOther);
 
-        Map<Class<?>, MappedAnnotation> annotations = new AnnotationMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, Chain.empty())
+        Map<Class<?>, MappedAnnotation> annotations = new AnnotationMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, Chain.empty(), validatorDescriptorChain)
                 .mapAnnotations(classes);
 
         Map<Class<?>, MappedScalarClass> mappedScalarEntries = new ScalarClassMapper(classDescriptorChain, appliedDirectiveDescriptorChain)
@@ -158,8 +165,8 @@ public final class ClassMapper {
     public List<MappedClass> mapInputAndObjectType(Class<?> clazz, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
         List<MappedClass> mappedClasses = new ArrayList<>();
 
-        ObjectTypeClassMapper objectTypeClassMapper = new ObjectTypeClassMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain);
-        InputTypeClassMapper inputTypeClassMapper = new InputTypeClassMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain);
+        ObjectTypeClassMapper objectTypeClassMapper = new ObjectTypeClassMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain, validatorDescriptorChain);
+        InputTypeClassMapper inputTypeClassMapper = new InputTypeClassMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain, validatorDescriptorChain);
 
         MappedObjectTypeClass objectTypeClass = objectTypeClassMapper.mapObjectTypeClass(clazz, MappedElementType.OBJECT_TYPE, annotations, constructor, builder);
 
@@ -220,7 +227,7 @@ public final class ClassMapper {
 
     private ObjectBuilder createObjectBuilder(Collection<ScalarEntry> scalarEntries, Collection<Class<?>> classes, Collection<MappedClass> defaultClasses, ObjectConstructor constructor, boolean usePairClassesAsEachOther) {
         EnumMapper enumMapper = new EnumMapper(classDescriptorChain, enumConstantDescriptorChain, Chain.empty());
-        InputTypeClassMapper inputTypeClassMapper = new InputTypeClassMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, Chain.empty());
+        InputTypeClassMapper inputTypeClassMapper = new InputTypeClassMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, Chain.empty(), validatorDescriptorChain);
         ScalarClassMapper scalarClassMapper = new ScalarClassMapper(classDescriptorChain, Chain.empty());
 
         Map<Class<?>, MappedEnum> enums = enumMapper.mapEnums(classes);
@@ -261,7 +268,7 @@ public final class ClassMapper {
     }
 
     private List<MappedClass> mapAnnotationClass(Class<? extends Annotation> clazz, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
-        MappedAnnotation mappedAnnotation = new AnnotationMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain)
+        MappedAnnotation mappedAnnotation = new AnnotationMapper(classDescriptorChain, methodDescriptorChain, parameterDescriptorChain, appliedDirectiveDescriptorChain, validatorDescriptorChain)
                 .mapAnnotation(clazz, annotations, constructor, builder);
         if (mappedAnnotation != null) {
             return Arrays.asList(mappedAnnotation);
@@ -308,5 +315,6 @@ public final class ClassMapper {
         this.parameterDescriptorChain = DEFAULT_PARAMETER_DESCRIPTORS;
         this.appliedDirectiveDescriptorChain = DEFAULT_APPLIED_DIRECTIVE_DESCRIPTORS;
         this.enumConstantDescriptorChain = DEFAULT_ENUM_CONSTANT_DESCRIPTORS;
+        this.validatorDescriptorChain = DEFAULT_VALIDATOR_DESCRIPTORS;
     }
 }

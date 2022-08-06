@@ -18,6 +18,7 @@ package test_graphql_adapter.schema.types;
 import graphql_adapter.annotations.GraphqlDescription;
 import graphql_adapter.annotations.GraphqlField;
 import graphql_adapter.annotations.GraphqlInterface;
+import graphql_adapter.annotations.GraphqlNonNull;
 import test_graphql_adapter.schema.directives.Since;
 
 @GraphqlDescription("D8999999")
@@ -26,9 +27,11 @@ import test_graphql_adapter.schema.directives.Since;
 public interface UserInterface {
 
     @Since("1.0.11")
-    @GraphqlField(nullable = false)
+    @GraphqlField
+    @GraphqlNonNull
     String name();
 
-    @GraphqlField(nullable = false)
+    @GraphqlField
+    @GraphqlNonNull
     UserType type();
 }

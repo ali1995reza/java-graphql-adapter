@@ -16,9 +16,10 @@
 package graphql_adapter.adaptedschema.mapping.mapped_elements.method;
 
 import graphql_adapter.adaptedschema.functions.ValueParser;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.GraphqlValidator;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedMethodImpl;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.TypeInformation;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.ValidatableMappedMethodImpl;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.annotation.AppliedAnnotation;
 
 import java.lang.reflect.Method;
@@ -26,13 +27,13 @@ import java.util.List;
 
 import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
-final class MappedAnnotationMethodImpl extends MappedMethodImpl implements MappedAnnotationMethod {
+final class MappedAnnotationMethodImpl extends ValidatableMappedMethodImpl implements MappedAnnotationMethod {
 
     private final Object defaultValue;
     private final Class<? extends ValueParser<?, ?>> valueParser;
 
-    public MappedAnnotationMethodImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Method method, TypeInformation<?> type, Object defaultValue, Class<? extends ValueParser<?, ?>> valueParser) {
-        super(name, MappedElementType.ARGUMENT, description, appliedAnnotations, method, type);
+    public MappedAnnotationMethodImpl(String name, String description, List<AppliedAnnotation> appliedAnnotations, Method method, TypeInformation<?> type, List<GraphqlValidator> validators, Object defaultValue, Class<? extends ValueParser<?, ?>> valueParser) {
+        super(name, MappedElementType.ARGUMENT, description, appliedAnnotations, method, type, validators);
         this.defaultValue = defaultValue;
         this.valueParser = valueParser;
     }

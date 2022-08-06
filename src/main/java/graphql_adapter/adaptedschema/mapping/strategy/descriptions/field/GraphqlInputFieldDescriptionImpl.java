@@ -18,12 +18,14 @@ package graphql_adapter.adaptedschema.mapping.strategy.descriptions.field;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.DefaultValueDetails;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptions.GraphqlDefaultValueContainerElementDescriptionImpl;
 
+import java.util.List;
+
 class GraphqlInputFieldDescriptionImpl extends GraphqlDefaultValueContainerElementDescriptionImpl implements GraphqlInputFieldDescription {
 
     private final String setter;
 
-    public GraphqlInputFieldDescriptionImpl(String name, String description, boolean nullable, DefaultValueDetails defaultValue, String setter) {
-        super(name, description, nullable, defaultValue);
+    public GraphqlInputFieldDescriptionImpl(String name, String description, List<Boolean> nullability, DefaultValueDetails defaultValue, String setter) {
+        super(name, description, nullability, defaultValue);
         this.setter = setter;
     }
 

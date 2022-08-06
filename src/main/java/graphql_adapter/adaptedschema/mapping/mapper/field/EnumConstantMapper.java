@@ -36,7 +36,7 @@ import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 public class EnumConstantMapper extends AbstractElementMapper {
 
     public EnumConstantMapper(Chain<EnumConstantDescriptor> enumValueDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(null, null, null, enumValueDescriptorChain, appliedDirectiveDescriptorChain);
+        super(null, null, null, enumValueDescriptorChain, appliedDirectiveDescriptorChain, null);
     }
 
     public MappedEnumConstant mapEnumConstant(Class<?> clazz, Enum<?> enumConstant, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {

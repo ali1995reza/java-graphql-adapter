@@ -19,7 +19,7 @@ import graphql_adapter.adaptedschema.mapping.mapped_elements.DefaultValueContain
 
 import java.lang.reflect.Method;
 
-public interface MappedInputFieldMethod extends MappedMethod, DefaultValueContainerMappedElement {
+public interface MappedInputFieldMethod extends ValidatableMappedMethod, DefaultValueContainerMappedElement {
 
     static MappedInputFieldMethodBuilder newInputFieldMethod() {
         return MappedInputFieldMethodBuilder.newBuilder();

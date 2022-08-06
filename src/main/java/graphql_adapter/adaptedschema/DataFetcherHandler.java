@@ -31,6 +31,7 @@ import graphql_adapter.adaptedschema.system_objects.directive.*;
 import graphql_adapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
 import graphql_adapter.adaptedschema.utils.CollectionUtils;
 import graphql_adapter.adaptedschema.utils.NullifyUtils;
+import graphql_adapter.adaptedschema.utils.ValidatableElementUtils;
 import graphql_adapter.codegenerator.AdaptedGraphQLDataFetcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,18 @@ import java.util.function.Supplier;
 public class DataFetcherHandler implements DataFetcher<Object> {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(DataFetcherHandler.class);
+
+    private final static BuildingObjectConfig VALUE_BUILDING_CONFIG = BuildingObjectConfig.newConfig()
+            .dontUseExactProvidedListForScalarTypes()
+            .useInputFieldsDefaultValues()
+            .validateInputFields()
+            .build();
+
+    private final static BuildingObjectConfig OBJECT_BUILDING_CONFIG = BuildingObjectConfig.newConfig()
+            .useExactProvidedListForScalarTypes()
+            .dontUseInputFieldDefaultValues()
+            .validateInputFields()
+            .build();
 
     private final AdaptedGraphQLDataFetcher<?> wrapped;
     private final Supplier<AdaptedGraphQLSchema> schemaSupplier;
@@ -66,7 +79,6 @@ public class DataFetcherHandler implements DataFetcher<Object> {
             return result;
         } catch (Exception e) {
             LOGGER.error("An exception occurs when handling data fetcher", e);
-            e.printStackTrace();
             throw e;
         }
     }
@@ -89,15 +101,15 @@ public class DataFetcherHandler implements DataFetcher<Object> {
         Map<String, Object> arguments = new HashMap<>();
         for (MappedAnnotationMethod method : discoveredDirective.asMappedElement().mappedMethods().values()) {
             Argument argument = argumentByName.get(method.name());
+            Object value;
             if (argument == null) {
-                if (method.hasDefaultValue()) {
-                    arguments.put(method.name(), method.defaultValue());
-                }
+                value = method.defaultValue();
             } else {
-                Object val = schema.objectBuilder().buildFromValue(argument.getValue(), method.type(), BuildingObjectConfig.ONLY_USE_DEFAULT_VALUES);
-                if (val != null) {
-                    arguments.put(method.name(), val);
-                }
+                value = schema.objectBuilder().buildFromValue(argument.getValue(), method.type(), VALUE_BUILDING_CONFIG);
+            }
+            ValidatableElementUtils.validate(value, method, schema.objectConstructor());
+            if (value != null) {
+                arguments.put(method.name(), value);
             }
         }
 
@@ -113,19 +125,21 @@ public class DataFetcherHandler implements DataFetcher<Object> {
 
         Map<String, Object> arguments = new HashMap<>();
         for (QueryAppliedDirectiveArgument argument : appliedArguments) {
-            if (argument.getArgumentValue().isSet() && argument.getArgumentValue().getValue() == null) {
-                continue;
-            }
             MappedAnnotationMethod method = discoveredDirective.asMappedElement()
                     .mappedMethods().get(argument.getName());
-            Object val = schema.objectBuilder().buildFromObject(argument.getValue(), method.type(), BuildingObjectConfig.ONLY_USE_EXACT_LIST);
-            if (val == null && method.hasDefaultValue()) {
-                val = method.defaultValue();
-            }
-            if (val == null) {
+
+            if (argument.getArgumentValue().isSet() && argument.getArgumentValue().getValue() == null) {
+                ValidatableElementUtils.validate(null, method, schema.objectConstructor());
                 continue;
             }
-            arguments.put(method.name(), val);
+            Object value = schema.objectBuilder().buildFromObject(argument.getValue(), method.type(), OBJECT_BUILDING_CONFIG);
+            if (value == null && method.hasDefaultValue()) {
+                value = method.defaultValue();
+            }
+            ValidatableElementUtils.validate(value, method, schema.objectConstructor());
+            if (value != null) {
+                arguments.put(method.name(), value);
+            }
         }
 
         return arguments;
@@ -180,9 +194,9 @@ public class DataFetcherHandler implements DataFetcher<Object> {
                     .getSelectionSet().getSelectionsOfType(FragmentSpread.class);
             Map<Class<?>, GraphqlDirectivesList> directivesListMap = null;
 
-            if (isNotEmpty(inlineFragments)) {
+            if (!CollectionUtils.isEmpty(inlineFragments)) {
                 for (InlineFragment fragment : inlineFragments) {
-                    if (!isNotEmpty(fragment.getDirectives())) {
+                    if (CollectionUtils.isEmpty(fragment.getDirectives())) {
                         continue;
                     }
 
@@ -197,16 +211,16 @@ public class DataFetcherHandler implements DataFetcher<Object> {
                 }
             }
 
-            if (isNotEmpty(fragmentSpreads)) {
+            if (!CollectionUtils.isEmpty(fragmentSpreads)) {
                 for (FragmentSpread fragment : fragmentSpreads) {
                     FragmentDefinition fragmentDefinition = environment.getFragmentsByName().get(fragment.getName());
                     DiscoveredObjectType objectType = schema.typeFinder().findObjectTypeByName(fragmentDefinition.getTypeCondition().getName());
                     List<GraphqlDirectiveDetails> detailsList = null;
-                    if (isNotEmpty(fragmentDefinition.getDirectives())) {
+                    if (!CollectionUtils.isEmpty(fragmentDefinition.getDirectives())) {
                         detailsList = getDirectives(fragmentDefinition.getDirectives(), schema,
                                 directive -> directive.function.preHandleFragmentDirective(directive, source, mappedFieldMethod, environment));
                     }
-                    if (isNotEmpty(fragment.getDirectives())) {
+                    if (!CollectionUtils.isEmpty(fragment.getDirectives())) {
                         if (detailsList == null) {
                             detailsList = new ArrayList<>();
                         }
@@ -235,8 +249,7 @@ public class DataFetcherHandler implements DataFetcher<Object> {
     }
 
     private OperationDirectives getOperationDirectivesAndExecutePreHandlers(Object source, AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
-        if (isNotEmpty(environment.getOperationDefinition().getDirectives())) {
-
+        if (!CollectionUtils.isEmpty(environment.getOperationDefinition().getDirectives())) {
             List<GraphqlDirectiveDetails> directivesList = getDirectives(environment.getOperationDefinition().getDirectives(), schema,
                     directive -> directive.function.preHandleOperationDirective(directive, source, environment.getOperationDefinition(), mappedFieldMethod, environment));
 
@@ -296,10 +309,6 @@ public class DataFetcherHandler implements DataFetcher<Object> {
         }
 
         return result;
-    }
-
-    private static boolean isNotEmpty(Collection<?> collection) {
-        return collection != null && !collection.isEmpty();
     }
 
     private final static class DirectiveDetailsWithFunction extends GraphqlDirectiveDetails {

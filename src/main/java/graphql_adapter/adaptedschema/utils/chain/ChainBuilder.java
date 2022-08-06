@@ -40,6 +40,7 @@ public class ChainBuilder<T> implements IBuilder<ChainBuilder<T>, Chain<T>> {
 
     @Override
     public ChainBuilder<T> copy(Chain<T> chain) {
+        this.refresh();
         chain.forEach(this::addToLast);
         return this;
     }

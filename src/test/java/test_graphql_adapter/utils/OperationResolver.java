@@ -19,10 +19,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class QueryResolver {
+public class OperationResolver {
 
-    public static String getQuery(String filename) {
-        InputStream stream = getResource("/queries/" + filename + ".txt");
+    public static String getOperation(String filename) {
+        InputStream stream = getResource("/operations/" + filename + ".graphql");
         try {
             return readString(stream);
         } catch (IOException e) {
@@ -61,6 +61,6 @@ public class QueryResolver {
     }
 
     private static InputStream getResource(String name) {
-        return QueryResolver.class.getResourceAsStream(name);
+        return OperationResolver.class.getResourceAsStream(name);
     }
 }

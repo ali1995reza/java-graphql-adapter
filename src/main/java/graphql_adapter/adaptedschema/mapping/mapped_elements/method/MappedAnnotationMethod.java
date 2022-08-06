@@ -18,7 +18,7 @@ package graphql_adapter.adaptedschema.mapping.mapped_elements.method;
 import graphql_adapter.adaptedschema.functions.ValueParser;
 import graphql_adapter.adaptedschema.mapping.mapped_elements.DefaultValueContainerMappedElement;
 
-public interface MappedAnnotationMethod extends MappedMethod, DefaultValueContainerMappedElement {
+public interface MappedAnnotationMethod extends ValidatableMappedMethod, DefaultValueContainerMappedElement {
 
     static MappedAnnotationMethodBuilder newAnnotationMethod() {
         return MappedAnnotationMethodBuilder.newBuilder();

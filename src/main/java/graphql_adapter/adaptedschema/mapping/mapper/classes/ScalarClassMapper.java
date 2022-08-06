@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 public class ScalarClassMapper extends AbstractElementMapper {
     public ScalarClassMapper(Chain<ClassDescriptor> classDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(classDescriptorChain, null, null, null, appliedDirectiveDescriptorChain);
+        super(classDescriptorChain, null, null, null, appliedDirectiveDescriptorChain, null);
     }
 
     public MappedScalarClass mapScalarClass(Class<?> clazz, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {

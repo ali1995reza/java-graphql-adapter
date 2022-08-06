@@ -30,6 +30,6 @@ public @interface ComplexInputProvider {
 
     @Since("1.0.20")
     @DefaultValue("{name:'k1', value:'v1', priority: 1, inner: {name:'k2', value:'v2', priority: '2', inner: '{name:\\'k3\\', value:\\'v3\\', priority: 3}'}}")
-    @GraphqlDirectiveArgument(type = Complex.class)
+    @GraphqlDirectiveArgument(type = Complex.class, nullability = true)
     String input();
 }

@@ -16,11 +16,11 @@
 package graphql_adapter.adaptedschema.mapping.mapped_elements.method;
 
 import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedElementType;
-import graphql_adapter.adaptedschema.mapping.mapped_elements.MappedMethodBuilder;
+import graphql_adapter.adaptedschema.mapping.mapped_elements.ValidatableMappedMethodBuilder;
 
 import java.lang.reflect.Method;
 
-public class MappedInputFieldMethodBuilder extends MappedMethodBuilder<MappedInputFieldMethodBuilder, MappedInputFieldMethod> {
+public class MappedInputFieldMethodBuilder extends ValidatableMappedMethodBuilder<MappedInputFieldMethodBuilder, MappedInputFieldMethod> {
 
     public static MappedInputFieldMethodBuilder newBuilder() {
         return new MappedInputFieldMethodBuilder();
@@ -41,6 +41,7 @@ public class MappedInputFieldMethodBuilder extends MappedMethodBuilder<MappedInp
                 appliedAnnotations(),
                 method(),
                 type(),
+                validators(),
                 defaultValue(),
                 setter()
         );

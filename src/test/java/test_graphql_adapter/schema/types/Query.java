@@ -22,6 +22,8 @@ import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectivesH
 import graphql_adapter.adaptedschema.tools.object_builder.BuildingObjectConfig;
 import graphql_adapter.annotations.*;
 import test_graphql_adapter.schema.directives.*;
+import test_graphql_adapter.schema.validators.Match;
+import test_graphql_adapter.schema.validators.NotOneOf;
 import test_graphql_adapter.utils.Randomer;
 
 import java.nio.charset.StandardCharsets;
@@ -36,7 +38,7 @@ import java.util.concurrent.CompletableFuture;
 public class Query {
 
     @GraphqlField
-    public BankAccount getBankAccount(@GraphqlDescription("username of bank account owner") String username, DataFetchingEnvironment environment) {
+    public BankAccount getBankAccount(@Match("\\w+") @NotOneOf({"NOT1", "NOT2"}) @GraphqlDescription("username of bank account owner") String username, DataFetchingEnvironment environment) {
         String token = environment.getGraphQlContext().get("auth");
         if (!Objects.equals(username, token)) {
             throw new IllegalStateException("authentication failed");
@@ -66,12 +68,12 @@ public class Query {
     @GraphqlField
     public PageDetails getPageDetails(AdaptedGraphQLSchema schema, DataFetchingEnvironment environment) {
         PageParameters parameters = schema.objectBuilder()
-                .buildFromObject(environment.getArgument("pageParameters"), PageParameters.class, BuildingObjectConfig.ONLY_USE_EXACT_LIST);
+                .buildFromObject(environment.getArgument("pageParameters"), PageParameters.class, BuildingObjectConfig.newConfig().useExactProvidedListForScalarTypes().build());
         return new PageDetails(parameters.getPage(), parameters.getSize());
     }
 
     @GraphqlField
-    public UserInterface getUser(@GraphqlArgument(name = "user", nullable = false) InputUser user) {
+    public UserInterface getUser(@GraphqlNonNull @GraphqlArgument(name = "user") InputUser user) {
         if (user.type().isNormal()) {
             return NormalUser.create(user.getName());
         }
@@ -92,7 +94,7 @@ public class Query {
         }
     }
 
-    @GraphqlField(nullable = false)
+    @GraphqlField
     public boolean isDirectivesHealthy(GraphqlDirectivesHolder directives) {
         GraphqlDirectiveDetails upperCase = directives.fieldDirectives().directivesByClass()
                 .get(UpperCase.class);
@@ -107,14 +109,14 @@ public class Query {
                 delay.getArgument("seconds").equals(0);
     }
 
-    @GraphqlField(nullable = false)
+    @GraphqlField
     public boolean isSystemParamsHealthy(AdaptedGraphQLSchema schema, AdaptedGraphQLSchema duplicateSchema, DataFetchingEnvironment environment, GraphqlDirectivesHolder directives) {
         return schema != null && environment != null && directives != null && schema == duplicateSchema;
     }
 
     @GraphqlField
-    public List<List<Integer>> multiplyMatrices(@DefaultValue("[[1, 2, 3], [4, 5, 6], [7, 8, 9]]") @GraphqlArgument(name = "m1", nullable = false) List<List<Integer>> first,
-                                                @DefaultValue("[[1, 2, 3], [4, 5, 6], [7, 8, 9]]") @GraphqlArgument(name = "m2", nullable = false) Integer[][] second) {
+    public List<List<Integer>> multiplyMatrices(@DefaultValue("[[1, 2, 3], [4, 5, 6], [7, 8, 9]]") @GraphqlArgument(name = "m1") @GraphqlNonNull List<List<Integer>> first,
+                                                @DefaultValue("[[1, 2, 3], [4, 5, 6], [7, 8, 9]]") @GraphqlArgument(name = "m2") @GraphqlNonNull Integer @GraphqlNonNull [] @GraphqlNonNull [] second) {
         int i, j, k;
 
         int row1 = first.size();
@@ -146,14 +148,14 @@ public class Query {
             @DefaultValue("{name:'k1', value:'v1', priority: 1, inner: {name:'k2', value:'v2', priority: '2', inner: '{name:\\'k3\\', value:\\'v3\\', priority: 3}'}}")
             @GraphqlArgument(name = "input") Complex input,
             @DefaultValue(",")
-            @GraphqlArgument(name = "separator", nullable = false) char separator) {
+            @GraphqlArgument(name = "separator") @GraphqlNonNull char separator) {
         return serialize(input, separator);
     }
 
     @GraphqlField
     public String serializeToStringFromDirective(
             @DefaultValue(",")
-            @GraphqlArgument(name = "separator", nullable = false) char separator, GraphqlDirectivesHolder directives) {
+            @GraphqlArgument(name = "separator") @GraphqlNonNull char separator, GraphqlDirectivesHolder directives) {
         if (directives.isOperationDirectivesPresent()) {
             GraphqlDirectiveDetails directive = directives.operationDirectives().directivesByClass().get(ComplexInputProvider.class);
             if (directive != null) {

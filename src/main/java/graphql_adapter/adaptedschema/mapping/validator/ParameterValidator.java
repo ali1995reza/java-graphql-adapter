@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import static graphql_adapter.adaptedschema.exceptions.SchemaExceptionBuilder.exception;
+import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 public class ParameterValidator {
 
@@ -36,9 +37,8 @@ public class ParameterValidator {
             Assert.isNull(mappedParameter.name(), exception(e, "non-schema parameters name must be null", clazz, method, parameter));
         }
         Assert.isNotNull(mappedParameter.parameter(), exception(e, "mapped parameter parameter is null", clazz, method, parameter));
-        final boolean nullable = (mappedParameter.type().hasDimensions() || !mappedParameter.type().type().isPrimitive()) && mappedParameter.type().isNullable();
-        TypeInformation<?> expectedType = TypeInformation.of(mappedParameter.parameter(), nullable);
-        Assert.isEquals(expectedType, mappedParameter.type(), exception(e, "mapped parameter detected type is not valid, expected: " + expectedType + ", actual:" + mappedParameter.type(), clazz, method, parameter));
+        TypeInformation<?> expectedType = TypeInformation.of(mappedParameter.parameter());
+        Assert.isTrue(expectedType.canBeEqualsTo(cast(mappedParameter.type())), exception(e, "mapped parameter detected type is not valid, expected: " + expectedType + ", actual:" + mappedParameter.type(), clazz, method, parameter));
         Assert.isNotNegative(mappedParameter.index(), exception(e, "mapped parameter index is negative", clazz, method, parameter));
     }
 }

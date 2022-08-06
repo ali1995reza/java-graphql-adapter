@@ -1,0 +1,3 @@
+query {
+    serializeToString(input: {name: "n1", value: "v1", priority:12, inner:{name: "n+2", value: "v2", priority: 10}})
+}

@@ -29,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import test_graphql_adapter.schema.TestSchemaProvider;
 import test_graphql_adapter.schema.directives.*;
 import test_graphql_adapter.schema.types.*;
+import test_graphql_adapter.schema.validators.*;
+import test_graphql_adapter.utils.TestUtils;
 
 import java.util.Arrays;
 
@@ -182,7 +184,7 @@ public class TestSchemaObjectTypes {
         MappedFieldMethod booleanValue2Field = findFieldAndTest("booleanValue2", objectType, 0, TypeInformation.nonNullable(boolean.class));
         assertDescriptionIsNull(booleanValue2Field);
 
-        MappedFieldMethod intArrayField = findFieldAndTest("intArray", objectType, 0, TypeInformation.nullableArray(int.class));
+        MappedFieldMethod intArrayField = findFieldAndTest("intArray", objectType, 0, TypeInformation.array(int.class, true, false));
         assertDescriptionEquals(intArrayField, "D989");
     }
 
@@ -191,7 +193,7 @@ public class TestSchemaObjectTypes {
         DiscoveredObjectType type = findAndTestObjectType(IntList.class, "IntList", 4);
         assertDescriptionIsNull(type);
 
-        MappedFieldMethod dataField = findFieldAndTest("data", type, TypeInformation.nullableList(Integer.class));
+        MappedFieldMethod dataField = findFieldAndTest("data", type, TypeInformation.list(Integer.class, true, true));
         assertDescriptionIsNull(dataField);
 
         MappedFieldMethod isEmptyField = findFieldAndTest("isEmpty", type, TypeInformation.nonNullable(boolean.class));
@@ -202,7 +204,11 @@ public class TestSchemaObjectTypes {
         assertDescriptionIsNull(sizeField);
 
         MappedFieldMethod getField = findFieldAndTest("get", type, 1, TypeInformation.nullable(Integer.class));
-        findParameterAndTest("index", getField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), 0);
+        MappedParameter indexParameter = findParameterAndTest("index", getField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), 0);
+        assertDescriptionIsNull(indexParameter);
+        testValidators(indexParameter, 1, validator -> {
+            NonNegative argument = validator.validationArgument();
+        });
         assertDescriptionIsNull(getField);
 
         assertAndTestNumberOfImplementedInterfaces(0, type);
@@ -217,27 +223,41 @@ public class TestSchemaObjectTypes {
         MappedFieldMethod encodeToBase64Field = findFieldAndTest("encodeToBase64", type, 1, TypeInformation.nullable(String.class));
         MappedParameter inputParameter = findParameterAndTest("input", encodeToBase64Field, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(String.class));
         assertDescriptionIsNull(inputParameter);
+        testValidators(inputParameter, 2, validator -> {
+            Match match = validator.validationArgument();
+            TestUtils.assertEquals(MatchValidationFunction.class, validator.validationFunction());
+            TestUtils.assertEquals("\\w{5,}", match.value());
+        }, validator -> {
+            Match match = validator.validationArgument();
+            TestUtils.assertEquals(MatchValidationFunction.class, validator.validationFunction());
+            TestUtils.assertEquals("[A-Za-z0-9]+", match.value());
+        });
         assertDescriptionIsNull(encodeToBase64Field);
 
-        MappedFieldMethod splitField = findFieldAndTest("split", type, 2, 1, TypeInformation.nullableList(String.class));
+        MappedFieldMethod splitField = findFieldAndTest("split", type, 2, 1, TypeInformation.list(String.class, true, true));
         findAppliedAnnotationAndTest(Since.class, "Since", splitField, "version", "1.0.12");
         MappedParameter inputParameter2 = findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
         assertDescriptionEquals(inputParameter2, "D2019");
+        assertNoValidators(inputParameter2);
         MappedParameter splitorParameter = findParameterAndTest("splitor", splitField, ParameterModel.SCHEMA_ARGUMENT, 1, 1, TypeInformation.nonNullable(Splitor.class));
+        assertNoValidators(inputParameter2);
         findAppliedAnnotationAndTest(Since.class, "Since", splitorParameter, "version", "1.0.13");
         assertDescriptionIsNull(splitorParameter);
         assertDescriptionEquals(splitField, "D145");
 
-        MappedFieldMethod combineInto3DMatrixField = findFieldAndTest("combineInto3DMatrix", type, 2, 0, TypeInformation.nullableArray(int.class, 3));
-        MappedParameter aParameter = findParameterAndTest("a", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableArray(int.class, 2));
+        MappedFieldMethod combineInto3DMatrixField = findFieldAndTest("combineInto3DMatrix", type, 2, 0, TypeInformation.array(int.class, true, true, false, false));
+        MappedParameter aParameter = findParameterAndTest("a", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.array(int.class, true, false, false));
         assertDescriptionIsNull(aParameter);
-        MappedParameter bParameter = findParameterAndTest(isParameterNamePresent() ? "b" : "arg1", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, TypeInformation.nullableList(Integer.class, 2));
+        assertNoValidators(aParameter);
+        MappedParameter bParameter = findParameterAndTest(isParameterNamePresent() ? "b" : "arg1", combineInto3DMatrixField, ParameterModel.SCHEMA_ARGUMENT, 1, TypeInformation.list(Integer.class, true, true, false));
         assertDescriptionIsNull(bParameter);
+        assertNoValidators(bParameter);
         assertDescriptionIsNull(combineInto3DMatrixField);
 
-        MappedFieldMethod listToArrayField = findFieldAndTest("listToArray", type, 1, 0, TypeInformation.nullableArray(int.class));
-        MappedParameter listParameter = findParameterAndTest(isParameterNamePresent() ? "list" : "arg0", listToArrayField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullableList(Integer.class));
+        MappedFieldMethod listToArrayField = findFieldAndTest("listToArray", type, 1, 0, TypeInformation.array(int.class, true, false));
+        MappedParameter listParameter = findParameterAndTest(isParameterNamePresent() ? "list" : "arg0", listToArrayField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.list(Integer.class, true, true));
         assertDescriptionIsNull(listParameter);
+        assertNoValidators(listParameter);
         assertDescriptionIsNull(listToArrayField);
 
         MappedFieldMethod inputToOutputField = findFieldAndTest("inputToOutput", type, 1, 1, TypeInformation.nullable(Foo.class));
@@ -247,11 +267,13 @@ public class TestSchemaObjectTypes {
         MappedParameter inputParameter3 = findParameterAndTest("input", inputToOutputField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Foo.class),
                 new Foo().setIntValue(-1).setIntValue2(-2).setIntArray(new int[]{1, 2, 3, 4}));
         assertDescriptionIsNull(inputParameter3);
+        assertNoValidators(inputParameter3);
         assertDescriptionIsNull(inputToOutputField);
 
         MappedFieldMethod inputToOutputFromDirectiveField = findFieldAndTest("inputToOutputFromDirective", type, 2, 0, TypeInformation.nullable(Foo.class));
         MappedParameter indexParameter = findParameterAndTest("index", inputToOutputFromDirectiveField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(int.class), -1);
         assertDescriptionIsNull(indexParameter);
+        assertNoValidators(indexParameter);
         assertDescriptionIsNull(inputToOutputFromDirectiveField);
 
         assertAndTestNumberOfImplementedInterfaces(1, type);
@@ -301,32 +323,46 @@ public class TestSchemaObjectTypes {
         MappedFieldMethod getListField = findFieldAndTest("getList", type, 1, TypeInformation.nullable(IntList.class));
         MappedParameter periodParameter = findParameterAndTest("period", getListField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(IntPeriodScalar.class));
         assertDescriptionIsNull(getListField);
+        assertNoValidators(periodParameter);
         assertDescriptionIsNull(periodParameter);
 
-        MappedFieldMethod multiplyMatricesField = findFieldAndTest("multiplyMatrices", type, 2, TypeInformation.nullableList(Integer.class, 2));
-        MappedParameter m1Parameter = findParameterAndTest("m1", multiplyMatricesField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullableList(Integer.class, 2),
+        MappedFieldMethod multiplyMatricesField = findFieldAndTest("multiplyMatrices", type, 2, TypeInformation.list(Integer.class, true, true, true));
+        MappedParameter m1Parameter = findParameterAndTest("m1", multiplyMatricesField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.list(Integer.class, false, true, true),
                 Arrays.asList(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6), Arrays.asList(7, 8, 9)));
         assertDescriptionIsNull(m1Parameter);
-        MappedParameter m2Parameter = findParameterAndTest("m2", multiplyMatricesField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullableArray(Integer.class, 2),
+        assertNoValidators(m1Parameter);
+        MappedParameter m2Parameter = findParameterAndTest("m2", multiplyMatricesField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.array(Integer.class, false, false, false),
                 new Integer[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
         assertDescriptionIsNull(m2Parameter);
+        assertNoValidators(m2Parameter);
         assertDescriptionIsNull(multiplyMatricesField);
 
         MappedFieldMethod getUserField = findFieldAndTest("getUser", type, 1, TypeInformation.nullable(UserInterface.class));
         MappedParameter userParameter = findParameterAndTest("user", getUserField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nonNullable(InputUser.class));
-        assertDescriptionIsNull(getUserField);
         assertDescriptionIsNull(userParameter);
+        assertNoValidators(userParameter);
+        assertDescriptionIsNull(getUserField);
 
         MappedFieldMethod getVehicleField = findFieldAndTest("getVehicle", type, 2, TypeInformation.nullable(Vehicle.class));
         MappedParameter isCarParameter = findParameterAndTest("isCar", getVehicleField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Boolean.class), true);
         findParameterAndTest(null, getVehicleField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
         assertDescriptionIsNull(isCarParameter);
+        assertNoValidators(isCarParameter);
         assertDescriptionIsNull(getVehicleField);
 
         MappedFieldMethod getBankAccountField = findFieldAndTest("getBankAccount", type, 2, TypeInformation.nullable(BankAccount.class));
         MappedParameter usernameParameter = findParameterAndTest(isParameterNamePresent() ? "username" : "arg0", getBankAccountField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
         findParameterAndTest(null, getBankAccountField, ParameterModel.DATA_FETCHING_ENVIRONMENT, 1, TypeInformation.nullable(DataFetchingEnvironment.class));
         assertDescriptionEquals(usernameParameter, "username of bank account owner");
+        testValidators(usernameParameter, 2, validator -> {
+            Match match = validator.validationArgument();
+            TestUtils.assertEquals(MatchValidationFunction.class, validator.validationFunction());
+            TestUtils.assertEquals("\\w+", match.value());
+        }, validator -> {
+            NotOneOf notOneOf = validator.validationArgument();
+            TestUtils.assertEquals(NotOneOfValidationFunction.class, validator.validationFunction());
+            TestUtils.assertEquals(new String[]{"NOT1", "NOT2"}, notOneOf.value());
+        });
         assertDescriptionIsNull(getBankAccountField);
 
         MappedFieldMethod isSystemParamsHealthyField = findFieldAndTest("isSystemParamsHealthy", type, 4, TypeInformation.nonNullable(boolean.class));
@@ -353,13 +389,16 @@ public class TestSchemaObjectTypes {
         MappedParameter inputParameter = findParameterAndTest("input", serializeToStringField, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nullable(Complex.class),
                 new Complex("k1", "v1", 1).setInner(new Complex("k2", "v2", 2).setInner(new Complex("k3", "v3", 3))));
         assertDescriptionIsNull(inputParameter);
+        assertNoValidators(inputParameter);
         MappedParameter separatorParameter = findParameterAndTest("separator", serializeToStringField, ParameterModel.SCHEMA_ARGUMENT, 1, 0, TypeInformation.nonNullable(char.class), ',');
         assertDescriptionIsNull(separatorParameter);
+        assertNoValidators(separatorParameter);
         assertDescriptionIsNull(serializeToStringField);
 
         MappedFieldMethod serializeToStringFromDirective = findFieldAndTest("serializeToStringFromDirective", type, 2, 0, TypeInformation.nullable(String.class));
         MappedParameter separatorParameter2 = findParameterAndTest("separator", serializeToStringFromDirective, ParameterModel.SCHEMA_ARGUMENT, 0, 0, TypeInformation.nonNullable(char.class), ',');
         assertDescriptionIsNull(separatorParameter2);
+        assertNoValidators(separatorParameter2);
         findParameterAndTest(null, serializeToStringFromDirective, ParameterModel.DIRECTIVES, 1, TypeInformation.nullable(GraphqlDirectivesHolder.class));
         assertDescriptionIsNull(serializeToStringFromDirective);
 

@@ -17,12 +17,10 @@ package test_graphql_adapter.schema.types;
 
 import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectiveDetails;
 import graphql_adapter.adaptedschema.system_objects.directive.GraphqlDirectivesHolder;
-import graphql_adapter.annotations.DefaultValue;
-import graphql_adapter.annotations.GraphqlArgument;
-import graphql_adapter.annotations.GraphqlField;
-import graphql_adapter.annotations.GraphqlMutation;
+import graphql_adapter.annotations.*;
 import test_graphql_adapter.schema.directives.FooProvider;
 import test_graphql_adapter.schema.parsers.CustomFooValueParser;
+import test_graphql_adapter.schema.validators.Match;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -32,12 +30,12 @@ import java.util.List;
 public class TestMutation implements MutationInterface {
 
     @Override
-    public String encodeToBase64(String input) {
+    public String encodeToBase64(@Match("[A-Za-z0-9]+") String input) {
         return Base64.getEncoder().encodeToString(input.getBytes(StandardCharsets.UTF_8));
     }
 
     @GraphqlField
-    public int[][][] combineInto3DMatrix(@GraphqlArgument(name = "a") int[][] a, List<List<Integer>> b) {
+    public int[][] @GraphqlNonNull [] combineInto3DMatrix(@GraphqlArgument(name = "a") int[] @GraphqlNonNull [] a, List<List<@GraphqlNonNull Integer>> b) {
         int[][][] combined = new int[2][][];
         combined[0] = a;
         combined[1] = new int[b.size()][];
@@ -59,7 +57,7 @@ public class TestMutation implements MutationInterface {
     }
 
     @GraphqlField
-    public Foo inputToOutputFromDirective(@DefaultValue("-1") @GraphqlArgument(name = "index", nullable = false) int index, GraphqlDirectivesHolder holder) {
+    public Foo inputToOutputFromDirective(@DefaultValue("-1") @GraphqlArgument(name = "index") @GraphqlNonNull int index, GraphqlDirectivesHolder holder) {
         GraphqlDirectiveDetails details = holder.fieldDirectives()
                 .directivesByName().get("FooProvider");
         if (index < 0) {

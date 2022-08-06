@@ -26,16 +26,15 @@ import graphql_adapter.adaptedschema.utils.NullifyUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Objects;
+import java.util.*;
 
 import static graphql_adapter.adaptedschema.exceptions.SchemaExceptionBuilder.exception;
-import static graphql_adapter.adaptedschema.utils.ClassUtils.cast;
 
 public final class TypeInformation<T> {
 
-    private final static TypeInformation<DataFetchingEnvironment> ENVIRONMENT = new TypeInformation<>(DataFetchingEnvironment.class, true, 0, null);
-    private final static TypeInformation<GraphqlDirectivesHolder> DIRECTIVES = new TypeInformation<>(GraphqlDirectivesHolder.class, true, 0, null);
-    private final static TypeInformation<AdaptedGraphQLSchema> ADAPTED_SCHEMA = new TypeInformation<>(AdaptedGraphQLSchema.class, true, 0, null);
+    private final static TypeInformation<DataFetchingEnvironment> ENVIRONMENT = new TypeInformation<>(DataFetchingEnvironment.class, booleanListOf(true), 0, null);
+    private final static TypeInformation<GraphqlDirectivesHolder> DIRECTIVES = new TypeInformation<>(GraphqlDirectivesHolder.class, booleanListOf(true), 0, null);
+    private final static TypeInformation<AdaptedGraphQLSchema> ADAPTED_SCHEMA = new TypeInformation<>(AdaptedGraphQLSchema.class, booleanListOf(true), 0, null);
 
     public static TypeInformation<AdaptedGraphQLSchema> adaptedSchema(Parameter parameter) {
         TypeInformation<?> typeInformation = TypeInformation.of(parameter);
@@ -55,115 +54,121 @@ public final class TypeInformation<T> {
         return ENVIRONMENT;
     }
 
+    public static <T> TypeInformation<T> array(Class<T> clazz, Boolean... nullability) {
+        return new TypeInformation<>(
+                clazz,
+                Arrays.asList(nullability),
+                nullability.length - 1,
+                DimensionModel.ARRAY
+        );
+    }
+
+    public static <T> TypeInformation<T> list(Class<T> clazz, Boolean... nullability) {
+        return new TypeInformation<>(
+                clazz,
+                Arrays.asList(nullability),
+                nullability.length - 1,
+                DimensionModel.LIST
+        );
+    }
+
     public static <T> TypeInformation<T> nonNullable(Class<T> clazz) {
-        return new TypeInformation<>(clazz, false, 0, DimensionModel.SINGLE);
-    }
-
-    public static <T> TypeInformation<T> nonNullableArray(Class<T> clazz, int dimensions) {
-        return new TypeInformation<>(clazz, false, dimensions, DimensionModel.ARRAY);
-    }
-
-    public static <T> TypeInformation<T> nonNullableArray(Class<T> clazz) {
-        return nonNullableArray(clazz, 1);
-    }
-
-    public static <T> TypeInformation<T> nonNullableList(Class<T> clazz, int dimensions) {
-        return new TypeInformation<>(clazz, false, dimensions, DimensionModel.LIST);
-    }
-
-    public static <T> TypeInformation<T> nonNullableList(Class<T> clazz) {
-        return nonNullableList(clazz, 1);
+        return single(clazz, false);
     }
 
     public static <T> TypeInformation<T> nullable(Class<T> clazz) {
-        return new TypeInformation<>(clazz, true, 0, DimensionModel.SINGLE);
+        return single(clazz, true);
     }
 
-    public static <T> TypeInformation<T> nullableArray(Class<T> clazz, int dimensions) {
-        return new TypeInformation<>(clazz, true, dimensions, DimensionModel.ARRAY);
-    }
-
-    public static <T> TypeInformation<T> nullableArray(Class<T> clazz) {
-        return nullableArray(clazz, 1);
-    }
-
-    public static <T> TypeInformation<T> nullableList(Class<T> clazz, int dimensions) {
-        return new TypeInformation<>(clazz, true, dimensions, DimensionModel.LIST);
-    }
-
-    public static <T> TypeInformation<T> nullableList(Class<T> clazz) {
-        return nullableList(clazz, 1);
-    }
-
-    public static TypeInformation<?> of(TypeDetails typeDetails, boolean nullable) {
+    public static TypeInformation<?> of(TypeDetails typeDetails, List<Boolean> nullability) {
         return new TypeInformation<>(
                 typeDetails.type(),
-                nullable,
+                nullability,
                 typeDetails.dimensions(),
                 typeDetails.dimensionModel()
         );
     }
 
-    public static TypeInformation<?> of(Parameter parameter, boolean nullable) {
+    public static TypeInformation<?> of(Parameter parameter, List<Boolean> nullability) {
         TypeDetails details = MappingUtils.findTypeDetails(parameter);
-        return of(details, nullable);
+        return of(details, nullability);
     }
 
     public static TypeInformation<?> of(Parameter parameter) {
         TypeDetails details = MappingUtils.findTypeDetails(parameter);
-        return of(details, details.dimensions() > 0 || !details.type().isPrimitive());
+        return of(details, !details.type().isPrimitive() ? booleanListOf(true, details.dimensions() + 1) : booleanListOf(true, details.dimensions() + 1, false));
     }
 
-    public static TypeInformation<?> of(Method method, boolean nullable) {
+    public static TypeInformation<?> of(Method method, List<Boolean> nullability) {
         TypeDetails details = MappingUtils.findTypeDetails(method);
-        return of(details, nullable);
+        return of(details, nullability);
     }
 
     public static TypeInformation<?> of(Method method) {
-        return of(method, !method.getReturnType().isPrimitive());
+        TypeDetails details = MappingUtils.findTypeDetails(method);
+        return of(details, !details.type().isPrimitive() ? booleanListOf(true, details.dimensions() + 1) : booleanListOf(true, details.dimensions() + 1, false));
     }
 
-    public static <T> TypeInformation<T> toNonNullable(TypeInformation<T> nullable) {
-        return new TypeInformation<>(nullable.type, false, nullable.dimensions, nullable.dimensionModel);
+    public static <T> TypeInformation<T> single(Class<T> clazz, boolean nullability) {
+        return new TypeInformation<>(
+                clazz,
+                Collections.singletonList(nullability),
+                0,
+                DimensionModel.SINGLE
+        );
     }
+    private final List<Boolean> nullability;
 
-    public static <T> TypeInformation<T> toNullable(TypeInformation<T> nonNullable) {
-        return new TypeInformation<>(nonNullable.type, true, nonNullable.dimensions, nonNullable.dimensionModel);
-    }
-
-    private final Class<T> type;
-    private final boolean nullable;
-    private final int dimensions;
-    private final DimensionModel dimensionModel;
-
-    public TypeInformation(Class<T> type, boolean nullable, int dimensions, DimensionModel dimensionModel) {
+    public TypeInformation(Class<T> type, List<Boolean> nullability, int dimensions, DimensionModel dimensionModel) {
         this.type = type;
-        this.nullable = nullable;
+        this.nullability = Collections.unmodifiableList(new ArrayList<>(nullability));
         this.dimensions = dimensions;
         this.dimensionModel = NullifyUtils.getOrDefault(dimensionModel, DimensionModel.SINGLE);
+        Assert.isEquals(this.nullability.size(), this.dimensions + 1, new IllegalStateException("nullability list and dimensions has difference size [" + this + "]"));
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TypeInformation<?> that = cast(o);
-        return nullable == that.nullable && dimensions == that.dimensions && Objects.equals(type, that.type) && dimensionModel == that.dimensionModel;
+        TypeInformation<?> that = (TypeInformation<?>) o;
+        return dimensions == that.dimensions && Objects.equals(type, that.type) && Objects.equals(nullability, that.nullability) && dimensionModel == that.dimensionModel;
     }
+
+    private final Class<T> type;
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, nullable, dimensions, dimensionModel);
+        return Objects.hash(type, nullability, dimensions, dimensionModel);
     }
+    private final int dimensions;
+    private final DimensionModel dimensionModel;
 
     @Override
     public String toString() {
-        return "TypeDescriptor{" +
+        return "TypeInformation{" +
                 "type=" + type +
-                ", nullable=" + nullable +
+                ", nullability=" + nullability +
                 ", dimensions=" + dimensions +
                 ", dimensionModel=" + dimensionModel +
                 '}';
+    }
+
+    public boolean canBeEqualsTo(TypeInformation<T> that) {
+        if (this == that) return true;
+        return dimensions == that.dimensions && Objects.equals(type, that.type) && (lastDimensionNullability() || !that.lastDimensionNullability()) && dimensionModel == that.dimensionModel;
+    }
+
+    public boolean lastDimensionNullability() {
+        return nullability(dimensions);
+    }
+
+    public boolean nullability(int dimension) {
+        return nullability.get(dimension);
+    }
+
+    public List<Boolean> nullability() {
+        return nullability;
     }
 
     public DimensionModel dimensionModel() {
@@ -178,8 +183,24 @@ public final class TypeInformation<T> {
         return dimensions > 0;
     }
 
-    public boolean isNullable() {
-        return nullable;
+    private static List<Boolean> booleanListOf(boolean value, int size) {
+        return booleanListOf(value, size, value);
+    }
+
+    private static List<Boolean> booleanListOf(boolean value, int size, boolean lastOne) {
+        List<Boolean> list = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            if (i == size - 1) {
+                list.add(lastOne);
+            } else {
+                list.add(value);
+            }
+        }
+        return list;
+    }
+
+    private static List<Boolean> booleanListOf(boolean value) {
+        return Collections.singletonList(value);
     }
 
     public Class<T> type() {

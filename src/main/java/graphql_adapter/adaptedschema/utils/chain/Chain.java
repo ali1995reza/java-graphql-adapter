@@ -30,4 +30,8 @@ public interface Chain<T> extends Iterable<T> {
     }
 
     int size();
+
+    default boolean isEmpty() {
+        return size() == 0;
+    }
 }

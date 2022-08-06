@@ -38,9 +38,10 @@ public class GraphqlDirectiveDescriptionBuilder extends GraphqlElementDescriptio
 
     @Override
     public GraphqlDirectiveDescriptionBuilder copy(GraphqlDirectiveDescription graphqlDirectiveDescription) {
-        graphqlDirectiveDescription.locations().forEach(this::addLocation);
-        return super.copy(graphqlDirectiveDescription)
+        super.copy(graphqlDirectiveDescription)
                 .functionality(graphqlDirectiveDescription.functionality());
+        graphqlDirectiveDescription.locations().forEach(this::addLocation);
+        return this;
     }
 
     @Override

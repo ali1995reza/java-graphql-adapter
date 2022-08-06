@@ -49,6 +49,18 @@ import java.util.function.Function;
 
 public class TestObjectBuilder {
 
+    private final static BuildingObjectConfig DISABLE_ALL = BuildingObjectConfig.newConfig()
+            .dontUseInputFieldDefaultValues()
+            .dontUseExactProvidedListForScalarTypes()
+            .dontValidateInputFields()
+            .build();
+
+    private final static BuildingObjectConfig ONLY_USE_EXACT_LIST = BuildingObjectConfig.newConfig()
+            .useExactProvidedListForScalarTypes()
+            .dontUseInputFieldDefaultValues()
+            .dontValidateInputFields()
+            .build();
+
     private final static Random RANDOM = new SecureRandom();
     private final static int ROUND = 100;
     private final static int MAXIMUM_DIMENSIONS = 5;
@@ -395,8 +407,8 @@ public class TestObjectBuilder {
         Object describeObjectAsString = describeObjectInString(describedObjectAsMap);
         Value<?> describeObjectAsValue = describeObjectAsValue(randomObject);
 
-        TestUtils.assertEquals(randomObject, builder().buildFromObject(describedObjectAsMap, clazz, dimensions, dimensionModel, BuildingObjectConfig.ONLY_USE_EXACT_LIST));
-        TestUtils.assertEquals(randomObject, builder().buildFromObject(describeObjectAsString, clazz, dimensions, dimensionModel, BuildingObjectConfig.DISABLE_BOTH));
-        TestUtils.assertEquals(randomObject, builder().buildFromValue(describeObjectAsValue, clazz, dimensions, dimensionModel, BuildingObjectConfig.DISABLE_BOTH));
+        TestUtils.assertEquals(randomObject, builder().buildFromObject(describedObjectAsMap, clazz, dimensions, dimensionModel, ONLY_USE_EXACT_LIST));
+        TestUtils.assertEquals(randomObject, builder().buildFromObject(describeObjectAsString, clazz, dimensions, dimensionModel, DISABLE_ALL));
+        TestUtils.assertEquals(randomObject, builder().buildFromValue(describeObjectAsValue, clazz, dimensions, dimensionModel, DISABLE_ALL));
     }
 }

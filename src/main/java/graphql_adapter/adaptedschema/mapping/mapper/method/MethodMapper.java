@@ -27,8 +27,10 @@ import graphql_adapter.adaptedschema.mapping.strategy.descriptions.field.Graphql
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.annotations.AppliedDirectiveDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.method.MethodDescriptor;
 import graphql_adapter.adaptedschema.mapping.strategy.descriptors.parameter.ParameterDescriptor;
+import graphql_adapter.adaptedschema.mapping.strategy.descriptors.validators.ValidatorDescriptor;
 import graphql_adapter.adaptedschema.mapping.validator.MethodValidator;
 import graphql_adapter.adaptedschema.tools.object_builder.ObjectBuilder;
+import graphql_adapter.adaptedschema.utils.ValidatableElementUtils;
 import graphql_adapter.adaptedschema.utils.chain.Chain;
 import graphql_adapter.codegenerator.ObjectConstructor;
 
@@ -42,9 +44,9 @@ public class MethodMapper extends AbstractElementMapper {
 
     private final ParameterMapper parameterMapper;
 
-    public MethodMapper(Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain) {
-        super(null, methodDescriptorChain, parameterDescriptorChain, null, appliedDirectiveDescriptorChain);
-        this.parameterMapper = new ParameterMapper(parameterDescriptorChain, appliedDirectiveDescriptorChain);
+    public MethodMapper(Chain<MethodDescriptor> methodDescriptorChain, Chain<ParameterDescriptor> parameterDescriptorChain, Chain<AppliedDirectiveDescriptor> appliedDirectiveDescriptorChain, Chain<ValidatorDescriptor> validatorDescriptorChain) {
+        super(null, methodDescriptorChain, parameterDescriptorChain, null, appliedDirectiveDescriptorChain, validatorDescriptorChain);
+        this.parameterMapper = new ParameterMapper(parameterDescriptorChain, appliedDirectiveDescriptorChain, validatorDescriptorChain);
     }
 
     public MappedAnnotationMethod mapAnnotationMethod(Class<? extends Annotation> clazz, Method method, Map<Class<?>, MappedAnnotation> annotations, ObjectConstructor constructor, ObjectBuilder builder) {
@@ -52,11 +54,10 @@ public class MethodMapper extends AbstractElementMapper {
         if (argumentDescription == null) {
             return null;
         }
-        //ArgumentValidator.validate(); //todo
 
         TypeInformation<?> type = new TypeInformation<>(
                 argumentDescription.type(),
-                argumentDescription.nullable(),
+                argumentDescription.nullability(),
                 argumentDescription.dimensions(),
                 argumentDescription.dimensionModel()
         );
@@ -68,7 +69,12 @@ public class MethodMapper extends AbstractElementMapper {
                 .valueParser(argumentDescription.valueParser())
                 .defaultValue(parseAndGetDefaultValue(argumentDescription.defaultValue(), type, constructor, builder))
                 .description(argumentDescription.description())
+                .addValidators(describeDirectiveArgumentValidators(method, clazz))
                 .build();
+
+        if(mappedMethod.hasDefaultValue()) {
+            ValidatableElementUtils.validate(mappedMethod.defaultValue(), mappedMethod, constructor);
+        }
 
         MethodValidator.validateMappedAnnotationMethod(mappedMethod, clazz, method);
 
@@ -94,7 +100,7 @@ public class MethodMapper extends AbstractElementMapper {
         MappedFieldMethod mappedMethod = methodBuilder.method(method)
                 .description(description.description())
                 .name(description.name())
-                .type(TypeInformation.of(method, description.nullable()))
+                .type(TypeInformation.of(method, description.nullability()))
                 .build();
 
         mappedMethod = addAppliedAnnotations(MappedFieldMethod::newFieldMethod, mappedMethod, annotations, constructor, builder);
@@ -112,7 +118,7 @@ public class MethodMapper extends AbstractElementMapper {
 
         Method setterMethod = detectSetter(inputFieldDescription.setter(), clazz, method);
         MappedInputFieldMethodBuilder methodBuilder = MappedInputFieldMethod.newInputFieldMethod();
-        TypeInformation<?> type = TypeInformation.of(method, inputFieldDescription.nullable());
+        TypeInformation<?> type = TypeInformation.of(method, inputFieldDescription.nullability());
 
         MappedInputFieldMethod mappedMethod = methodBuilder.method(method)
                 .description(inputFieldDescription.description())
@@ -120,9 +126,14 @@ public class MethodMapper extends AbstractElementMapper {
                 .type(type)
                 .defaultValue(parseAndGetDefaultValue(inputFieldDescription.defaultValue(), type, constructor, builder))
                 .setter(setterMethod)
+                .addValidators(describeInputFieldValidators(method, clazz))
                 .build();
 
         mappedMethod = addAppliedAnnotations(MappedInputFieldMethod::newInputFieldMethod, mappedMethod, annotations, constructor, builder);
+
+        if(mappedMethod.hasDefaultValue()) {
+            ValidatableElementUtils.validate(mappedMethod.defaultValue(), mappedMethod, constructor);
+        }
 
         MethodValidator.validateInputFieldMethod(mappedMethod, clazz, method);
 

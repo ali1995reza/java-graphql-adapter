@@ -46,7 +46,7 @@ public class TestSchemaInterfaceTypes {
         assertDescriptionEquals(inputParameter, "D29876");
         assertDescriptionEquals(encodeToBase64Field, "D2299");
 
-        MappedFieldMethod splitField = findFieldAndTest("split", interfaceType, 2, 1, TypeInformation.nullableList(String.class));
+        MappedFieldMethod splitField = findFieldAndTest("split", interfaceType, 2, 1, TypeInformation.list(String.class, true, true));
         findAppliedAnnotationAndTest(Since.class, "Since", splitField, "version", "1.0.12");
         MappedParameter inputParameter2 = findParameterAndTest("input", splitField, ParameterModel.SCHEMA_ARGUMENT, 0, TypeInformation.nullable(String.class));
         assertDescriptionEquals(inputParameter2, "D2019");
